@@ -1,0 +1,58 @@
+{
+  "name": "@bloomprotocol/att-comms-kit",
+  "version": "1.0.0-beta.0",
+  "main": "dist/index.js",
+  "module": "dist/att-comms-kit.esm.js",
+  "typings": "dist/index.d.ts",
+  "description": "Shared types and utility functions for attestation related kits",
+  "repository": "https://github.com/hellobloom/att-comm-kit",
+  "author": "Bloom Team <team@bloom.co>",
+  "license": "Apache-2.0",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "start": "tsdx watch --tsconfig ./tsconfig.build.json",
+    "build": "tsdx build --tsconfig ./tsconfig.build.json",
+    "test": "tsdx test",
+    "lint": "tsdx lint src test",
+    "prepare": "npm run build",
+    "prepublishOnly": "npm run test && npm run lint"
+  },
+  "dependencies": {
+    "@types/eth-sig-util": "^2.1.0",
+    "@types/randombytes": "^2.0.0",
+    "eth-sig-util": "^2.5.2",
+    "ethereumjs-util": "^6.2.0",
+    "ethereumjs-wallet": "^0.6.3",
+    "js-sha3": "^0.8.0",
+    "merkletreejs": "0.1.1",
+    "randombytes": "^2.1.0"
+  },
+  "devDependencies": {
+    "@bloomprotocol/eslint-config": "^1.0.0-beta.1",
+    "@bloomprotocol/prettier-config": "^1.0.0-beta.1",
+    "@types/jest": "^24.0.25",
+    "@types/node": "^13.1.4",
+    "@typescript-eslint/eslint-plugin": "^2.14.0",
+    "@typescript-eslint/parser": "^2.14.0",
+    "acorn": "^7.1.0",
+    "eslint": "^6.8.0",
+    "eslint-config-prettier": "^6.9.0",
+    "eslint-plugin-prettier": "^3.1.2",
+    "prettier": "^1.19.1",
+    "tsdx": "^0.12.1",
+    "tslib": "^1.10.0",
+    "typescript": "^3.7.4"
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "jsx",
+      "json",
+      "node"
+    ]
+  }
+}

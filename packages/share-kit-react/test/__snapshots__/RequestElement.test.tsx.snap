@@ -1,0 +1,91 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`RequestElement renders correctly 1`] = `
+Object {
+  "action": "request_attestation_data",
+  "org_logo_url": "https://bloom.co/images/notif/bloom-logo.png",
+  "org_name": "Bloom",
+  "org_privacy_policy_url": "https://bloom.co/legal/privacy",
+  "org_usage_policy_url": "https://bloom.co/legal/terms",
+  "token": "token",
+  "types": Array [
+    "phone",
+    "email",
+  ],
+  "url": "https://receive-kit.bloom.co/api/receive?share-kit-from=button",
+}
+`;
+
+exports[`RequestElement renders correctly 2`] = `"https://mysite.com/bloom-callback"`;
+
+exports[`RequestElement updates when buttonCallbackUrl changes 1`] = `
+Object {
+  "action": "request_attestation_data",
+  "org_logo_url": "https://bloom.co/images/notif/bloom-logo.png",
+  "org_name": "Bloom",
+  "org_privacy_policy_url": "https://bloom.co/legal/privacy",
+  "org_usage_policy_url": "https://bloom.co/legal/terms",
+  "token": "token",
+  "types": Array [
+    "phone",
+    "email",
+  ],
+  "url": "https://receive-kit.bloom.co/api/receive?share-kit-from=button",
+}
+`;
+
+exports[`RequestElement updates when buttonCallbackUrl changes 2`] = `"https://mysite.com/bloom-callback"`;
+
+exports[`RequestElement updates when buttonCallbackUrl changes 3`] = `
+Object {
+  "action": "request_attestation_data",
+  "org_logo_url": "https://bloom.co/images/notif/bloom-logo.png",
+  "org_name": "Bloom",
+  "org_privacy_policy_url": "https://bloom.co/legal/privacy",
+  "org_usage_policy_url": "https://bloom.co/legal/terms",
+  "token": "token",
+  "types": Array [
+    "phone",
+    "email",
+  ],
+  "url": "https://receive-kit.bloom.co/api/receive?share-kit-from=button",
+}
+`;
+
+exports[`RequestElement updates when buttonCallbackUrl changes 4`] = `"https://mysite.com/bloom-callback-2"`;
+
+exports[`RequestElement updates when requestData changes 1`] = `
+Object {
+  "action": "request_attestation_data",
+  "org_logo_url": "https://bloom.co/images/notif/bloom-logo.png",
+  "org_name": "Bloom",
+  "org_privacy_policy_url": "https://bloom.co/legal/privacy",
+  "org_usage_policy_url": "https://bloom.co/legal/terms",
+  "token": "token",
+  "types": Array [
+    "phone",
+    "email",
+  ],
+  "url": "https://receive-kit.bloom.co/api/receive?share-kit-from=button",
+}
+`;
+
+exports[`RequestElement updates when requestData changes 2`] = `"https://mysite.com/bloom-callback"`;
+
+exports[`RequestElement updates when requestData changes 3`] = `
+Object {
+  "action": "request_attestation_data",
+  "org_logo_url": "https://bloom.co/images/notif/bloom-logo.png",
+  "org_name": "Bloom",
+  "org_privacy_policy_url": "https://bloom.co/legal/privacy",
+  "org_usage_policy_url": "https://bloom.co/legal/terms",
+  "token": "token 2",
+  "types": Array [
+    "phone",
+    "email",
+  ],
+  "url": "https://receive-kit.bloom.co/api/receive?share-kit-from=button",
+}
+`;
+
+exports[`RequestElement updates when requestData changes 4`] = `"https://mysite.com/bloom-callback"`;
