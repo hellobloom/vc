@@ -64,7 +64,7 @@ const validateOnChainProperties = (subject: string, payloadData: VerifiedData, l
   if (!matchingTraitAttestedLogs) {
     errors.push({
       key: 'TraitAttested',
-      message: "Unable to find 'TraitAttested' event logs with a" + ` 'dataHash' of '${payloadData.layer2Hash}'.`,
+      message: `Unable to find 'TraitAttested' event logs with a 'dataHash' of '${payloadData.layer2Hash}'.`,
     })
     return errors
   }

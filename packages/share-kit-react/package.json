@@ -14,7 +14,8 @@
   "scripts": {
     "start": "tsdx watch --tsconfig ./tsconfig.build.json",
     "build": "tsdx build --tsconfig ./tsconfig.build.json",
-    "test": "tsdx test",
+    "test": "CI=true tsdx test",
+    "test:watch": "tsdx test",
     "lint": "tsdx lint src test stories",
     "prepare": "npm run build",
     "prepublishOnly": "npm run test && npm run lint",

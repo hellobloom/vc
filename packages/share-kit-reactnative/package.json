@@ -19,7 +19,8 @@
     "build": "tsdx build --tsconfig ./tsconfig.build.json && npm run copy-dist",
     "copy-dist": "npm run clean-example && copyfiles \"dist/**\" example/",
     "clean-example": "rimraf example/dist",
-    "test": "tsdx test",
+    "test": "CI=true tsdx test",
+    "test:watch": "tsdx test",
     "lint": "tsdx lint src test",
     "prepare": "npm run build",
     "prepublishOnly": "npm run test && npm run lint"

@@ -1,5 +1,5 @@
 import {renderRequestButton} from '../../src/elements/renderRequestButton'
-import {RequestData, ButtonOptions} from '../../src/types'
+import {Action, RequestData, ButtonOptions} from '../../src/types'
 
 describe('renderRequestButton', () => {
   let requestButton: {
@@ -20,10 +20,14 @@ describe('renderRequestButton', () => {
     requestButton = renderRequestButton({
       container,
       requestData: {
-        version: 1,
+        action: Action.attestation,
         token: 'token',
         url: 'https://receive-kit.bloom.co/api/receive',
-        payload_url: 'https://receive-kit.bloom.co/api/get-payload',
+        org_logo_url: 'https://bloom.co/images/notif/bloom-logo.png',
+        org_name: 'Bloom',
+        org_usage_policy_url: 'https://bloom.co/legal/terms',
+        org_privacy_policy_url: 'https://bloom.co/legal/privacy',
+        types: ['phone', 'email'],
       },
       buttonOptions: {
         callbackUrl: 'https://bloom.co/callback-url',
@@ -52,10 +56,14 @@ describe('renderRequestButton', () => {
   test('renders a medium button', () => {
     requestButton.update({
       requestData: {
-        version: 1,
+        action: Action.attestation,
         token: 'token',
         url: 'https://receive-kit.bloom.co/api/receive',
-        payload_url: 'https://receive-kit.bloom.co/api/get-payload',
+        org_logo_url: 'https://bloom.co/images/notif/bloom-logo.png',
+        org_name: 'Bloom',
+        org_usage_policy_url: 'https://bloom.co/legal/terms',
+        org_privacy_policy_url: 'https://bloom.co/legal/privacy',
+        types: ['phone', 'email'],
       },
       buttonOptions: {
         callbackUrl: 'https://bloom.co/callback-url',
@@ -69,10 +77,14 @@ describe('renderRequestButton', () => {
   test('renders a small button', () => {
     requestButton.update({
       requestData: {
-        version: 1,
+        action: Action.attestation,
         token: 'token',
         url: 'https://receive-kit.bloom.co/api/receive',
-        payload_url: 'https://receive-kit.bloom.co/api/get-payload',
+        org_logo_url: 'https://bloom.co/images/notif/bloom-logo.png',
+        org_name: 'Bloom',
+        org_usage_policy_url: 'https://bloom.co/legal/terms',
+        org_privacy_policy_url: 'https://bloom.co/legal/privacy',
+        types: ['phone', 'email'],
       },
       buttonOptions: {
         callbackUrl: 'https://bloom.co/callback-url',
@@ -87,10 +99,14 @@ describe('renderRequestButton', () => {
   test('updates the button', () => {
     requestButton.update({
       requestData: {
-        version: 1,
-        token: 'token',
+        action: Action.attestation,
+        token: 'token 2',
         url: 'https://receive-kit.bloom.co/api/receive',
-        payload_url: 'https://receive-kit.bloom.co/api/get-payload',
+        org_logo_url: 'https://bloom.co/images/notif/bloom-logo.png',
+        org_name: 'Bloom',
+        org_usage_policy_url: 'https://bloom.co/legal/terms',
+        org_privacy_policy_url: 'https://bloom.co/legal/privacy',
+        types: ['phone', 'email'],
       },
       buttonOptions: {
         callbackUrl: 'https://bloom.co/callback-url-2',

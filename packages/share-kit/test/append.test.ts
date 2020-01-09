@@ -1,4 +1,4 @@
-import {appendQuery} from '../src/append'
+import {appendQuery} from '../src/elements/append'
 
 test('should append query object to url', () => {
   const result = appendQuery('http://example.com/', {foo: 'bar'})
