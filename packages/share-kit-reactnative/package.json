@@ -1,0 +1,61 @@
+{
+  "name": "@bloomprotocol/share-kit-reactnative",
+  "version": "1.1.0-beta.0",
+  "description": "React Native implementation of @bloomprotocol/share-kit",
+  "main": "dist/index.js",
+  "module": "dist/share-kit-reactnative.esm.js",
+  "typings": "dist/index.d.ts",
+  "repository": "https://github.com/hellobloom/share-kit-reactnative",
+  "author": "Bloom Team <team@bloom.co>",
+  "license": "Apache-2.0",
+  "files": [
+    "dist"
+  ],
+  "contributors": [
+    "Mulili Nzuki"
+  ],
+  "scripts": {
+    "start": "tsdx watch --tsconfig ./tsconfig.build.json --onSuccess \"npm run copy-dist\"",
+    "build": "tsdx build --tsconfig ./tsconfig.build.json && npm run copy-dist",
+    "copy-dist": "npm run clean-example && copyfiles \"dist/**\" example/",
+    "clean-example": "rimraf example/dist",
+    "test": "tsdx test",
+    "lint": "tsdx lint src test",
+    "prepare": "npm run build",
+    "prepublishOnly": "npm run test && npm run lint"
+  },
+  "dependencies": {
+    "@bloomprotocol/share-kit": "^7.6.0-beta.1",
+    "@types/base-64": "^0.1.3",
+    "@types/extend": "^3.0.1",
+    "base-64": "^0.1.0",
+    "extend": "^3.0.2",
+    "react-native-linear-gradient": "^2.5.6",
+    "react-native-svg": "^9.6.1",
+    "url": "^0.11.0"
+  },
+  "peerDependencies": {
+    "react-native": "^0.60.0"
+  },
+  "devDependencies": {
+    "@bloomprotocol/eslint-config": "^1.0.0-beta.1",
+    "@bloomprotocol/prettier-config": "^1.0.0-beta.1",
+    "@types/jest": "^24.0.15",
+    "@types/react": "^16.8.19",
+    "@types/react-native": "^0.57.60",
+    "@typescript-eslint/eslint-plugin": "^2.14.0",
+    "@typescript-eslint/parser": "^2.14.0",
+    "copyfiles": "^2.1.1",
+    "eslint": "^6.8.0",
+    "eslint-config-prettier": "^6.9.0",
+    "eslint-plugin-prettier": "^3.1.2",
+    "prettier": "^1.19.1",
+    "react": "16.8.6",
+    "react-native": "0.60.4",
+    "react-native-typescript-transformer": "^1.2.12",
+    "rimraf": "^2.6.2",
+    "tsdx": "^0.12.1",
+    "tslib": "^1.10.0",
+    "typescript": "^3.7.4"
+  }
+}
