@@ -1,6 +1,6 @@
 import {Options as QROptions} from '@bloomprotocol/qr'
 
-import {TAttestationTypeNames} from '@bloomprotocol/att-comms-kit'
+import {TAttestationTypeNames} from '@bloomprotocol/attestations-common'
 import Bowser from 'bowser'
 
 // Request Types

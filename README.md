@@ -16,4 +16,4 @@ Attestation related kits for TS/JS
 
 ## Common Types and Logic
 
-- TS: [@bloomprotocol/att-comms-kit](./packages/att-comms-kit)
+- TS: [@bloomprotocol/attestations-common](./packages/attestations-common)

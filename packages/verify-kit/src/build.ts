@@ -13,7 +13,7 @@ import {
   IVerifiablePresentation,
   IAuthProof,
   IVerifiableAuth,
-} from '@bloomprotocol/att-comms-kit'
+} from '@bloomprotocol/attestations-common'
 import * as EthU from 'ethereumjs-util'
 
 import {formatMerkleProofForShare, hashCredentials} from './utils'

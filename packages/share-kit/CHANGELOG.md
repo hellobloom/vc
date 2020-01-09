@@ -8,6 +8,7 @@
 **Improvements**
 
 - Use the `@bloomprotocol/qr` package to render the QR code
+- Use the `@bloomprotocol/attestations-common` for shared types
 
 **Deprecations**:
 

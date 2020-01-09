@@ -39,7 +39,7 @@ npm install --save @bloomprotocol/att-comm-kit
 The `extractor` function helps extract data from a verifiable credential.
 
 ```typescript
-import {IVerifiableCredential, extract} from '@bloomprotocol/att-comms-kit'
+import {IVerifiableCredential, extract} from '@bloomprotocol/attestations-common'
 
 const emailCredential: IVerifiableCredential = {...}
 
@@ -49,7 +49,7 @@ const emailData = extract(emailCredential.credentialSubject.data, 'email', 'emai
 ## AttestationData
 
 ```typescript
-import {AttestationData} from '@bloomprotocol/att-comms-kit'
+import {AttestationData} from '@bloomprotocol/attestations-common'
 ```
 
 We define some extensible interfaces that the attestation data will be formatted in. These are use when extracting the data from the VC.

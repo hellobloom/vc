@@ -1,11 +1,11 @@
 {
-  "name": "@bloomprotocol/att-comms-kit",
+  "name": "@bloomprotocol/attestations-common",
   "version": "1.0.0-beta.0",
   "main": "dist/index.js",
-  "module": "dist/att-comms-kit.esm.js",
+  "module": "dist/attestations-common.esm.js",
   "typings": "dist/index.d.ts",
   "description": "Shared types and utility functions for attestation related kits",
-  "repository": "https://github.com/hellobloom/att-comm-kit",
+  "repository": "https://github.com/hellobloom/attestations-es",
   "author": "Bloom Team <team@bloom.co>",
   "license": "Apache-2.0",
   "files": [

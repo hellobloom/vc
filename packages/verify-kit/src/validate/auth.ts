@@ -1,4 +1,4 @@
-import {IVerifiableAuth} from '@bloomprotocol/att-comms-kit'
+import {IVerifiableAuth} from '@bloomprotocol/attestations-common'
 
 import {validateVerifiableAuth} from './structure/auth'
 import {ValidationResponse} from './utils'

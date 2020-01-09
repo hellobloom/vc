@@ -6,7 +6,7 @@ import {
   IProof,
   DataVersions,
   IVerifiedDataBatch,
-} from '@bloomprotocol/att-comms-kit'
+} from '@bloomprotocol/attestations-common'
 import * as EthU from 'ethereumjs-util'
 
 import {validateVerifiablePresentationResponse} from '../../src'

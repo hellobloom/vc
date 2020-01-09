@@ -8,7 +8,7 @@
 **Breaking**
 
 - Most functions have been removed from the public API. The two main entry points are now `validateVerifiablePresentationResponse` and `validateVerifiableAuthResponse`
-- All `type`s have been removed from this library, they are exported by [Attestations Commons Kit](https://github.com/hellobloom/attestations-ts/tree/master/packages/att-comms-kit) now.
+- All `type`s have been removed from this library, they are exported by [attestations-common](https://github.com/hellobloom/attestations-ts/tree/master/packages/attestations-common) now.
 
 ## 1.0.0
 

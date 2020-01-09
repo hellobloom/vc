@@ -1,6 +1,6 @@
 {
   "name": "@bloomprotocol/verify-kit",
-  "version": "2.0.0-beta.1",
+  "version": "2.0.0-beta.0",
   "main": "dist/index.js",
   "module": "dist/verify-kit.esm.js",
   "typings": "dist/index.d.ts",
@@ -20,7 +20,7 @@
     "prepublishOnly": "npm run test && npm run lint"
   },
   "dependencies": {
-    "@bloomprotocol/att-comms-kit": "^1.0.0-beta.0",
+    "@bloomprotocol/attestations-common": "^1.0.0-beta.0",
     "abi-decoder": "^2.2.2",
     "ethereumjs-util": "^6.2.0",
     "js-sha3": "^0.8.0",
@@ -28,7 +28,7 @@
     "web3": "^1.2.4"
   },
   "devDependencies": {
-    "@bloomprotocol/eslint-config": "^1.0.0-beta.1",
+    "@bloomprotocol/eslint-config": "^1.0.0-",
     "@bloomprotocol/prettier-config": "^1.0.0-beta.1",
     "@types/eth-sig-util": "^2.1.0",
     "@types/jest": "^24.0.25",
