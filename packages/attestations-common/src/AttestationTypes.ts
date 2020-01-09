@@ -248,7 +248,7 @@ export const AttestationTypeIDs: AttestationTypeID[] = Object.keys(AttestationTy
 
 // Type accessors
 
-export const getAttestationTypeAttrib = (typeId: AttestationTypeID, attrib: keyof AttestationType) => {
+export const getAttestationTypeAttrib = <T extends keyof AttestationType>(typeId: AttestationTypeID, attrib: T): AttestationType[T] => {
   const val = AttestationTypesByID[typeId][attrib]
   if (val === undefined || val === null) {
     throw new Error(`AttestationTypeID ${typeId} not supported`)
@@ -256,7 +256,8 @@ export const getAttestationTypeAttrib = (typeId: AttestationTypeID, attrib: keyo
   return val
 }
 
-const attestationTypeAccessor = (attrib: keyof AttestationType) => (typeId: AttestationTypeID) => getAttestationTypeAttrib(typeId, attrib)
+const attestationTypeAccessor = <T extends keyof AttestationType>(attrib: T) => (typeId: AttestationTypeID) =>
+  getAttestationTypeAttrib<T>(typeId, attrib)
 
 export const getAttestationTypeStr = attestationTypeAccessor('name')
 
