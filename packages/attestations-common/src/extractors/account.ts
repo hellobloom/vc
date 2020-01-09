@@ -3,10 +3,7 @@ import {IBaseAttAccount, IBaseAttAccountData, TPersonalNameObj} from '../Attesta
 
 export const fields: Array<keyof IBaseAttAccountData> = ['id', 'email', 'name', 'start_date', 'end_date']
 
-export const extractAccount = (
-  a: IBaseAttAccount,
-  valType: string,
-): IBaseAttAccountData | TPersonalNameObj | string | number | null => {
+export const extractAccount = (a: IBaseAttAccount, valType: string): IBaseAttAccountData | TPersonalNameObj | string | number | null => {
   // Get first provider
   const account: IBaseAttAccountData | null = B.getFirst(a.data)
   if (account) {

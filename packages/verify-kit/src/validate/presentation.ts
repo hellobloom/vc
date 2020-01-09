@@ -1,4 +1,10 @@
-import {IVerifiedDataLegacy, IVerifiedDataOnChain, VerifiedData, IVerifiablePresentation, DataVersions} from '@bloomprotocol/attestations-common'
+import {
+  IVerifiedDataLegacy,
+  IVerifiedDataOnChain,
+  VerifiedData,
+  IVerifiablePresentation,
+  DataVersions,
+} from '@bloomprotocol/attestations-common'
 
 import {getDecodedTxEventLogs, getDecodedLogValueByName, TDecodedLog} from '../txUtils'
 import {validateVerifiablePresentation} from './structure/presentation'

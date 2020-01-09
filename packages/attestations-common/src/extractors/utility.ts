@@ -1,5 +1,5 @@
 import * as B from './base'
-import { IBaseAttUtility, TAddress, IBaseAttUtilityProvider } from '../AttestationData'
+import {IBaseAttUtility, TAddress, IBaseAttUtilityProvider} from '../AttestationData'
 
 export const extractUtility = (
   a: IBaseAttUtility,

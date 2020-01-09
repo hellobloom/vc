@@ -1,5 +1,5 @@
 import * as B from './base'
-import { IBaseAttDOB } from '../AttestationData'
+import {IBaseAttDOB} from '../AttestationData'
 
 export const extractDOB = (a: B.MaybeDS<IBaseAttDOB>, valType: string): string | null => {
   switch (valType) {

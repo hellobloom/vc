@@ -1,5 +1,5 @@
 import * as B from './base'
-import { TAddress, IBaseAttAddress, IBaseAttAddressProvider } from '../AttestationData'
+import {TAddress, IBaseAttAddress, IBaseAttAddressProvider} from '../AttestationData'
 
 export const fields: Array<keyof TAddress> = [
   'full',
@@ -14,10 +14,7 @@ export const fields: Array<keyof TAddress> = [
   'country',
 ]
 
-export const extractAddress = (
-  a: IBaseAttAddress,
-  valType: string,
-): IBaseAttAddressProvider | TAddress | string | number | null => {
+export const extractAddress = (a: IBaseAttAddress, valType: string): IBaseAttAddressProvider | TAddress | string | number | null => {
   // Get first provider
   const providerBlock: IBaseAttAddressProvider | null = B.getFirst(a.data)
   if (providerBlock) {

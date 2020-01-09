@@ -13,7 +13,23 @@ import {extractPhone} from './phone'
 import {extractSanctionScreen} from './sanctionScreen'
 import {extractSSN} from './ssn'
 import {extractUtility} from './utility'
-import { IBaseAtt, IBaseAttPhone, IBaseAttEmail, IBaseAttName, IBaseAttSSN, IBaseAttDOB, IBaseAttAccount, IBaseAttSanctionScreen, IBaseAttPEP, IBaseAttIDDoc, IBaseAttUtility, IBaseAttAddress, IBaseAttIncome, IBaseAttAssets, IBaseAttGender,  } from '../AttestationData'
+import {
+  IBaseAtt,
+  IBaseAttPhone,
+  IBaseAttEmail,
+  IBaseAttName,
+  IBaseAttSSN,
+  IBaseAttDOB,
+  IBaseAttAccount,
+  IBaseAttSanctionScreen,
+  IBaseAttPEP,
+  IBaseAttIDDoc,
+  IBaseAttUtility,
+  IBaseAttAddress,
+  IBaseAttIncome,
+  IBaseAttAssets,
+  IBaseAttGender,
+} from '../AttestationData'
 import {TAttestationTypeNames} from '../AttestationTypes'
 
 export const extract = (dataStr: string, attType: TAttestationTypeNames, valType: string, errCallback?: (err: any) => void) => {
