@@ -1,6 +1,6 @@
 {
   "name": "@bloomprotocol/verify-kit",
-  "version": "2.0.0-beta.2",
+  "version": "2.0.0",
   "main": "dist/index.js",
   "module": "dist/verify-kit.esm.js",
   "typings": "dist/index.d.ts",
@@ -21,11 +21,10 @@
     "prepublishOnly": "npm run test && npm run lint"
   },
   "dependencies": {
-    "@bloomprotocol/attestations-common": "^1.0.0-beta.2",
+    "@bloomprotocol/attestations-common": "^1.0.0",
     "abi-decoder": "^2.2.2",
     "ethereumjs-util": "^6.2.0",
     "js-sha3": "^0.8.0",
-    "merkletreejs": "0.1.1",
     "web3": "^1.2.4"
   },
   "devDependencies": {

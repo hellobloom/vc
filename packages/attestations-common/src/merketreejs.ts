@@ -35,22 +35,6 @@ export class MerkleTree {
    * Lonely leaf nodes are promoted to the next level up without being hashed again.
    * @param {Buffer[]} leaves - Array of hashed leaves. Each leaf must be a Buffer.
    * @param {Function} hashAlgorithm - Algorithm used for hashing leaves and nodes
-   * @param {Object} options - Additional options
-   * @param {Boolean} options.isBitcoinTree - If set to `true`, constructs the Merkle
-   * Tree using the [Bitcoin Merkle Tree implementation](http://www.righto.com/2014/02/bitcoin-mining-hard-way-algorithms.html). Enable it when you need
-   * to replicate Bitcoin constructed Merkle Trees. In Bitcoin Merkle Trees, single nodes are combined with themselves, and each output hash is hashed again.
-   * @example
-   * const MerkleTree = require('merkletreejs')
-   * const crypto = require('crypto')
-   *
-   * function sha256(data) {
-   *   // returns Buffer
-   *   return crypto.createHash('sha256').update(data).digest()
-   * }
-   *
-   * const leaves = ['a', 'b', 'c'].map(x => sha3(x))
-   *
-   * const tree = new MerkleTree(leaves, sha256)
    */
   constructor(leaves: Buffer[], hashAlgorithm: (input: Buffer) => Buffer) {
     this.hashAlgo = bufferify(hashAlgorithm)
@@ -77,7 +61,9 @@ export class MerkleTree {
       // is odd number of nodes
       if (nodes.length % 2 === 1) {
         const data = nodes[nodes.length - 1]
-        this.layers[layerIndex].push(data)
+        const hash = data
+
+        this.layers[layerIndex].push(hash)
       }
 
       nodes = this.layers[layerIndex]
