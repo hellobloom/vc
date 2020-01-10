@@ -1,10 +1,10 @@
 import {keccak256} from 'js-sha3'
 import * as ethUtil from 'ethereumjs-util'
 import randomBytes from 'randombytes'
-import MerkleTree from 'merkletreejs'
 import * as ethSigUtil from 'eth-sig-util'
 import EthWallet from 'ethereumjs-wallet'
 
+import {MerkleTree} from './merketreejs'
 import {
   IIssuedClaimNode,
   ISignedClaimNode,
@@ -32,7 +32,7 @@ export const generateNonce = () => hashMessage(randomBytes(20).toString())
 
 export const getMerkleTreeFromLeaves = (leaves: string[]) => {
   const leavesSorted = leaves.sort().map(hexStr => ethUtil.toBuffer(hexStr))
-  return new MerkleTree(leavesSorted, (x: Buffer) => Buffer.from(keccak256(x), 'hex'))
+  return new MerkleTree(leavesSorted, x => Buffer.from(keccak256(x), 'hex'))
 }
 
 /**
