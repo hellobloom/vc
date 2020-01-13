@@ -1,32 +1,34 @@
 import Bowser from 'bowser'
+import {Options as QROptions} from '@bloomprotocol/qr'
 
-import {QROptions, ButtonOptions, RequestData, ShouldRenderButton, RequestElementResult} from './types'
+import {ButtonOptions, RequestData, ShouldRenderButton, RequestElementResult} from './types'
 import {renderRequestButton} from './elements/renderRequestButton'
 import {renderRequestQRCode} from './elements/renderRequestQRCode'
 
-const renderRequestElement = (config: {
+export const renderRequestElement = ({
+  shouldRenderButton,
+  ...renderConfig
+}: {
   container: HTMLElement
   requestData: RequestData
   qrOptions?: Partial<QROptions>
   shouldRenderButton?: ShouldRenderButton
   buttonOptions: ButtonOptions
 }): RequestElementResult => {
-  if (config.shouldRenderButton === undefined) {
-    config.shouldRenderButton = parsedResult => {
-      const isSupportedPlatform = parsedResult.platform.type === 'mobile' || parsedResult.platform.type === 'tablet'
-      const isSupportedOS = parsedResult.os.name === 'iOS' || parsedResult.os.name === 'Android'
+  let renderButton: boolean
 
-      return isSupportedPlatform && isSupportedOS
-    }
-  }
+  if (typeof shouldRenderButton === 'undefined') {
+    const parsedResult = Bowser.parse(window.navigator.userAgent)
 
-  const shouldRenderButton = config.shouldRenderButton(Bowser.parse(window.navigator.userAgent))
+    const isSupportedPlatform = parsedResult.platform.type === 'mobile' || parsedResult.platform.type === 'tablet'
+    const isSupportedOS = parsedResult.os.name === 'iOS' || parsedResult.os.name === 'Android'
 
-  if (shouldRenderButton) {
-    return renderRequestButton(config)
+    renderButton = isSupportedPlatform && isSupportedOS
+  } else if (typeof shouldRenderButton === 'boolean') {
+    renderButton = shouldRenderButton
   } else {
-    return renderRequestQRCode(config)
+    renderButton = shouldRenderButton(Bowser.parse(window.navigator.userAgent))
   }
-}
 
-export {renderRequestElement}
+  return (renderButton ? renderRequestButton : renderRequestQRCode)(renderConfig)
+}
