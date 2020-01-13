@@ -96,22 +96,16 @@ The user can share by tapping a button or scanning a QR code, sometimes you'll n
 
 The param will either be `share-kit-from=qr` OR `share-kit-from=button`.
 
-```
-// Input
-'https://mysite.com/api/share-kit/receive'
-
-// Output
-'https://mysite.com/api/share-kit/receive?share-kit-from=qr'
+```diff
+- 'https://mysite.com/api/share-kit/receive'
++ 'https://mysite.com/api/share-kit/receive?share-kit-from=qr'
 ```
 
 Works if your url already has a query param too!
 
-```
-// Input
-'https://mysite.com/api/share-kit/receive?my-param=',
-
-// Output
-'https://mysite.com/api/share-kit/receive?my-param=&share-kit-from=qr',
+```diff
+- 'https://mysite.com/api/share-kit/receive?my-param='
++ 'https://mysite.com/api/share-kit/receive?my-param=&share-kit-from=qr'
 ```
 
 ### RequestPayloadData
