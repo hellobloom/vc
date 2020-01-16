@@ -9,7 +9,7 @@ import {
 } from '@bloomprotocol/attestations-common'
 import * as EthU from 'ethereumjs-util'
 
-import {hashCredentials} from '../../utils'
+import {hashCredentials} from '../../../utils'
 
 export const isOptionalArrayOfAuthorizations = (value: any): boolean => {
   if (!Array.isArray(value)) return false

@@ -18,7 +18,9 @@ export type Validations<T> = {
   [k in keyof T]: Validator | Validator[]
 }
 
-export const genValidateFn = <T>(validations: Validations<T>) => (data: Unvalidated<T>): ValidationResponse<T> => {
+export type ValidateFn<T> = (data: Unvalidated<T>) => ValidationResponse<T>
+
+export const genValidateFn = <T>(validations: Validations<T>): ValidateFn<T> => data => {
   try {
     Object.keys(validations).forEach(_fieldName => {
       const fieldName = _fieldName as keyof T

@@ -1,3 +1,16 @@
+export type OnChain = {
+  validateOnChain: true
+  web3Provider: string
+}
+
+export type OffChain = {
+  validateOnChain?: false
+}
+
+export type ChainOptions = OnChain | OffChain
+
+export type SharedValidateVerifiablePresentationOptions = ChainOptions
+
 export type ValidationSuccessResponse<T> = {
   kind: 'validated'
   data: T

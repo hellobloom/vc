@@ -1,12 +1,24 @@
 import {validateDateTime} from './RFC3339DateTime'
+import {Validator, ValidateFn, Unvalidated} from './validation'
 
-export const isNotEmptyString = (value: any) => typeof value === 'string' && value.trim() !== ''
-
-export const isArrayOfNonEmptyStrings = (value: any) => {
-  if (!Array.isArray(value)) return false
-  if (value.length === 0) return false
-  return value.every(isNotEmptyString)
+export const isValid = <T>(valideFn: ValidateFn<T>) => (data: Unvalidated<T>) => {
+  return valideFn(data).kind === 'validated'
 }
+
+export const isUndefinedOr = (validator: Validator) => (value: any, data: any) => {
+  if (typeof value === 'undefined') return true
+  return validator(value, data)
+}
+
+export const isArrayOf = (validator: Validator, rejectEmpty = true): Validator => (value: any, data: any) => {
+  if (!Array.isArray(value)) return false
+  if (value.length === 0 && rejectEmpty) return false
+  return value.every(value => validator(value, data))
+}
+
+export const isNotEmptyString: Validator = (value: any) => typeof value === 'string' && value.trim() !== ''
+
+export const isArrayOfNonEmptyStrings: Validator = isArrayOf(isNotEmptyString)
 
 /**
  * Returns the value of `JSON.stringify` of a new object argument `obj`,
@@ -21,4 +33,4 @@ export const orderedStringify = (obj: {[i: string]: any}) => {
   return JSON.stringify(orderedObj)
 }
 
-export const isValidRFC3339DateTime = (value: any): boolean => validateDateTime(value)
+export const isValidRFC3339DateTime: Validator = (value: any) => validateDateTime(value)
