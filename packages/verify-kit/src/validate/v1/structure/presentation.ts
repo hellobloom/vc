@@ -5,6 +5,7 @@ import {
   VerifiablePresentationV1,
   FullVCV1,
   VerifiablePresentationProofV1,
+  VerifiablePresentationProofMetaDataV1,
   FullVCSubjectV1,
   FullVCAuthorizationV1,
   FullVCProofV1,
@@ -114,13 +115,28 @@ const validateVerifiableCredential = genValidateFn<FullVCV1>({
   proof: Utils.isValid(validateCredentialProof),
 })
 
-const validateProof = genValidateFn<VerifiablePresentationProofV1>({
+const validateProofMetaData = genValidateFn<VerifiablePresentationProofMetaDataV1>({
   type: Utils.isNotEmptyString,
   created: Utils.isValidRFC3339DateTime,
   creator: EthU.isValidAddress,
   nonce: Utils.isNotEmptyString,
   domain: Utils.isNotEmptyString,
   credentialHash: EthUtils.isValidHash,
+})
+
+const packedDataMatchesProof = (value: any, data: any) => {
+  return value.toLowerCase() === EthUtils.hashMessage(Utils.orderedStringify(data.metaData))
+}
+
+export const validatePresentationSignature = (value: string, data: any) => {
+  const recoveredSigner = EthUtils.recoverHashSigner(EthU.toBuffer(data.packedData), value)
+  return recoveredSigner.toLowerCase() === data.metaData.creator.toLowerCase()
+}
+
+const validateProof = genValidateFn<VerifiablePresentationProofV1>({
+  metaData: Utils.isValid(validateProofMetaData),
+  packedData: packedDataMatchesProof,
+  signature: [EthUtils.isValidSignatureString, validatePresentationSignature],
 })
 
 const proofMatchesCredential = (value: any, data: any) => {

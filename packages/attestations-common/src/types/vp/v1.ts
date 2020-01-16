@@ -2,7 +2,7 @@ import {BaseVCV1} from '../vc/shared/v1'
 
 export type VerifiablePresentationTypeV1 = ['VerifiablePresentation', ...string[]]
 
-export type VerifiablePresentationProofV1 = {
+export type VerifiablePresentationProofMetaDataV1 = {
   // type string describing share kit style proof
   type: string
   // recent timestamp in RFC3339 format
@@ -19,6 +19,18 @@ export type VerifiablePresentationProofV1 = {
 
   // hash of ordered array of layer2Hashes from each credential proof
   credentialHash: string
+}
+
+export type VerifiablePresentationProofV1 = {
+  metaData: VerifiablePresentationProofMetaDataV1
+  /**
+   * Hex string representation of the `metaData` being keccak256 hashed
+   */
+  packedData: string
+  /**
+   * Signature of `packedData` by the user with their pk.
+   */
+  signature: string
 }
 
 // TODO: This is missing the `signature` and `packedData` fields. How should those translate over?
