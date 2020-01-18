@@ -20,4 +20,4 @@
 
 - Initial release
 
-[attestation-common]: https://github.com/hellobloom/attestations-ts/tree/master/packages/attestations-common
+[attestation-common]: https://github.com/hellobloom/attestations-es/tree/master/packages/attestations-common

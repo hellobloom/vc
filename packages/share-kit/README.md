@@ -27,9 +27,9 @@ npm install --save @bloomprotocol/share-kit
 
 | Name                                                                                                               | Description                                         | Status             |
 | ------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------- | ------------------ |
-| [share-kit](https://github.com/hellobloom/attestations-ts/tree/master/packages//share-kit)                         | Plain DOM implementation                            | :white_check_mark: |
-| [share-kit-react](https://github.com/hellobloom/attestations-ts/tree/master/packages//share-kit-react)             | React wrapper for renderRequestElement              | :white_check_mark: |
-| [share-kit-reactnative](https://github.com/hellobloom/attestations-ts/tree/master/packages//share-kit-reactnative) | React Native implementation for renderRequestButton | :white_check_mark: |
+| [share-kit](https://github.com/hellobloom/attestations-es/tree/master/packages//share-kit)                         | Plain DOM implementation                            | :white_check_mark: |
+| [share-kit-react](https://github.com/hellobloom/attestations-es/tree/master/packages//share-kit-react)             | React wrapper for renderRequestElement              | :white_check_mark: |
+| [share-kit-reactnative](https://github.com/hellobloom/attestations-es/tree/master/packages//share-kit-reactnative) | React Native implementation for renderRequestButton | :white_check_mark: |
 | [share-kit-vue](https://github.com/hellobloom/share-kit-vue)                                                       | Vue wrapper for renderRequestElement                | :white_check_mark: |
 | [bloom_share_kit](https://github.com/hellobloom/share-kit-flutter)                                                 | Flutter implementation of renderRequestButton       | :white_check_mark: |
 

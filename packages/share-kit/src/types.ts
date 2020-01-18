@@ -1,4 +1,5 @@
 import {TAttestationTypeNames} from '@bloomprotocol/attestations-common'
+import {Options as QROptions} from '@bloomprotocol/qr'
 import Bowser from 'bowser'
 
 // Request Types
@@ -23,26 +24,6 @@ type RequestDataAttestation = RequestDataBase<Action.attestation> & {types: TAtt
 type RequestDataAuthentication = RequestDataBase<Action.authentication>
 
 type RequestData = RequestDataAttestation | RequestDataAuthentication
-
-enum ErrorCorrectionLevel {
-  'L' = 1,
-  'M' = 0,
-  'Q' = 3,
-  'H' = 2,
-}
-
-type QROptions = {
-  ecLevel: keyof typeof ErrorCorrectionLevel
-  size: number
-  bgColor: string
-  fgColor: string
-  hideLogo: boolean
-  padding: number
-  logoImage?: string
-  logoWidth?: number
-  logoHeight?: number
-  logoOpacity?: number
-}
 
 type SmallButtonType = 'square' | 'rounded-square' | 'circle' | 'squircle'
 
@@ -87,8 +68,6 @@ export {
   RequestDataAttestation,
   RequestDataAuthentication,
   RequestData,
-  ErrorCorrectionLevel,
-  QROptions,
   SmallButtonType,
   MediumButtonType,
   LargeButtonType,

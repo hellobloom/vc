@@ -1,6 +1,7 @@
+import {Options as QROptions} from '@bloomprotocol/qr'
 import Bowser from 'bowser'
 
-import {QROptions, ButtonOptions, RequestData, ShouldRenderButton, RequestElementResult} from './types'
+import {ButtonOptions, RequestData, ShouldRenderButton, RequestElementResult} from './types'
 import {renderRequestButton} from './elements/renderRequestButton'
 import {renderRequestQRCode} from './elements/renderRequestQRCode'
 
