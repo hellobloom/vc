@@ -1,0 +1,10 @@
+#!/bin/bash
+
+echo "-- Starting up a rabbit --"
+if [ -f "/usr/lib/systemd/system/rabbitmq.service" ]; then
+  sudo systemctl start rabbitmq
+else
+  rabbitmq-server &
+fi
+
+node_modules/.bin/tsc-watch -p tsconfig.build.json --onSuccess "bin/dev-services"

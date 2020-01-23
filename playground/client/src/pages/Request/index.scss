@@ -1,0 +1,41 @@
+.request {
+  &__type-checkbox {
+    display: block;
+  }
+
+  &__type-configs {
+    height: 300px;
+    overflow: scroll;
+    margin-left: -1.5rem;
+    margin-right: -1.5rem;
+    padding-right: 1.5rem;
+    padding-left: 1.5rem;
+  }
+
+  &__type-config {
+    &__options {
+      position: relative;
+
+      &__coming-soon {
+        position: absolute;
+        z-index: 10;
+        top: 1rem;
+        left: 0;
+        height: calc(100% - 1.6rem);
+        width: 100%;
+        background-color: rgba(#fff, 0.7);
+
+        &__text {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+        }
+      }
+    }
+  }
+
+  &__output {
+    margin-top: 3rem;
+  }
+}

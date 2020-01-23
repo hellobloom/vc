@@ -1,0 +1,4 @@
+#!/bin/bash
+
+# Stop rabbitmq service, ignore errors
+rabbitmqctl stop || true

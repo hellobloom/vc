@@ -1,41 +1,111 @@
 import fastify from 'fastify'
 import {uuid} from 'uuidv4'
+import S from 'fluent-schema'
 import {validateVerifiablePresentationResponse} from '@bloomprotocol/verify-kit'
+
+import {ShareRequest} from '@server/models'
+import {wsCookieKey} from '@server/cookies'
+import {sendNotification} from '@server/socket/sender'
 
 export const applyShareRoutes = (app: fastify.FastifyInstance) => {
   app.post<fastify.DefaultQuery, fastify.DefaultParams, fastify.DefaultHeaders, {types: string[]}>(
     '/api/v1/share/create',
+    {
+      schema: {
+        body: S.object()
+          .prop('types', S.array().items(S.string()))
+          .required(['types']),
+      },
+    },
     async (req, reply) => {
       const id = uuid()
-
-      // TODO: create request row in Request table with the provided types
+      await ShareRequest.create({id, requestedTypes: req.body.types})
 
       return reply.status(200).send({id})
     },
   )
 
-  app.get<fastify.DefaultQuery, {id: string}>('/api/v1/share/:id/get-types', async (req, reply) => {
-    // TODO: Get the types associated with the share request with the given id
+  app.get<fastify.DefaultQuery, {id: string}>(
+    '/api/v1/share/:id/get-types',
+    {
+      schema: {
+        params: S.object()
+          .prop('id', S.string().format('uuid'))
+          .required(['id']),
+      },
+    },
+    async (req, reply) => {
+      const request = await ShareRequest.findOne({where: {id: req.params.id}})
 
-    return reply.status(200).send({types: []})
-  })
+      if (!request) return reply.status(404).send({})
+      if (request.sharedTypes) return reply.status(400).send({})
 
-  app.get<fastify.DefaultQuery, {id: string}>('/api/v1/share/:id/get-shared-data', async (req, reply) => {
-    // TODO: Get the shared data's types associated with the share request with the given id
+      return reply
+        .status(200)
+        .setCookie(wsCookieKey, req.params.id, {signed: true, path: '/'})
+        .send({types: request.requestedTypes})
+    },
+  )
 
-    return reply.status(200).send({types: []})
-  })
+  app.get<fastify.DefaultQuery, {id: string}>(
+    '/api/v1/share/:id/get-shared-data',
+    {
+      schema: {
+        params: S.object()
+          .prop('id', S.string().format('uuid'))
+          .required(['id']),
+      },
+    },
+    async (req, reply) => {
+      const request = await ShareRequest.findOne({where: {id: req.params.id}})
 
-  app.get<{'share-kit-from': 'qr' | 'button'}>('/api/v1/share/recieve', async (req, reply) => {
-    const outcome = await validateVerifiablePresentationResponse(req.body, {version: 'v0'})
+      if (!request) return reply.status(404).send({})
+      if (!request.sharedTypes) return reply.status(404).send({})
 
-    if (outcome.kind === 'invalid') {
-      return reply.status(400).send({message: 'Share payload could not be validated'})
-    }
+      return reply.status(200).send({types: request.sharedTypes})
+    },
+  )
 
-    // TODO: Update the the Request row with the shared types
-    // TODO: Send a WS notif if req.query["share-kit-from"] === 'qr'
+  app.post<{'share-kit-from': 'qr' | 'button'}>(
+    '/api/v1/share/recieve',
+    {
+      schema: {
+        body: S.object()
+          .prop('token', S.string().format('uuid'))
+          .required(['token']),
+      },
+    },
+    async (req, reply) => {
+      const request = await ShareRequest.findOne({where: {id: req.body.token}})
 
-    return reply.status(200).send({success: true})
-  })
+      console.log({request})
+
+      if (!request) return reply.status(404).send({})
+
+      const outcome = await validateVerifiablePresentationResponse(req.body, {version: 'v0'})
+
+      console.log({outcome})
+
+      if (outcome.kind === 'invalid') {
+        return reply.status(400).send({message: 'Share payload could not be validated'})
+      }
+
+      const sharedTypes: string[] = outcome.data.verifiableCredential.map(vc => vc.type)
+      const hasAllRequestedTypes = request.requestedTypes.every(requested => sharedTypes.includes(requested))
+
+      console.log({hasAllRequestedTypes})
+
+      if (!hasAllRequestedTypes) return reply.status(400).send({success: false})
+
+      await request.update({sharedTypes: outcome.data.verifiableCredential.map(vc => vc.type)})
+
+      sendNotification({
+        recipient: req.body.token,
+        type: 'notif/share-recieved',
+        payload: JSON.stringify(sharedTypes),
+      })
+
+      return reply.status(200).send({success: true})
+    },
+  )
 }

@@ -1,3 +1,5 @@
+@use "sass:color";
+
 .loading--bouncing-dots {
   width: 100%;
   padding: 50px 0;
@@ -5,7 +7,7 @@
   &__content {
     display: block;
     margin: 0 auto;
-    fill: color-mod(#4b5473 tint(3%) a(50%));
+    fill: color.adjust(#4b5473, $alpha: -0.5);
   }
 
   &__item {

@@ -1,0 +1,3 @@
+#!/bin/bash
+
+node --inspect=5858 -r ./tsconfig-paths.js build/src/index.js

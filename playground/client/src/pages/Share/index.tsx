@@ -1,6 +1,6 @@
-import React, {useCallback, useRef, useState} from 'react'
+import React, {useCallback, useState, useEffect} from 'react'
 import {RequestElement, Action} from '@bloomprotocol/share-kit-react'
-import {TAttestationTypeNames} from '@bloomprotocol/attestations-common'
+import {TAttestationTypeNames, AttestationTypes} from '@bloomprotocol/attestations-common'
 import {useParams, Redirect} from 'react-router-dom'
 import {isUuid} from 'uuidv4'
 import bowser from 'bowser'
@@ -10,18 +10,18 @@ import {useShareGetTypes} from '../../query/share'
 import {BouncingDots} from '../../components/BouncingDots'
 import {sitemap} from '../../sitemap'
 import {api} from '../../api'
-import {useSocket} from '../../utils/hooks'
-import {useEffect} from 'react'
+import {resetSocketConnection, socketOn, socketOff} from '../../utils/socket'
+import {Message, MessageHeader, MessageBody, MessageSkin} from '../../components/Message'
+import {Card, CardContent} from '../../components/Card'
 
-const useGetSharedTypes = (isMobile: boolean, token: string) => {
+const useGetSharedTypes = (data: {types: string[]} | null) => {
   const [sharedTypes, setSharedTypes] = useState<string[] | null | undefined>()
 
   useEffect(() => {
     let current = true
 
     const get = async () => {
-      const urlParams = new URLSearchParams(window.location.search)
-      const token = urlParams.get('token')
+      const token = new URLSearchParams(window.location.search).get('token')
 
       if (token) {
         try {
@@ -40,16 +40,20 @@ const useGetSharedTypes = (isMobile: boolean, token: string) => {
     }
   }, [])
 
-  const socketCallback = useCallback(async () => {
-    try {
-      const {types} = await api.share.getSharedData({id: token})
-      setSharedTypes(types)
-    } catch {
-      setSharedTypes(null)
-    }
-  }, [token])
+  const socketCallback = useCallback(async types => {
+    setSharedTypes(types)
+  }, [])
 
-  useSocket('notif/share-recieved', socketCallback, !isMobile)
+  useEffect(() => {
+    if (data) {
+      resetSocketConnection()
+      socketOn('notif/share-recieved', socketCallback)
+    }
+
+    return () => {
+      socketOff('notif/share-recieved', socketCallback)
+    }
+  }, [data, socketCallback])
 
   return sharedTypes
 }
@@ -57,10 +61,10 @@ const useGetSharedTypes = (isMobile: boolean, token: string) => {
 type ShareProps = {}
 
 export const Share: React.FC<ShareProps> = props => {
-  const isMobile = useRef(bowser.parse(window.navigator.userAgent).platform.type === 'mobile').current
+  const isMobile = bowser.parse(window.navigator.userAgent).platform.type === 'mobile'
   const {id: token} = useParams<{id: string}>()
-  const {data} = useShareGetTypes({id: token})
-  const sharedTypes = useGetSharedTypes(isMobile, token)
+  const {data, error} = useShareGetTypes({id: token})
+  const sharedTypes = useGetSharedTypes(data)
 
   if (!isUuid(token)) return <Redirect to={'/not-found'} />
 
@@ -70,37 +74,75 @@ export const Share: React.FC<ShareProps> = props => {
 
   if (sharedTypes) {
     children = (
-      <div>
-        You shared the following data:
-        <ul>
-          {sharedTypes.map(type => (
-            <li key={type}>{type.toUpperCase()}</li>
-          ))}
-        </ul>
-      </div>
+      <Message skin={MessageSkin.success}>
+        <MessageHeader>
+          <p>Successfully Shared Credential Types</p>
+        </MessageHeader>
+        <MessageBody>
+          <ul>
+            {sharedTypes.map(type => {
+              const manifest = AttestationTypes[type as any]
+              const displayName = manifest ? manifest.nameFriendly : type
+
+              return <li key={type}>{displayName}</li>
+            })}
+          </ul>
+        </MessageBody>
+      </Message>
     )
-  } else if (data) {
+  } else if (error) {
     children = (
-      <RequestElement
-        requestData={{
-          action: Action.attestation,
-          token,
-          url: `${host}/api/v1/share/recieve`,
-          org_name: 'Attestation Playground',
-          org_logo_url: 'https://bloom.co/images/notif/bloom-logo.png',
-          org_usage_policy_url: 'https://bloom.co/legal/terms',
-          org_privacy_policy_url: 'https://bloom.co/legal/privacy',
-          // TODO: make this not typed to our attestation names
-          types: data.types as TAttestationTypeNames[],
-        }}
-        buttonOptions={{
-          callbackUrl: `${window.location.origin}${sitemap.share(token)}?token=${token}`,
-        }}
-      />
+      <Message skin={MessageSkin.warning}>
+        <MessageHeader>
+          <p>Could Not Fetch Request</p>
+        </MessageHeader>
+        <MessageBody>Please ensure that the URL is correct.</MessageBody>
+      </Message>
     )
   } else {
-    children = <BouncingDots />
+    let cardContent: React.ReactNode
+
+    if (data) {
+      cardContent = (
+        <RequestElement
+          shouldRenderButton={() => isMobile}
+          requestData={{
+            action: Action.attestation,
+            token,
+            url: `${host}/api/v1/share/recieve`,
+            org_name: 'Attestation Playground',
+            org_logo_url: 'https://bloom.co/images/notif/bloom-logo.png',
+            org_usage_policy_url: 'https://bloom.co/legal/terms',
+            org_privacy_policy_url: 'https://bloom.co/legal/privacy',
+            // TODO: make this not typed to our attestation names
+            types: data.types as TAttestationTypeNames[],
+          }}
+          qrOptions={{size: 256}}
+          buttonOptions={{
+            callbackUrl: `${window.location.origin}${sitemap.share(token)}?token=${token}`,
+          }}
+        />
+      )
+    } else {
+      cardContent = <BouncingDots />
+    }
+
+    children = (
+      <Card>
+        <CardContent>{cardContent}</CardContent>
+      </Card>
+    )
   }
 
-  return <Shell titleSuffix="Share">{children}</Shell>
+  return (
+    <Shell titleSuffix="Share">
+      <h1 className="title is-1 has-text-weight-bold has-text-centered">Share Credentials</h1>
+      <p className="subtitle has-text-centered">
+        Share requested credentials with a {isMobile ? 'click of a button' : 'scan of a QR code'}.
+      </p>
+      <div className="columns is-mobile is-centered">
+        <div className="column is-narrow">{children}</div>
+      </div>
+    </Shell>
+  )
 }

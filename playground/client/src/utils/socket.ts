@@ -7,7 +7,7 @@ type SocketHandlers = {
 const host = (() => {
   const isLocal = window.location.hostname === 'localhost'
   const protocol = isLocal ? 'ws' : 'wss'
-  const port = isLocal ? '8081' : '443'
+  const port = isLocal ? '3001' : '443'
 
   return `${protocol}://${window.location.hostname}:${port}/websocket`
 })()
@@ -24,7 +24,7 @@ const resetSocketConnection = () => {
       const decoded = JSON.parse(e.data)
       if (decoded instanceof Array) {
         const callbacks = socketHandlers[decoded[0]]
-        if (callbacks) callbacks.forEach(callback => callback(decoded[1]))
+        if (callbacks) callbacks.forEach(callback => callback(JSON.parse(decoded[1])))
       }
     } catch (e) {
       console.log('Error in websocket callback', e)

@@ -1,0 +1,7 @@
+#!/bin/bash
+
+export MAX_MEM=${MAX_MEM:-1500}
+
+echo "Running built server with max_old_space_size of $MAX_MEM MB"
+
+node --max_old_space_size="$MAX_MEM" -r ./tsconfig-paths.js build/src/index.js

@@ -1,4 +1,4 @@
-import {useQuery, prefetchQuery} from 'react-query'
+import {useQuery} from 'react-query'
 
 import {api} from '../api'
 import {WithVariables} from './query'
