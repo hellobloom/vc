@@ -13,9 +13,13 @@ module.exports = {
         allowNull: false,
         type: DataTypes.ARRAY(DataTypes.STRING()),
       },
-      sharedTypes: {
+      responseVersion: {
+        allowNull: false,
+        type: DataTypes.ENUM('v0', 'v1'),
+      },
+      verifiableCredential: {
         allowNull: true,
-        type: DataTypes.ARRAY(DataTypes.STRING()),
+        type: DataTypes.ARRAY(DataTypes.JSONB),
       },
       createdAt: {
         allowNull: false,

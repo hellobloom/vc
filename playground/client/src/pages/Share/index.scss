@@ -1,0 +1,7 @@
+.share {
+  &__shared-data-container {
+    & > ul {
+      padding: 1rem;
+    }
+  }
+}

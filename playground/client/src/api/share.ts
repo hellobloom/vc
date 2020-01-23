@@ -1,7 +1,8 @@
 import * as http from './http'
 
-export const createRequest = ({types}: {types: string[]}) => http.post<{id: string}>('/api/v1/share/create', {types})
+export const createRequest = ({types, responseVersion}: {types: string[]; responseVersion: string}) =>
+  http.post<{id: string}>('/api/v1/share/create', {types, responseVersion})
 
-export const getTypes = ({id}: {id: string}) => http.get<{types: string[]}>(`/api/v1/share/${id}/get-types`)
+export const getConfig = ({id}: {id: string}) => http.get<{types: string[]; responseVersion: 'v0' | 'v1'}>(`/api/v1/share/${id}/get-config`)
 
-export const getSharedData = ({id}: {id: string}) => http.get<{types: string[]}>(`/api/v1/share/${id}/get-shared-data`)
+export const getSharedData = ({id}: {id: string}) => http.get<{verifiableCredential: []}>(`/api/v1/share/${id}/get-shared-data`)

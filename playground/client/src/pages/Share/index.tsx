@@ -1,12 +1,14 @@
 import React, {useCallback, useState, useEffect} from 'react'
 import {RequestElement, Action} from '@bloomprotocol/share-kit-react'
-import {TAttestationTypeNames, AttestationTypes} from '@bloomprotocol/attestations-common'
+import {TAttestationTypeNames} from '@bloomprotocol/attestations-common'
 import {useParams, Redirect} from 'react-router-dom'
 import {isUuid} from 'uuidv4'
 import bowser from 'bowser'
+import JSONTree from 'react-json-tree'
+import clsx from 'clsx'
 
 import {Shell} from '../../components/Shell'
-import {useShareGetTypes} from '../../query/share'
+import {useShareGetConfig} from '../../query/share'
 import {BouncingDots} from '../../components/BouncingDots'
 import {sitemap} from '../../sitemap'
 import {api} from '../../api'
@@ -14,8 +16,10 @@ import {resetSocketConnection, socketOn, socketOff} from '../../utils/socket'
 import {Message, MessageHeader, MessageBody, MessageSkin} from '../../components/Message'
 import {Card, CardContent} from '../../components/Card'
 
+import './index.scss'
+
 const useGetSharedTypes = (data: {types: string[]} | null) => {
-  const [sharedTypes, setSharedTypes] = useState<string[] | null | undefined>()
+  const [sharedData, setSharedData] = useState<[] | null | undefined>()
 
   useEffect(() => {
     let current = true
@@ -25,10 +29,10 @@ const useGetSharedTypes = (data: {types: string[]} | null) => {
 
       if (token) {
         try {
-          const {types} = await api.share.getSharedData({id: token})
-          if (current) setSharedTypes(types)
+          const {verifiableCredential} = await api.share.getSharedData({id: token})
+          if (current) setSharedData(verifiableCredential)
         } catch {
-          if (current) setSharedTypes(null)
+          if (current) setSharedData(null)
         }
       }
     }
@@ -40,8 +44,8 @@ const useGetSharedTypes = (data: {types: string[]} | null) => {
     }
   }, [])
 
-  const socketCallback = useCallback(async types => {
-    setSharedTypes(types)
+  const socketCallback = useCallback(async verifiableCredential => {
+    setSharedData(verifiableCredential)
   }, [])
 
   useEffect(() => {
@@ -55,7 +59,7 @@ const useGetSharedTypes = (data: {types: string[]} | null) => {
     }
   }, [data, socketCallback])
 
-  return sharedTypes
+  return sharedData
 }
 
 type ShareProps = {}
@@ -63,8 +67,8 @@ type ShareProps = {}
 export const Share: React.FC<ShareProps> = props => {
   const isMobile = bowser.parse(window.navigator.userAgent).platform.type === 'mobile'
   const {id: token} = useParams<{id: string}>()
-  const {data, error} = useShareGetTypes({id: token})
-  const sharedTypes = useGetSharedTypes(data)
+  const {data, error} = useShareGetConfig({id: token})
+  const sharedData = useGetSharedTypes(data)
 
   if (!isUuid(token)) return <Redirect to={'/not-found'} />
 
@@ -72,21 +76,16 @@ export const Share: React.FC<ShareProps> = props => {
 
   let children: React.ReactNode
 
-  if (sharedTypes) {
+  if (sharedData) {
     children = (
       <Message skin={MessageSkin.success}>
         <MessageHeader>
-          <p>Successfully Shared Credential Types</p>
+          <p>Successfully Shared Credentials</p>
         </MessageHeader>
         <MessageBody>
-          <ul>
-            {sharedTypes.map(type => {
-              const manifest = AttestationTypes[type as any]
-              const displayName = manifest ? manifest.nameFriendly : type
-
-              return <li key={type}>{displayName}</li>
-            })}
-          </ul>
+          <div className="share__shared-data-container">
+            <JSONTree data={sharedData} />
+          </div>
         </MessageBody>
       </Message>
     )
@@ -109,7 +108,7 @@ export const Share: React.FC<ShareProps> = props => {
           requestData={{
             action: Action.attestation,
             token,
-            url: `${host}/api/v1/share/recieve`,
+            url: `${host}/api/v1/share/recieve?responseVersion=${data.responseVersion}`,
             org_name: 'Attestation Playground',
             org_logo_url: 'https://bloom.co/images/notif/bloom-logo.png',
             org_usage_policy_url: 'https://bloom.co/legal/terms',
@@ -141,7 +140,7 @@ export const Share: React.FC<ShareProps> = props => {
         Share requested credentials with a {isMobile ? 'click of a button' : 'scan of a QR code'}.
       </p>
       <div className="columns is-mobile is-centered">
-        <div className="column is-narrow">{children}</div>
+        <div className={clsx('column', {'is-narrow': !sharedData})}>{children}</div>
       </div>
     </Shell>
   )

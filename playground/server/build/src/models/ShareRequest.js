@@ -16,8 +16,12 @@ exports.initShareRequest = (sequelize) => {
             type: sequelize_1.DataTypes.ARRAY(sequelize_1.DataTypes.STRING()),
             allowNull: false,
         },
-        sharedTypes: {
-            type: sequelize_1.DataTypes.ARRAY(sequelize_1.DataTypes.STRING()),
+        responseVersion: {
+            type: sequelize_1.DataTypes.ENUM('v0', 'v1'),
+            allowNull: true,
+        },
+        verifiableCredential: {
+            type: sequelize_1.DataTypes.ARRAY(sequelize_1.DataTypes.JSONB),
             allowNull: true,
         },
         createdAt: {

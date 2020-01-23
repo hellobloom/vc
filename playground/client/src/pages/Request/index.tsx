@@ -48,14 +48,7 @@ export const Request: React.FC<RequestProps> = props => {
           </MessageBody>
         </Message>
       )}
-      <form
-        onSubmit={async e => {
-          e.preventDefault()
-          const {id} = await api.share.createRequest({types: Array.from(selectedTypes)})
-          setNewShareId(id)
-          setSelectedTypes(new Set())
-        }}
-      >
+      <div>
         <div className="title is-4">Credential Types:</div>
         <div className="columns">
           <div className="column">
@@ -222,10 +215,17 @@ export const Request: React.FC<RequestProps> = props => {
             </label>
           </div>
         </div>
-        <button className="button is-link" type="submit">
+        <button
+          className="button is-link"
+          onClick={async () => {
+            const {id} = await api.share.createRequest({types: Array.from(selectedTypes), responseVersion})
+            setNewShareId(id)
+            setSelectedTypes(new Set())
+          }}
+        >
           Request
         </button>
-      </form>
+      </div>
       <div className="request__output">
         <div className="title is-4">Output:</div>
         <pre>

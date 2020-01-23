@@ -1,4 +1,4 @@
 #!/bin/bash
 
-# Stop rabbitmq service, ignore errors
-rabbitmqctl stop || true
+echo "-- Resetting server --"
+(cd server && npm run reset-dev)

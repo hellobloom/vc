@@ -5,7 +5,9 @@ export class ShareRequest extends Model {
 
   requestedTypes!: string[]
 
-  sharedTypes?: string[]
+  responseVersion!: 'v0' | 'v1'
+
+  verifiableCredential?: []
 
   createdAt!: Date
 
@@ -25,8 +27,12 @@ export const initShareRequest = (sequelize: Sequelize) => {
         type: DataTypes.ARRAY(DataTypes.STRING()),
         allowNull: false,
       },
-      sharedTypes: {
-        type: DataTypes.ARRAY(DataTypes.STRING()),
+      responseVersion: {
+        type: DataTypes.ENUM('v0', 'v1'),
+        allowNull: true,
+      },
+      verifiableCredential: {
+        type: DataTypes.ARRAY(DataTypes.JSONB),
         allowNull: true,
       },
       createdAt: {
