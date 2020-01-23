@@ -12,7 +12,7 @@
     "@types/cookie": "^0.3.3",
     "@types/cookie-signature": "^1.0.3",
     "@types/node": "^10.17.12",
-    "@types/ramda": "^0.26.39",
+    "@types/ramda": "^0.26.40",
     "@types/validator": "^12.0.1",
     "@types/ws": "^7.2.0",
     "amqp-connection-manager": "^3.2.0",
@@ -25,14 +25,13 @@
     "fastify-cookie": "3.5.0",
     "fastify-helmet": "3.0.2",
     "fluent-schema": "^0.9.0",
-    "knex": "^0.20.8",
     "pg": "^7.17.1",
     "pg-hstore": "^2.3.3",
     "ramda": "^0.26.1",
     "sequelize": "^5.21.3",
     "sequelize-cli": "^5.5.1",
     "sqlite3": "^4.1.1",
-    "uuidv4": "^6.0.1",
+    "uuidv4": "^6.0.2",
     "ws": "^7.2.1"
   },
   "devDependencies": {
@@ -45,7 +44,7 @@
     "eslint-plugin-prettier": "^3.1.2",
     "prettier": "^1.19.1",
     "rimraf": "^3.0.0",
-    "tsc-watch": "^4.0.0",
+    "tsc-watch": "^4.1.0",
     "tsconfig-paths": "^3.9.0",
     "typescript": "^3.7.5"
   },
