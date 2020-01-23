@@ -107,7 +107,7 @@ export const Claim: React.FC<ClaimProps> = props => {
           claimData={{
             version: 1,
             token,
-            url: `${host}/api/v1/cred/${token}/claim`,
+            url: `${host}/api/v1/cred/${token}/claim-${data.claimVersion}`,
           }}
           qrOptions={{size: 256}}
           buttonOptions={{
