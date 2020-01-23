@@ -2,20 +2,124 @@ import React, {useState} from 'react'
 import {AttestationTypeNames, AttestationTypes} from '@bloomprotocol/attestations-common'
 import {stripIndent} from 'common-tags'
 import {Link} from 'react-router-dom'
-import {FixedSizeList as List, ListChildComponentProps} from 'react-window'
+import Case from 'case'
+import {FC} from 'react-forward-props'
 
 import {Shell} from '../../components/Shell'
 import {api} from '../../api'
 import {sitemap} from '../../sitemap'
 import {Message, MessageHeader, MessageBody, MessageSkin} from '../../components/Message'
 import {Card, CardContent, CardHeader, CardHeaderTitle} from '../../components/Card'
+import {Button, ButtonSkin} from '../../components/Button'
+import {Delete} from '../../components/Delete'
 
 import './index.scss'
+
+const getDisplayValueForType = (type: string) => {
+  const manifest = AttestationTypes[type as any]
+  return manifest ? `${AttestationTypes[type as any].nameFriendly} (${type})` : type
+}
+
+type TypeConfigProps = {
+  type: string
+}
+
+const TypeConfig: FC<'details', TypeConfigProps> = props => {
+  return (
+    <details className="request__type-config">
+      <summary className="is-size-5 has-text-weight-bold">{getDisplayValueForType(props.type)}</summary>
+      <div className="request__type-config__options">
+        <div className="request__type-config__options__coming-soon">
+          <div className="request__type-config__options__coming-soon__text is-size-3 has-text-centered">Coming Soon</div>
+        </div>
+        <div className="columns">
+          <div className="column">
+            <div className="field">
+              <div className="control">
+                <label className="checkbox">
+                  <input type="checkbox" /> Optional
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="columns">
+          <div className="column">
+            <div className="field">
+              <label htmlFor={`${props.type}-completed-before`} className="label">
+                Completed Before
+              </label>
+              <div className="control">
+                <input id={`${props.type}-completed-before`} className="input" type="text" placeholder="Completed Before" />
+              </div>
+            </div>
+          </div>
+          <div className="column">
+            <div className="field">
+              <label htmlFor={`${props.type}-completed-after`} className="label">
+                Completed After
+              </label>
+              <div className="control">
+                <input id={`${props.type}-completed-after`} className="input" type="text" placeholder="Completed After" />
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="columns">
+          <div className="column">
+            <div className="field">
+              <label htmlFor={`${props.type}-provider-whitelist`} className="label">
+                Provider Whitelist
+              </label>
+              <div className="control">
+                <input id={`${props.type}-provider-whitelist`} className="input" type="text" placeholder="Provider Whitelist" />
+              </div>
+            </div>
+          </div>
+          <div className="column">
+            <div className="field">
+              <label htmlFor={`${props.type}-provider-blacklist`} className="label">
+                Provider Blacklist
+              </label>
+              <div className="control">
+                <input id={`${props.type}-provider-blacklist`} className="input" type="text" placeholder="Provider Blacklist" />
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="columns">
+          <div className="column">
+            <div className="field">
+              <label htmlFor={`${props.type}-attester-whitelist`} className="label">
+                Provider Whitelist
+              </label>
+              <div className="control">
+                <input id={`${props.type}-attester-whitelist`} className="input" type="text" placeholder="Attester Whitelist" />
+              </div>
+            </div>
+          </div>
+          <div className="column">
+            <div className="field">
+              <label htmlFor={`${props.type}-attester-blacklist`} className="label">
+                Provider Blacklist
+              </label>
+              <div className="control">
+                <input id={`${props.type}-attester-blacklist`} className="input" type="text" placeholder="Attester Blacklist" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </details>
+  )
+}
 
 type RequestProps = {}
 
 export const Request: React.FC<RequestProps> = props => {
-  const [selectedTypes, setSelectedTypes] = useState<Set<string>>(new Set(['phone']))
+  const [selectedTypes, setSelectedTypes] = useState<Set<string>>(new Set())
+  const [customTypes, setCustomTypes] = useState<Set<string>>(new Set())
+  const [newCustomType, setNewCustomType] = useState('')
   const [responseVersion, setResponseVersion] = useState('v0')
 
   const [newShareId, setNewShareId] = useState<string>()
@@ -33,6 +137,8 @@ export const Request: React.FC<RequestProps> = props => {
     }
   }
 
+  const allRequestedTypes = [...Array.from(customTypes), ...Array.from(selectedTypes)]
+
   return (
     <Shell titleSuffix="Request">
       <h1 className="title is-1 has-text-weight-bold has-text-centered">Request Credentials</h1>
@@ -41,7 +147,7 @@ export const Request: React.FC<RequestProps> = props => {
         <Message skin={MessageSkin.success}>
           <MessageHeader>
             <p>Request Successfully Created</p>
-            <button onClick={() => setNewShareId(undefined)} className="delete" aria-label="delete"></button>
+            <Delete onClick={() => setNewShareId(undefined)} aria-label="clear message" />
           </MessageHeader>
           <MessageBody>
             To share data for this request navigate to <Link to={sitemap.share(newShareId)}>{sitemap.share(newShareId)}</Link>.
@@ -57,31 +163,79 @@ export const Request: React.FC<RequestProps> = props => {
                 <CardHeaderTitle>Types</CardHeaderTitle>
               </CardHeader>
               <CardContent>
-                <List itemData={AttestationTypeNames} itemCount={AttestationTypeNames.length} height={300} itemSize={30} width="100%">
-                  {({index, data, style}: Omit<ListChildComponentProps, 'data'> & {data: string[]}) => {
-                    const type = data[index]
+                <div className="request__add-types">
+                  <div className="request__custom-types">
+                    <form
+                      onSubmit={e => {
+                        e.preventDefault()
 
-                    return (
-                      <label style={style} className="request__type-checkbox checkbox">
-                        <input
-                          checked={selectedTypes.has(type)}
-                          onChange={() => {
-                            const newSelectedTypes = new Set(selectedTypes)
+                        const newCustomTypes = new Set(customTypes)
+                        newCustomTypes.add(newCustomType)
 
-                            if (!newSelectedTypes.delete(type)) {
-                              newSelectedTypes.add(type)
-                            }
+                        setCustomTypes(newCustomTypes)
+                        setNewCustomType('')
+                      }}
+                      className="request__custom-types__add-form"
+                    >
+                      <div className="field has-addons">
+                        <div className="control is-expanded">
+                          <input
+                            value={newCustomType}
+                            onChange={e => setNewCustomType(e.target.value.trim())}
+                            className="input"
+                            type="text"
+                            placeholder="Custom Type"
+                          />
+                        </div>
+                        <div className="control">
+                          <Button>Add</Button>
+                        </div>
+                      </div>
+                    </form>
+                    <div>
+                      {Array.from(customTypes).map(customType => {
+                        return (
+                          <div className="request__custom-type" key={customType}>
+                            <Delete
+                              className="request__custom-type__delete"
+                              onClick={() => {
+                                const newCustomTypes = new Set(customTypes)
+                                newCustomTypes.delete(customType)
 
-                            setSelectedTypes(newSelectedTypes)
-                          }}
-                          type="checkbox"
-                          name="attestation-type"
-                        />
-                        {' ' + AttestationTypes[type as any].nameFriendly}
-                      </label>
-                    )
-                  }}
-                </List>
+                                setCustomTypes(newCustomTypes)
+                              }}
+                              aria-label="remove custom type"
+                            />
+                            {customType}
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
+                  <div className="request__available-types">
+                    {AttestationTypeNames.map(type => {
+                      return (
+                        <label key={type} className="request__type-checkbox checkbox">
+                          <input
+                            checked={selectedTypes.has(type)}
+                            onChange={() => {
+                              const newSelectedTypes = new Set(selectedTypes)
+
+                              if (!newSelectedTypes.delete(type)) {
+                                newSelectedTypes.add(type)
+                              }
+
+                              setSelectedTypes(newSelectedTypes)
+                            }}
+                            type="checkbox"
+                            name="attestation-type"
+                          />
+                          {` ${getDisplayValueForType(type)}`}
+                        </label>
+                      )
+                    })}
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </div>
@@ -92,95 +246,9 @@ export const Request: React.FC<RequestProps> = props => {
               </CardHeader>
               <CardContent>
                 <div className="request__type-configs">
-                  {Array.from(selectedTypes).map(type => {
-                    return (
-                      <details key={type} className="request__type-config">
-                        <summary className="is-size-5 has-text-weight-bold">{AttestationTypes[type as any].nameFriendly}</summary>
-                        <div className="request__type-config__options">
-                          <div className="request__type-config__options__coming-soon">
-                            <div className="request__type-config__options__coming-soon__text is-size-3 has-text-centered">Coming Soon</div>
-                          </div>
-                          <div className="columns">
-                            <div className="column">
-                              <div className="field">
-                                <div className="control">
-                                  <label className="checkbox">
-                                    <input type="checkbox" /> Optional
-                                  </label>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="columns">
-                            <div className="column">
-                              <div className="field">
-                                <label htmlFor={`${type}-completed-before`} className="label">
-                                  Completed Before
-                                </label>
-                                <div className="control">
-                                  <input id={`${type}-completed-before`} className="input" type="text" placeholder="Completed Before" />
-                                </div>
-                              </div>
-                            </div>
-                            <div className="column">
-                              <div className="field">
-                                <label htmlFor={`${type}-completed-after`} className="label">
-                                  Completed After
-                                </label>
-                                <div className="control">
-                                  <input id={`${type}-completed-after`} className="input" type="text" placeholder="Completed After" />
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="columns">
-                            <div className="column">
-                              <div className="field">
-                                <label htmlFor={`${type}-provider-whitelist`} className="label">
-                                  Provider Whitelist
-                                </label>
-                                <div className="control">
-                                  <input id={`${type}-provider-whitelist`} className="input" type="text" placeholder="Provider Whitelist" />
-                                </div>
-                              </div>
-                            </div>
-                            <div className="column">
-                              <div className="field">
-                                <label htmlFor={`${type}-provider-blacklist`} className="label">
-                                  Provider Blacklist
-                                </label>
-                                <div className="control">
-                                  <input id={`${type}-provider-blacklist`} className="input" type="text" placeholder="Provider Blacklist" />
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="columns">
-                            <div className="column">
-                              <div className="field">
-                                <label htmlFor={`${type}-attester-whitelist`} className="label">
-                                  Provider Whitelist
-                                </label>
-                                <div className="control">
-                                  <input id={`${type}-attester-whitelist`} className="input" type="text" placeholder="Attester Whitelist" />
-                                </div>
-                              </div>
-                            </div>
-                            <div className="column">
-                              <div className="field">
-                                <label htmlFor={`${type}-attester-blacklist`} className="label">
-                                  Provider Blacklist
-                                </label>
-                                <div className="control">
-                                  <input id={`${type}-attester-blacklist`} className="input" type="text" placeholder="Attester Blacklist" />
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </details>
-                    )
-                  })}
+                  {allRequestedTypes.map(type => (
+                    <TypeConfig key={type} type={type} />
+                  ))}
                 </div>
               </CardContent>
             </Card>
@@ -215,16 +283,17 @@ export const Request: React.FC<RequestProps> = props => {
             </label>
           </div>
         </div>
-        <button
-          className="button is-link"
+        <Button
+          skin={ButtonSkin.link}
           onClick={async () => {
-            const {id} = await api.share.createRequest({types: Array.from(selectedTypes), responseVersion})
+            const {id} = await api.share.createRequest({types: allRequestedTypes, responseVersion})
             setNewShareId(id)
             setSelectedTypes(new Set())
+            setCustomTypes(new Set())
           }}
         >
           Request
-        </button>
+        </Button>
       </div>
       <div className="request__output">
         <div className="title is-4">Output:</div>
@@ -239,9 +308,7 @@ export const Request: React.FC<RequestProps> = props => {
             org_logo_url: 'https://bloom.co/images/notif/bloom-logo.png',
             org_usage_policy_url: 'https://bloom.co/legal/terms',
             org_privacy_policy_url: 'https://bloom.co/legal/privacy',
-            types: [${Array.from(selectedTypes)
-              .map(type => `"${type}"`)
-              .join(', ')}]
+            types: [${allRequestedTypes.map(type => `"${type}"`).join(', ')}]
           }
           `}
           </code>

@@ -3,6 +3,7 @@
     display: block;
   }
 
+  &__add-types,
   &__type-configs {
     height: 300px;
     overflow: scroll;
@@ -10,6 +11,29 @@
     margin-right: -1.5rem;
     padding-right: 1.5rem;
     padding-left: 1.5rem;
+  }
+
+  &__custom-types {
+    border-bottom: 2px solid hsl(0, 0%, 96%);
+    padding-bottom: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+
+  &__custom-type {
+    display: flex;
+    align-items: center;
+
+    &:first-child {
+      margin-top: 0.75rem;
+    }
+
+    &:not(:last-child) {
+      margin-bottom: 0.75rem;
+    }
+
+    &__delete {
+      margin-right: 0.25rem;
+    }
   }
 
   &__type-config {
