@@ -1,0 +1,7 @@
+.claim {
+  &__claimed-data-container {
+    & > ul {
+      padding: 1rem;
+    }
+  }
+}

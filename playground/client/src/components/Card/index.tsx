@@ -78,7 +78,7 @@ const CardFooterItem: FC<'div', CardFooterItemProps> = props => {
   const As = props.as || 'div'
 
   return (
-    <As {...props} className={clsx('card-footer', props.className)}>
+    <As {...props} className={clsx('card-footer-item', props.className)}>
       {props.children}
     </As>
   )

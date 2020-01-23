@@ -9,6 +9,14 @@ module.exports = {
         type: DataTypes.UUID,
         defaultValue: Sequelize.fn('uuid_generate_v4'),
       },
+      claimNodes: {
+        allowNull: false,
+        type: DataTypes.ARRAY(DataTypes.JSONB),
+      },
+      claimVersion: {
+        allowNull: false,
+        type: DataTypes.ENUM('v1'),
+      },
       createdAt: {
         allowNull: false,
         type: DataTypes.DATE,

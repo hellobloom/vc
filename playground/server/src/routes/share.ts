@@ -1,5 +1,4 @@
 import fastify from 'fastify'
-import {uuid} from 'uuidv4'
 import S from 'fluent-schema'
 import {validateVerifiablePresentationResponse} from '@bloomprotocol/verify-kit'
 
@@ -19,10 +18,9 @@ export const applyShareRoutes = (app: fastify.FastifyInstance) => {
       },
     },
     async (req, reply) => {
-      const id = uuid()
-      await ShareRequest.create({id, requestedTypes: req.body.types, responseVersion: req.body.responseVersion})
+      const request = await ShareRequest.create({requestedTypes: req.body.types, responseVersion: req.body.responseVersion})
 
-      return reply.status(200).send({id})
+      return reply.status(200).send({id: request.id})
     },
   )
 
@@ -71,14 +69,13 @@ export const applyShareRoutes = (app: fastify.FastifyInstance) => {
     },
   )
 
-  app.post<{'share-kit-from': 'qr' | 'button'; responseVersion: 'v0' | 'v1'}>(
-    '/api/v1/share/recieve',
+  app.post<{'share-kit-from': 'qr' | 'button'}>(
+    '/api/v1/share/recieve-v0',
     {
       schema: {
         querystring: S.object()
           .prop('share-kit-from', S.enum(['qr', 'button']))
-          .prop('responseVersion', S.enum(['v0', 'v1']))
-          .required(['share-kit-from', 'responseVersion']),
+          .required(['share-kit-from']),
         body: S.object()
           .prop('token', S.string().format('uuid'))
           .required(['token']),
@@ -88,72 +85,75 @@ export const applyShareRoutes = (app: fastify.FastifyInstance) => {
       const request = await ShareRequest.findOne({where: {id: req.body.token}})
       if (!request) return reply.status(404).send({})
 
-      if (req.query.responseVersion === 'v0') {
-        console.log('recieve - v0')
-        const outcome = await validateVerifiablePresentationResponse(req.body, {version: 'v0'})
-        if (outcome.kind === 'invalid') {
-          return reply.status(400).send({message: 'Share payload could not be validated'})
-        }
-
-        console.log('recieve - v0 - outcome', outcome)
-
-        const sharedTypes: string[] = outcome.data.verifiableCredential.map(vc => vc.type)
-        const hasAllRequestedTypes = request.requestedTypes.every(requested => sharedTypes.includes(requested))
-
-        if (!hasAllRequestedTypes) return reply.status(400).send({success: false})
-
-        const {verifiableCredential} = outcome.data
-
-        if (req.query['share-kit-from'] === 'qr') {
-          console.log('recieve - v0 - from qr')
-
-          sendNotification({
-            recipient: req.body.token,
-            type: 'notif/share-recieved',
-            payload: JSON.stringify(verifiableCredential),
-          })
-
-          await request.destroy()
-        } else {
-          console.log('recieve - v0 - from button')
-
-          await request.update({verifiableCredential})
-        }
-      } else {
-        console.log('recieve - v1')
-
-        const outcome = await validateVerifiablePresentationResponse(req.body, {version: 'v1'})
-        if (outcome.kind === 'invalid') {
-          return reply.status(400).send({message: 'Share payload could not be validated'})
-        }
-
-        console.log('recieve - v1 - outcome', outcome)
-
-        const sharedTypes: string[][] = outcome.data.verifiableCredential.map(vc => vc.type)
-        const hasAllRequestedTypes = request.requestedTypes.every(requested => sharedTypes.some(types => types.includes(requested)))
-
-        if (!hasAllRequestedTypes) return reply.status(400).send({success: false})
-
-        const {verifiableCredential} = outcome.data
-
-        if (req.query['share-kit-from'] === 'qr') {
-          console.log('recieve - v1 - from qr')
-
-          sendNotification({
-            recipient: req.body.token,
-            type: 'notif/share-recieved',
-            payload: JSON.stringify(verifiableCredential),
-          })
-
-          await request.destroy()
-        } else {
-          console.log('recieve - v1 - from button')
-
-          await request.update({verifiableCredential})
-        }
+      const outcome = await validateVerifiablePresentationResponse(req.body, {version: 'v0'})
+      if (outcome.kind === 'invalid') {
+        return reply.status(400).send({message: 'Share payload could not be validated'})
       }
 
-      console.log('recieve - before send')
+      const sharedTypes: string[] = outcome.data.verifiableCredential.map(vc => vc.type)
+      const hasAllRequestedTypes = request.requestedTypes.every(requested => sharedTypes.includes(requested))
+
+      if (!hasAllRequestedTypes) return reply.status(400).send({success: false})
+
+      const {verifiableCredential} = outcome.data
+
+      if (req.query['share-kit-from'] === 'qr') {
+        console.log('recieve - v0 - from qr')
+
+        sendNotification({
+          recipient: req.body.token,
+          type: 'notif/share-recieved',
+          payload: JSON.stringify(verifiableCredential),
+        })
+
+        await request.destroy()
+      } else {
+        await request.update({verifiableCredential})
+      }
+
+      return reply.status(200).send({success: true})
+    },
+  )
+
+  app.post<{'share-kit-from': 'qr' | 'button'}>(
+    '/api/v1/share/recieve-v1',
+    {
+      schema: {
+        querystring: S.object()
+          .prop('share-kit-from', S.enum(['qr', 'button']))
+          .required(['share-kit-from']),
+        body: S.object()
+          .prop('token', S.string().format('uuid'))
+          .required(['token']),
+      },
+    },
+    async (req, reply) => {
+      const request = await ShareRequest.findOne({where: {id: req.body.token}})
+      if (!request) return reply.status(404).send({})
+
+      const outcome = await validateVerifiablePresentationResponse(req.body, {version: 'v1'})
+      if (outcome.kind === 'invalid') {
+        return reply.status(400).send({message: 'Share payload could not be validated'})
+      }
+
+      const sharedTypes: string[][] = outcome.data.verifiableCredential.map(vc => vc.type)
+      const hasAllRequestedTypes = request.requestedTypes.every(requested => sharedTypes.some(types => types.includes(requested)))
+
+      if (!hasAllRequestedTypes) return reply.status(400).send({success: false})
+
+      const {verifiableCredential} = outcome.data
+
+      if (req.query['share-kit-from'] === 'qr') {
+        sendNotification({
+          recipient: req.body.token,
+          type: 'notif/share-recieved',
+          payload: JSON.stringify(verifiableCredential),
+        })
+
+        await request.destroy()
+      } else {
+        await request.update({verifiableCredential})
+      }
 
       return reply.status(200).send({success: true})
     },

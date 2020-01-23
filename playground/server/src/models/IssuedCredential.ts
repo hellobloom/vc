@@ -3,6 +3,10 @@ import {Sequelize, Model, DataTypes, UUIDV4} from 'sequelize'
 export class IssuedCredential extends Model {
   id!: string
 
+  claimNodes!: {type: string; version: string; provider: string; data: {}}[]
+
+  claimVersion!: 'v1'
+
   createdAt!: Date
 
   updatedAt!: Date
@@ -16,6 +20,14 @@ export const initIssuedCredential = (sequelize: Sequelize) => {
         primaryKey: true,
         allowNull: false,
         defaultValue: UUIDV4,
+      },
+      claimNodes: {
+        allowNull: false,
+        type: DataTypes.ARRAY(DataTypes.JSONB),
+      },
+      claimVersion: {
+        allowNull: false,
+        type: DataTypes.ENUM('v1'),
       },
       createdAt: {
         allowNull: false,

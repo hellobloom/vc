@@ -12,6 +12,14 @@ exports.initIssuedCredential = (sequelize) => {
             allowNull: false,
             defaultValue: sequelize_1.UUIDV4,
         },
+        claimNodes: {
+            allowNull: false,
+            type: sequelize_1.DataTypes.ARRAY(sequelize_1.DataTypes.JSONB),
+        },
+        claimVersion: {
+            allowNull: false,
+            type: sequelize_1.DataTypes.ENUM('v1'),
+        },
         createdAt: {
             allowNull: false,
             type: sequelize_1.DataTypes.DATE,

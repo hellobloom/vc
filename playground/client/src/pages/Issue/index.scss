@@ -1,4 +1,16 @@
 .issue {
+  &__claim-nodes,
+  &__vc {
+    &__content {
+      height: 300px;
+      overflow: scroll;
+      margin-left: -1.5rem;
+      margin-right: -1.5rem;
+      padding-right: 1.5rem;
+      padding-left: 1.5rem;
+    }
+  }
+
   &__claim-nodes {
     &__title {
       justify-content: space-between;

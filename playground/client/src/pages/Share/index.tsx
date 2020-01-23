@@ -18,7 +18,7 @@ import {Card, CardContent} from '../../components/Card'
 
 import './index.scss'
 
-const useGetSharedTypes = (data: {types: string[]} | null) => {
+const useGetSharedTypes = (ready: boolean) => {
   const [sharedData, setSharedData] = useState<[] | null | undefined>()
 
   useEffect(() => {
@@ -49,7 +49,7 @@ const useGetSharedTypes = (data: {types: string[]} | null) => {
   }, [])
 
   useEffect(() => {
-    if (data) {
+    if (ready) {
       resetSocketConnection()
       socketOn('notif/share-recieved', socketCallback)
     }
@@ -57,7 +57,7 @@ const useGetSharedTypes = (data: {types: string[]} | null) => {
     return () => {
       socketOff('notif/share-recieved', socketCallback)
     }
-  }, [data, socketCallback])
+  }, [ready, socketCallback])
 
   return sharedData
 }
@@ -68,7 +68,7 @@ export const Share: React.FC<ShareProps> = props => {
   const isMobile = bowser.parse(window.navigator.userAgent).platform.type === 'mobile'
   const {id: token} = useParams<{id: string}>()
   const {data, error} = useShareGetConfig({id: token})
-  const sharedData = useGetSharedTypes(data)
+  const sharedData = useGetSharedTypes(data !== null)
 
   if (!isUuid(token)) return <Redirect to={'/not-found'} />
 
@@ -108,7 +108,7 @@ export const Share: React.FC<ShareProps> = props => {
           requestData={{
             action: Action.attestation,
             token,
-            url: `${host}/api/v1/share/recieve?responseVersion=${data.responseVersion}`,
+            url: `${host}/api/v1/share/recieve-${data.responseVersion}`,
             org_name: 'Attestation Playground',
             org_logo_url: 'https://bloom.co/images/notif/bloom-logo.png',
             org_usage_policy_url: 'https://bloom.co/legal/terms',

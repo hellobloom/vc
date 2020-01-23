@@ -11,8 +11,9 @@ import {Shell} from '../../components/Shell'
 import {Message, MessageSkin, MessageHeader, MessageBody} from '../../components/Message'
 import {Delete} from '../../components/Delete'
 import {sitemap} from '../../sitemap'
-import {Button, ButtonSize} from '../../components/Button'
-import {Card, CardHeader, CardHeaderTitle, CardContent} from '../../components/Card'
+import {Button, ButtonSkin} from '../../components/Button'
+import {Card, CardHeader, CardHeaderTitle, CardContent, CardFooter, CardFooterItem} from '../../components/Card'
+import {api} from '../../api'
 
 import './index.scss'
 
@@ -124,10 +125,47 @@ export const Issue: React.FC<IssueProps> = props => {
         <div className="column is-half">
           <Card>
             <CardHeader>
-              <CardHeaderTitle className="issue__claim-nodes__title">
-                Claim Nodes
+              <CardHeaderTitle className="issue__claim-nodes__title">Claim Nodes</CardHeaderTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="issue__claim-nodes__content">
+                {claimNodes.map((claimNode, index) => {
+                  const updateClaimNode = (cb: (claimNode: ClaimNodeInfo) => void) => {
+                    const newClaimNodes = [...claimNodes]
+                    const foundClaimNode = newClaimNodes[index]
+
+                    cb(foundClaimNode)
+                    setClaimNodes(newClaimNodes)
+                  }
+
+                  return (
+                    <details className="issue__claim-node">
+                      <summary className="is-size-5 has-text-weight-bold">Node #{index}</summary>
+                      <ClaimNodeBuilder
+                        key={index}
+                        {...claimNode}
+                        onTypeChange={type => {
+                          updateClaimNode(node => (node.type = type))
+                        }}
+                        onVersionChange={version => {
+                          updateClaimNode(node => (node.version = version))
+                        }}
+                        onProviderChange={provider => {
+                          updateClaimNode(node => (node.provider = provider))
+                        }}
+                        onDataChange={data => {
+                          updateClaimNode(node => (node.data = data))
+                        }}
+                      />
+                    </details>
+                  )
+                })}
+              </div>
+            </CardContent>
+            <CardFooter>
+              <CardFooterItem>
                 <Button
-                  size={ButtonSize.small}
+                  isFullwidth
                   onClick={() => {
                     setClaimNodes([
                       ...claimNodes,
@@ -140,43 +178,10 @@ export const Issue: React.FC<IssueProps> = props => {
                     ])
                   }}
                 >
-                  Add
+                  Add Node
                 </Button>
-              </CardHeaderTitle>
-            </CardHeader>
-            <CardContent>
-              {claimNodes.map((claimNode, index) => {
-                const updateClaimNode = (cb: (claimNode: ClaimNodeInfo) => void) => {
-                  const newClaimNodes = [...claimNodes]
-                  const foundClaimNode = newClaimNodes[index]
-
-                  cb(foundClaimNode)
-                  setClaimNodes(newClaimNodes)
-                }
-
-                return (
-                  <details className="issue__claim-node">
-                    <summary className="is-size-5 has-text-weight-bold">Node #{index}</summary>
-                    <ClaimNodeBuilder
-                      key={index}
-                      {...claimNode}
-                      onTypeChange={type => {
-                        updateClaimNode(node => (node.type = type))
-                      }}
-                      onVersionChange={version => {
-                        updateClaimNode(node => (node.version = version))
-                      }}
-                      onProviderChange={provider => {
-                        updateClaimNode(node => (node.provider = provider))
-                      }}
-                      onDataChange={data => {
-                        updateClaimNode(node => (node.data = data))
-                      }}
-                    />
-                  </details>
-                )
-              })}
-            </CardContent>
+              </CardFooterItem>
+            </CardFooter>
           </Card>
         </div>
         <div className="column is-half">
@@ -185,9 +190,10 @@ export const Issue: React.FC<IssueProps> = props => {
               <CardHeaderTitle>Verifiable Credential</CardHeaderTitle>
             </CardHeader>
             <CardContent>
-              <pre>
-                <code>
-                  {codeBlock`
+              <div className="issue__vc__content">
+                <pre>
+                  <code>
+                    {codeBlock`
                     const vc = buildSelectivelyDisclosableVCV1({
                       claimNodes: [
                         ${claimNodes
@@ -209,9 +215,24 @@ export const Issue: React.FC<IssueProps> = props => {
                       privateKey: 'did:ethr:0x...',
                     })
                   `}
-                </code>
-              </pre>
+                  </code>
+                </pre>
+              </div>
             </CardContent>
+            <CardFooter>
+              <CardFooterItem>
+                <Button
+                  isFullwidth
+                  skin={ButtonSkin.info}
+                  onClick={async () => {
+                    const {id} = await api.cred.create({claimNodes})
+                    setNewCredId(id)
+                  }}
+                >
+                  Issue VC
+                </Button>
+              </CardFooterItem>
+            </CardFooter>
           </Card>
         </div>
       </div>
