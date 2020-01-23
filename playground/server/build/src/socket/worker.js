@@ -92,7 +92,11 @@ exports.applySocketWorker = ({ server }) => {
         const tokens = [];
         const cookiesToCheckFor = [
             {
-                key: cookies_1.wsCookieKey,
+                key: cookies_1.shareCookieKey,
+                validator: uuidv4_1.isUuid,
+            },
+            {
+                key: cookies_1.claimCookieKey,
                 validator: uuidv4_1.isUuid,
             },
         ];

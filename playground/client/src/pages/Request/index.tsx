@@ -2,7 +2,6 @@ import React, {useState} from 'react'
 import {AttestationTypeNames, AttestationTypes} from '@bloomprotocol/attestations-common'
 import {stripIndent} from 'common-tags'
 import {Link} from 'react-router-dom'
-import Case from 'case'
 import {FC} from 'react-forward-props'
 
 import {Shell} from '../../components/Shell'
@@ -124,7 +123,7 @@ export const Request: React.FC<RequestProps> = props => {
 
   const [newShareId, setNewShareId] = useState<string>()
 
-  const handleResponseVersionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleResponseVersionChange: React.ChangeEventHandler<HTMLInputElement> = e => {
     switch (e.target.value) {
       case 'v0':
         setResponseVersion('v0')
@@ -300,17 +299,17 @@ export const Request: React.FC<RequestProps> = props => {
         <pre>
           <code>
             {stripIndent`
-          const requestData: RequestData = {
-            action: Action.attestation,
-            token: '...',
-            url: '...',
-            org_name: 'Attestation Playground',
-            org_logo_url: 'https://bloom.co/images/notif/bloom-logo.png',
-            org_usage_policy_url: 'https://bloom.co/legal/terms',
-            org_privacy_policy_url: 'https://bloom.co/legal/privacy',
-            types: [${allRequestedTypes.map(type => `"${type}"`).join(', ')}]
-          }
-          `}
+              const requestData: RequestData = {
+                action: Action.attestation,
+                token: '...',
+                url: '...',
+                org_name: 'Attestation Playground',
+                org_logo_url: 'https://bloom.co/images/notif/bloom-logo.png',
+                org_usage_policy_url: 'https://bloom.co/legal/terms',
+                org_privacy_policy_url: 'https://bloom.co/legal/privacy',
+                types: [${allRequestedTypes.map(type => `"${type}"`).join(', ')}]
+              }
+            `}
           </code>
         </pre>
       </div>

@@ -37,6 +37,12 @@
   }
 
   &__type-config {
+    &:not(:last-child) {
+      border-bottom: 2px solid hsl(0, 0%, 96%);
+      padding-bottom: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+
     &__options {
       position: relative;
 

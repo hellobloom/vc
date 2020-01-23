@@ -1,0 +1,15 @@
+.issue {
+  &__claim-nodes {
+    &__title {
+      justify-content: space-between;
+    }
+  }
+
+  &__claim-node {
+    &:not(:last-child) {
+      border-bottom: 2px solid hsl(0, 0%, 96%);
+      padding-bottom: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+  }
+}

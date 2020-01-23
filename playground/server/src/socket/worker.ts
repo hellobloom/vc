@@ -5,7 +5,7 @@ import {isUuid} from 'uuidv4'
 import {ConsumeMessage} from 'amqplib'
 
 import {getEnv} from '@server/env'
-import {wsCookieKey} from '@server/cookies'
+import {shareCookieKey, claimCookieKey} from '@server/cookies'
 import {getChannel} from '@server/amqp'
 import fastify from 'fastify'
 
@@ -99,7 +99,11 @@ export const applySocketWorker = ({server}: fastify.FastifyInstance) => {
 
     const cookiesToCheckFor = [
       {
-        key: wsCookieKey,
+        key: shareCookieKey,
+        validator: isUuid,
+      },
+      {
+        key: claimCookieKey,
         validator: isUuid,
       },
     ]

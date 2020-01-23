@@ -45,7 +45,7 @@ exports.applyShareRoutes = (app) => {
             return reply.status(400).send({});
         return reply
             .status(200)
-            .setCookie(cookies_1.wsCookieKey, req.params.id, { signed: true, path: '/' })
+            .setCookie(cookies_1.shareCookieKey, req.params.id, { signed: true, path: '/' })
             .send({ types: request.requestedTypes, responseVersion: request.responseVersion });
     }));
     app.get('/api/v1/share/:id/get-shared-data', {

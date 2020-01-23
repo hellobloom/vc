@@ -4,7 +4,7 @@ import S from 'fluent-schema'
 import {validateVerifiablePresentationResponse} from '@bloomprotocol/verify-kit'
 
 import {ShareRequest} from '@server/models'
-import {wsCookieKey} from '@server/cookies'
+import {shareCookieKey} from '@server/cookies'
 import {sendNotification} from '@server/socket/sender'
 
 export const applyShareRoutes = (app: fastify.FastifyInstance) => {
@@ -43,7 +43,7 @@ export const applyShareRoutes = (app: fastify.FastifyInstance) => {
 
       return reply
         .status(200)
-        .setCookie(wsCookieKey, req.params.id, {signed: true, path: '/'})
+        .setCookie(shareCookieKey, req.params.id, {signed: true, path: '/'})
         .send({types: request.requestedTypes, responseVersion: request.responseVersion})
     },
   )
