@@ -203,7 +203,7 @@ export const Issue: React.FC<IssueProps> = props => {
                           })
                           .join(',\n')},
                       ],
-                      subject: 'did:eth:0x...',
+                      subject: 'did:ethr:0x...',
                       issuanceDate: '...',
                       expirationDate: '...',
                       privateKey: 'did:ethr:0x...',
