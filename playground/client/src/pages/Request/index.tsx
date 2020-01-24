@@ -285,7 +285,7 @@ export const Request: React.FC<RequestProps> = props => {
         <Button
           skin={ButtonSkin.link}
           onClick={async () => {
-            const {id} = await api.share.createRequest({types: allRequestedTypes, responseVersion})
+            const {id} = await api.share.create({types: allRequestedTypes, responseVersion})
             setNewShareId(id)
             setSelectedTypes(new Set())
             setCustomTypes(new Set())

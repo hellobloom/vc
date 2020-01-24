@@ -227,6 +227,7 @@ export const Issue: React.FC<IssueProps> = props => {
                   onClick={async () => {
                     const {id} = await api.cred.create({claimNodes})
                     setNewCredId(id)
+                    setClaimNodes([])
                   }}
                 >
                   Issue VC
