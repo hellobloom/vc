@@ -66,7 +66,8 @@ const getVar = (config: GetVarConfig): any => {
 
 type EnvConfig = {
   port: number
-  host: string
+  host?: string
+  appServerUrl?: string
   sessionSecret: string
   amqp: {
     host: string
@@ -78,6 +79,7 @@ type EnvConfig = {
 export const getEnv = (): EnvConfig => ({
   port: getVar({name: 'PORT', type: 'number', required: true}),
   host: getVar({name: 'HOST', type: 'string'}),
+  appServerUrl: getVar({name: 'APP_SERVER_URL', type: 'string'}),
   sessionSecret: getVar({name: 'SESSION_SECRET', type: 'string'}),
   amqp: getVar({name: 'AMQP', type: 'object'}),
 })

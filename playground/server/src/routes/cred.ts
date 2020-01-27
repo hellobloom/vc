@@ -122,9 +122,13 @@ export const applyCredRoutes = (app: fastify.FastifyInstance) => {
 
       await cred.update({claimed: true})
 
+      const env = getEnv()
+
       return reply.status(200).send({
         credential: vc,
-        batch_url: `${getEnv().host}/api/v1/cred/${req.params.id}/claim-v1/batch?issue-kit-from${req.query['issue-kit-from']}`,
+        batch_url: `${env.appServerUrl || env.host}/api/v1/cred/${req.params.id}/claim-v1/batch?issue-kit-from${
+          req.query['issue-kit-from']
+        }`,
       })
     },
   )
