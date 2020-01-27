@@ -22,7 +22,7 @@ type VCClaimNodeDataV1 = {
   version: string
 }
 
-export interface VCClaimNodeTypeV1 {
+export type VCClaimNodeTypeV1 = {
   /**
    * The type of attestation (phone, email, etc.)
    */
@@ -37,7 +37,7 @@ export interface VCClaimNodeTypeV1 {
   nonce: string
 }
 
-export interface VCClaimNodeAuxSigV1 {
+export type VCClaimNodeAuxSigV1 = {
   /**
    * Hex string containing subject's auxiliary signature
    * Signs the ordered stringified object containing

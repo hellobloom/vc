@@ -1,4 +1,5 @@
 import {Sequelize, Model, DataTypes, UUIDV4} from 'sequelize'
+import {SelectivelyDisclosableVC, SelectivelyDisclosableBatchVC} from '@bloomprotocol/attestations-common'
 
 export class IssuedCredential extends Model {
   id!: string
@@ -6,6 +7,12 @@ export class IssuedCredential extends Model {
   claimNodes!: {type: string; version: string; provider: string; data: {}}[]
 
   claimVersion!: 'v1'
+
+  claimed!: boolean
+
+  credential?: SelectivelyDisclosableVC
+
+  batchCredential?: SelectivelyDisclosableBatchVC
 
   createdAt!: Date
 
@@ -28,6 +35,15 @@ export const initIssuedCredential = (sequelize: Sequelize) => {
       claimVersion: {
         allowNull: false,
         type: DataTypes.ENUM('v1'),
+      },
+      claimed: {
+        allowNull: false,
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+      },
+      credential: {
+        allowNull: true,
+        type: DataTypes.JSONB,
       },
       createdAt: {
         allowNull: false,

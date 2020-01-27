@@ -3,6 +3,13 @@ import * as ethUtil from 'ethereumjs-util'
 import randomBytes from 'randombytes'
 import * as ethSigUtil from 'eth-sig-util'
 import EthWallet from 'ethereumjs-wallet'
+import {
+  IDidResolver,
+  IDidResolveResult,
+  DidDocument,
+  IDidDocument,
+  IDidDocumentPublicKey,
+} from '@decentralized-identity/did-common-typescript'
 
 import {MerkleTree} from './merkletreejs'
 import {
@@ -649,3 +656,45 @@ export const validateBloomBatchMerkleTreeComponents = genValidateFn({
   subject: ethUtil.isValidAddress,
   subjectSig: [isValidSignatureString, validateSubjectSig],
 })
+
+interface IEthDidDocumentPublicKey extends IDidDocumentPublicKey {
+  ethereumAddress: string
+}
+interface IEthDidDocument extends IDidDocument {
+  publicKey?: IEthDidDocumentPublicKey[]
+}
+
+const ethrDidDocumentTmpl = (ethAddress: string): IEthDidDocument => ({
+  '@context': 'https://w3id.org/did/v1',
+  id: `did:ethr:${ethAddress}`,
+  publicKey: [
+    {
+      id: `did:ethr:${ethAddress}#owner`,
+      type: 'Secp256k1VerificationKey2018',
+      controller: `did:ethr:${ethAddress}`,
+      ethereumAddress: ethAddress,
+    },
+  ],
+  authentication: [
+    {
+      type: 'Secp256k1SignatureAuthentication2018',
+      publicKey: `did:ethr:${ethAddress}#owner`,
+    },
+  ],
+})
+
+/**
+ * Simplified "resolver", that just uses a template to avoid unnecessary performance issues.
+ */
+export class EthereumDIDResolver implements IDidResolver {
+  public async resolve(did: string): Promise<IDidResolveResult> {
+    if (!did.startsWith('did:ethr:') || !ethUtil.isValidAddress(did.replace('did:ethr:', ''))) {
+      throw Error('unable to resolve did document')
+    }
+
+    const didDocument = ethrDidDocumentTmpl(did.replace('did:ethr:', ''))
+    return {
+      didDocument: new DidDocument(didDocument),
+    }
+  }
+}

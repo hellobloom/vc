@@ -105,9 +105,9 @@ const signVCClaimNodeV1 = ({
   return signedClaimNode
 }
 
-export const buildSelectivelyDisclosableVCV1 = ({
+export const buildSelectivelyDisclosableVCV1 = async ({
   claimNodes,
-  subject,
+  subjectDID,
   issuanceDate,
   expirationDate,
   privateKey,
@@ -117,7 +117,7 @@ export const buildSelectivelyDisclosableVCV1 = ({
   rootHashNonce: _rootHashNonce,
 }: {
   claimNodes: VCClaimNodeV1[]
-  subject: string
+  subjectDID: string
   issuanceDate: string
   expirationDate: string
   privateKey: Buffer
@@ -126,6 +126,10 @@ export const buildSelectivelyDisclosableVCV1 = ({
   localRevocationTokens?: string[]
   rootHashNonce?: string
 }) => {
+  const {
+    didDocument: {id: subject},
+  } = await new EthUtils.EthereumDIDResolver().resolve(subjectDID)
+
   const signedClaimNodes = claimNodes.map((claimNode, i) =>
     signVCClaimNodeV1({
       claimNode,
@@ -155,7 +159,7 @@ export const buildSelectivelyDisclosableVCV1 = ({
     '@context': ['https://www.w3.org/2018/credentials/v1'],
     id: 'placeholder',
     type: ['VerifiableCredential', 'SelectivelyDisclosableVerifiableCredential'],
-    issuer,
+    issuer: `did:ethr:${issuer}`,
     issuanceDate,
     expirationDate,
     credentialSubject: {
@@ -176,7 +180,7 @@ export const buildSelectivelyDisclosableVCV1 = ({
   return credential
 }
 
-export const buildSelectivelyDisclosableBatchVCV1 = ({
+export const buildSelectivelyDisclosableBatchVCV1 = async ({
   credential,
   privateKey,
   contractAddress,
@@ -189,18 +193,35 @@ export const buildSelectivelyDisclosableBatchVCV1 = ({
   subjectSignature: string
   requestNonce: string
 }) => {
+  const issuerWallet = EthWallet.fromPrivateKey(privateKey)
+
   const {
-    issuer,
-    credentialSubject: {id: subject},
+    issuer: issuerDid,
+    credentialSubject: {id: subjectDID},
     proof: {layer2Hash: rootHash},
   } = credential
 
-  if (!validateSignedAgreement(subjectSignature, contractAddress, rootHash, requestNonce, subject)) {
-    throw new Error('Invalid subject sig')
+  const {
+    didDocument: {id: issuer},
+  } = await new EthUtils.EthereumDIDResolver().resolve(issuerDid)
+
+  const {
+    didDocument: {id: subject},
+  } = await new EthUtils.EthereumDIDResolver().resolve(subjectDID)
+
+  // TODO validate checksum
+
+  const recoveredSigner = EthUtils.recoverHashSigner(Buffer.from(credential.proof.rootHash), credential.proof.issuerSignature)
+  if (recoveredSigner !== issuerWallet.getAddressString()) {
+    throw new Error('Invalid issuer sig')
   }
 
-  if (issuer !== EthWallet.fromPrivateKey(privateKey).getAddressString()) {
+  if (issuer !== issuerWallet.getAddressString()) {
     throw new Error('Private key mismatch')
+  }
+
+  if (!validateSignedAgreement(subjectSignature, contractAddress, rootHash, requestNonce, subject)) {
+    throw new Error('Invalid subject sig')
   }
 
   const batchIssuerSignature = EthUtils.signHash(

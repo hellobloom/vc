@@ -21,6 +21,7 @@
     "prepublishOnly": "npm run test && npm run lint"
   },
   "dependencies": {
+    "@decentralized-identity/did-common-typescript": "^0.1.19",
     "@types/crypto-js": "^3.1.43",
     "@types/eth-sig-util": "^2.1.0",
     "@types/randombytes": "^2.0.0",

@@ -42,6 +42,7 @@ const ClaimNodeBuilder: FC<'div', ClaimNodeBuilderProps> = props => {
         </label>
         <div className="control">
           <input
+            required
             value={props.type}
             onChange={e => props.onTypeChange(e.target.value.trim())}
             id={`${id}-type`}
@@ -57,6 +58,7 @@ const ClaimNodeBuilder: FC<'div', ClaimNodeBuilderProps> = props => {
         </label>
         <div className="control">
           <input
+            required
             value={props.version}
             onChange={e => props.onVersionChange(e.target.value.trim())}
             id={`${id}-version`}
@@ -106,6 +108,8 @@ export const Issue: React.FC<IssueProps> = props => {
     },
   ])
 
+  const isDisabled = !claimNodes.every(({type, version, data}) => type.trim() !== '' && version.trim() !== '' && data !== null)
+
   return (
     <Shell titleSuffix="Issue">
       <h1 className="title is-1 has-text-weight-bold has-text-centered">Issue Credential</h1>
@@ -140,7 +144,19 @@ export const Issue: React.FC<IssueProps> = props => {
 
                   return (
                     <details className="issue__claim-node">
-                      <summary className="is-size-5 has-text-weight-bold">Node #{index}</summary>
+                      <summary className="is-size-5 has-text-weight-bold">
+                        <div className="issue__claim-node__title">
+                          <span>Node #{index}</span>
+                          <Delete
+                            onClick={() => {
+                              const newClaimNodes = [...claimNodes]
+                              newClaimNodes.splice(index, 1)
+                              setClaimNodes(newClaimNodes)
+                            }}
+                            aria-label="Remove claim node"
+                          />
+                        </div>
+                      </summary>
                       <ClaimNodeBuilder
                         key={index}
                         {...claimNode}
@@ -227,8 +243,16 @@ export const Issue: React.FC<IssueProps> = props => {
                   onClick={async () => {
                     const {id} = await api.cred.create({claimNodes})
                     setNewCredId(id)
-                    setClaimNodes([])
+                    setClaimNodes([
+                      {
+                        type: '',
+                        provider: '',
+                        version: '',
+                        data: {},
+                      },
+                    ])
                   }}
+                  isDisabled={isDisabled}
                 >
                   Issue VC
                 </Button>

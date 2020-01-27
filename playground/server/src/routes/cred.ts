@@ -1,10 +1,12 @@
 import fastify from 'fastify'
 import S from 'fluent-schema'
-import {buildClaimNodeV1, buildSelectivelyDisclosableVCV1} from '@bloomprotocol/issue-kit'
+import {buildClaimNodeV1, buildSelectivelyDisclosableVCV1, buildSelectivelyDisclosableBatchVCV1} from '@bloomprotocol/issue-kit'
+import {SelectivelyDisclosableVCV1} from '@bloomprotocol/attestations-common'
 
 import {IssuedCredential} from '@server/models'
 import {claimCookieKey} from '@server/cookies'
 import {sendNotification} from '@server/socket/sender'
+import {getEnv} from '@server/env'
 
 export const applyCredRoutes = (app: fastify.FastifyInstance) => {
   app.post<
@@ -60,8 +62,8 @@ export const applyCredRoutes = (app: fastify.FastifyInstance) => {
     },
   )
 
-  app.post(
-    '/api/v1/cred/:id/claim-v1',
+  app.get<fastify.DefaultQuery, {id: string}>(
+    '/api/v1/cred/:id/get-claimed-data',
     {
       schema: {
         params: S.object()
@@ -71,7 +73,35 @@ export const applyCredRoutes = (app: fastify.FastifyInstance) => {
     },
     async (req, reply) => {
       const cred = await IssuedCredential.findOne({where: {id: req.params.id}})
+
       if (!cred) return reply.status(404).send({})
+      if (!cred.credential) return reply.status(404).send({})
+      if (!cred.batchCredential) return reply.status(404).send({})
+
+      const {credential, batchCredential} = cred
+
+      await cred.destroy()
+
+      return reply.status(200).send({credential, batchCredential})
+    },
+  )
+
+  app.post<{'issue-kit-from': 'qr' | 'button'}, {id: string}, fastify.DefaultHeaders, {subject: string}>(
+    '/api/v1/cred/:id/claim-v1',
+    {
+      schema: {
+        querystring: S.object()
+          .prop('issue-kit-from', S.enum(['qr', 'button']))
+          .required(['issue-kit-from']),
+        params: S.object()
+          .prop('id', S.string().format('uuid'))
+          .required(['id']),
+      },
+    },
+    async (req, reply) => {
+      const cred = await IssuedCredential.findOne({where: {id: req.params.id}})
+      if (!cred) return reply.status(404).send({})
+      if (cred.claimed) return reply.status(400).send({})
 
       const claimNodes = cred.claimNodes.map(node =>
         buildClaimNodeV1({
@@ -82,24 +112,127 @@ export const applyCredRoutes = (app: fastify.FastifyInstance) => {
         }),
       )
 
-      const vc = buildSelectivelyDisclosableVCV1({
+      const vc = await buildSelectivelyDisclosableVCV1({
         claimNodes,
-        subject: '',
+        subjectDID: '',
         issuanceDate: '',
         expirationDate: '',
-        privateKey: Buffer.from([]),
+        privateKey: Buffer.from(''),
       })
 
-      if (req.query['share-kit-from'] === 'qr') {
+      await cred.update({claimed: true})
+
+      return reply.status(200).send({
+        credential: vc,
+        batch_url: `${getEnv().host}/api/v1/cred/${req.params.id}/claim-v1/batch?issue-kit-from${req.query['issue-kit-from']}`,
+      })
+    },
+  )
+
+  app.post<
+    {'issue-kit-from': 'qr' | 'button'},
+    {id: string},
+    fastify.DefaultHeaders,
+    {
+      credential: SelectivelyDisclosableVCV1
+      subjectSignature: string
+    }
+  >(
+    '/api/v1/cred/:id/claim-v1/batch',
+    {
+      schema: {
+        querystring: S.object()
+          .prop('issue-kit-from', S.enum(['qr', 'button']))
+          .required(['issue-kit-from']),
+        params: S.object()
+          .prop('id', S.string().format('uuid'))
+          .required(['id']),
+        body: S.object()
+          .prop(
+            'credential',
+            S.object()
+              .prop('@context', S.array().items(S.string()))
+              .prop('id', S.string())
+              .prop('type', S.array().items(S.string()))
+              .prop('issuer', S.string())
+              .prop('issuanceDate', S.string())
+              .prop('expirateDate', S.string())
+              .prop(
+                'credentialSubject',
+                S.object()
+                  .prop('id', S.string())
+                  .prop(
+                    'claimNodes',
+                    S.array().items(
+                      S.object()
+                        .prop(
+                          'claimNode',
+                          S.object()
+                            .prop(
+                              'data',
+                              S.object()
+                                .prop('data', S.string())
+                                .prop('nonce', S.string())
+                                .prop('version', S.string())
+                                .required(['data', 'nonce', 'version']),
+                            )
+                            .prop(
+                              'type',
+                              S.object()
+                                .prop('type', S.string())
+                                .prop('provider', S.string())
+                                .prop('nonce', S.string())
+                                .required(['type', 'nonce']),
+                            )
+                            .prop('aux', S.string())
+                            .required(['data', 'type', 'aux']),
+                        )
+                        .prop('issuer', S.string())
+                        .prop('issuerSignature', S.string())
+                        .required(['claimNode', 'issuer', 'issuerSignature']),
+                    ),
+                  )
+                  .required(['id', 'claimNodes']),
+              )
+              .prop(
+                'proof',
+                S.object()
+                  .prop('issuerSignature', S.string())
+                  .prop('layer2Hash', S.string())
+                  .prop('checksumSignature', S.string())
+                  .prop('paddingNodes', S.array().items(S.string()))
+                  .prop('rootHash', S.string())
+                  .prop('rootHashNonce', S.string())
+                  .required(['issuerSignature', 'layer2Hash', 'checksumSignature', 'paddingNodes', 'rootHash', 'rootHashNonce']),
+              )
+              .required(['@context', 'id', 'type', 'issuer', 'issuanceDate', 'credentialSubject', 'proof']),
+          )
+          .prop('subjectSignature', S.string())
+          .required(['credential', 'subjectSignature']),
+      },
+    },
+    async (req, reply) => {
+      const cred = await IssuedCredential.findOne({where: {id: req.params.id}})
+      if (!cred) return reply.status(404).send({})
+
+      const batchVc = await buildSelectivelyDisclosableBatchVCV1({
+        credential: req.body.credential,
+        privateKey: Buffer.from([]),
+        contractAddress: '',
+        subjectSignature: req.body.subjectSignature,
+        requestNonce: '',
+      })
+
+      if (req.query['issue-kit-from'] === 'qr') {
         sendNotification({
-          recipient: req.body.token,
+          recipient: req.params.id,
           type: 'notif/cred-claimed',
-          payload: JSON.stringify(vc),
+          payload: JSON.stringify({batchCredential: batchVc, credential: req.body.credential}),
         })
 
         await cred.destroy()
       } else {
-        await cred.update({})
+        await cred.update({batchCredential: batchVc, credential: req.body.credential})
       }
 
       return reply.status(200).send({})

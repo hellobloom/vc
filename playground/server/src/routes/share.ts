@@ -98,8 +98,6 @@ export const applyShareRoutes = (app: fastify.FastifyInstance) => {
       const {verifiableCredential} = outcome.data
 
       if (req.query['share-kit-from'] === 'qr') {
-        console.log('recieve - v0 - from qr')
-
         sendNotification({
           recipient: req.body.token,
           type: 'notif/share-recieved',
@@ -123,12 +121,22 @@ export const applyShareRoutes = (app: fastify.FastifyInstance) => {
           .prop('share-kit-from', S.enum(['qr', 'button']))
           .required(['share-kit-from']),
         body: S.object()
-          .prop('token', S.string().format('uuid'))
-          .required(['token']),
+          .prop(
+            'proof',
+            S.object()
+              .prop(
+                'metaData',
+                S.object()
+                  .prop('nonce')
+                  .required(['nonce']),
+              )
+              .required(['metaData']),
+          )
+          .required(['proof']),
       },
     },
     async (req, reply) => {
-      const request = await ShareRequest.findOne({where: {id: req.body.token}})
+      const request = await ShareRequest.findOne({where: {id: req.body.proof.metaData.nonce}})
       if (!request) return reply.status(404).send({})
 
       const outcome = await validateVerifiablePresentationResponse(req.body, {version: 'v1'})

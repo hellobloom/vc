@@ -3,7 +3,7 @@ import {Stage, IMerkleProofShare} from '../../misc'
 import {BaseVCV1, BaseVCTypeV1, BaseVCSubjectV1, VCSignedClaimNodeV1} from '../shared/v1'
 import {IDataNodeLegacy} from '../shared/v0'
 
-export interface FullVCAuthorizationV1 {
+export type FullVCAuthorizationV1 = {
   /**
    * Address of keypair granting authorization
    */

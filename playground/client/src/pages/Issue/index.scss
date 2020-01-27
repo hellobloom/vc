@@ -23,5 +23,12 @@
       padding-bottom: 0.75rem;
       margin-bottom: 0.75rem;
     }
+
+    &__title {
+      display: inline-flex;
+      align-items: center;
+      justify-content: space-between;
+      width: calc(100% - 22.1833px);
+    }
   }
 }
