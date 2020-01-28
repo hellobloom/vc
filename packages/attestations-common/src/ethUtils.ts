@@ -688,7 +688,7 @@ const ethrDidDocumentTmpl = (ethAddress: string): IEthDidDocument => ({
  */
 export class EthereumDIDResolver implements IDidResolver {
   public async resolve(did: string): Promise<IDidResolveResult> {
-    if (!did.startsWith('did:ethr:') || !ethUtil.isValidAddress(did.replace('did:ethr:', ''))) {
+    if (!isValidDID(did)) {
       throw Error('unable to resolve did document')
     }
 
@@ -697,4 +697,10 @@ export class EthereumDIDResolver implements IDidResolver {
       didDocument: new DidDocument(didDocument),
     }
   }
+}
+
+export const isValidDID = (value: any): value is string => {
+  if (typeof value !== 'string') return false
+
+  return value.startsWith('did:ethr:') && ethUtil.isValidAddress(value.replace('did:ethr:', ''))
 }

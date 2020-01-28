@@ -1,7 +1,7 @@
 import {validateDateTime} from './RFC3339DateTime'
 import {Validator, ValidateFn, Unvalidated} from './validation'
 
-export const isValid = <T>(valideFn: ValidateFn<T>) => (data: Unvalidated<T>) => {
+export const isValid = <T>(valideFn: ValidateFn<T>) => (data: Unvalidated<T>): data is T => {
   return valideFn(data).kind === 'validated'
 }
 

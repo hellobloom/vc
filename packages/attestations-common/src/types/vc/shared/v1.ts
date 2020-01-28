@@ -1,5 +1,3 @@
-import {TAttestationTypeNames} from '../../attestation'
-
 type VCClaimNodeDataV1 = {
   /**
    * String representation of the attestations data.
@@ -26,7 +24,7 @@ export type VCClaimNodeTypeV1 = {
   /**
    * The type of attestation (phone, email, etc.)
    */
-  type: TAttestationTypeNames
+  type: string
   /**
    * Optionally identifies service used to perform attestation
    */

@@ -25,6 +25,7 @@
     "abi-decoder": "^2.2.2",
     "ethereumjs-util": "^6.2.0",
     "js-sha3": "^0.8.0",
+    "jsonld-signatures": "^4.6.0",
     "web3": "^1.2.4"
   },
   "devDependencies": {

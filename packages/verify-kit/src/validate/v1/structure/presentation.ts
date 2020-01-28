@@ -5,15 +5,12 @@ import {
   VerifiablePresentationV1,
   FullVCV1,
   VerifiablePresentationProofV1,
-  VerifiablePresentationProofMetaDataV1,
   FullVCSubjectV1,
   FullVCAuthorizationV1,
   FullVCProofV1,
   FullVCVerifiedDataBatchV1,
 } from '@bloomprotocol/attestations-common'
 import * as EthU from 'ethereumjs-util'
-
-import {hashCredentials} from '../../../utils'
 
 export const isValidPositionString = (value: any): boolean => {
   return ['left', 'right'].indexOf(value) > -1
@@ -88,7 +85,7 @@ const validateAuthorization = genValidateFn<FullVCAuthorizationV1>({
 })
 
 const validateCredentialSubject = genValidateFn<FullVCSubjectV1>({
-  id: EthU.isValidAddress,
+  id: EthUtils.isValidDID,
   data: Utils.isNotEmptyString,
   authorization: Utils.isArrayOf(Utils.isValid(validateAuthorization), false),
 })
@@ -96,56 +93,47 @@ const validateCredentialSubject = genValidateFn<FullVCSubjectV1>({
 const validateCredentialProof = genValidateFn<FullVCProofV1>({
   type: Utils.isNotEmptyString,
   created: Utils.isValidRFC3339DateTime,
-  creator: EthU.isValidAddress,
+  proofPurpose: (value: any) => value === 'assertionMethod',
+  verificationMethod: EthU.isValidAddress,
+  jws: Utils.isNotEmptyString,
   data: isValidVerifiedData,
 })
+
+const isCredentialProofValid = (_: any, __: any) => {
+  // TODO verify the proof's JWS with jsonld-signatures
+  return true
+}
 
 const validateVerifiableCredential = genValidateFn<FullVCV1>({
   '@context': Utils.isArrayOfNonEmptyStrings,
   id: Utils.isNotEmptyString,
-  type: [
-    Utils.isArrayOfNonEmptyStrings,
-    (value: any) =>
-      value[0] === 'VerifiableCredential' && value[1] === 'FullCredential' && value.splice(2).every(EthUtils.isValidTypeString),
-  ],
-  issuer: EthU.isValidAddress,
+  type: [Utils.isArrayOfNonEmptyStrings, (value: any) => value[0] === 'VerifiableCredential' && value[1] === 'FullCredential'],
+  issuer: EthUtils.isValidDID,
   issuanceDate: Utils.isValidRFC3339DateTime,
   expirationDate: Utils.isUndefinedOr(Utils.isValidRFC3339DateTime),
   credentialSubject: Utils.isValid(validateCredentialSubject),
-  proof: Utils.isValid(validateCredentialProof),
+  proof: [Utils.isValid(validateCredentialProof), isCredentialProofValid],
 })
-
-const validateProofMetaData = genValidateFn<VerifiablePresentationProofMetaDataV1>({
-  type: Utils.isNotEmptyString,
-  created: Utils.isValidRFC3339DateTime,
-  creator: EthU.isValidAddress,
-  nonce: Utils.isNotEmptyString,
-  domain: Utils.isNotEmptyString,
-  credentialHash: EthUtils.isValidHash,
-})
-
-const packedDataMatchesProof = (value: any, data: any) => {
-  return value.toLowerCase() === EthUtils.hashMessage(Utils.orderedStringify(data.metaData))
-}
-
-export const validatePresentationSignature = (value: string, data: any) => {
-  const recoveredSigner = EthUtils.recoverHashSigner(EthU.toBuffer(data.packedData), value)
-  return recoveredSigner.toLowerCase() === data.metaData.creator.toLowerCase()
-}
 
 const validateProof = genValidateFn<VerifiablePresentationProofV1>({
-  metaData: Utils.isValid(validateProofMetaData),
-  packedData: packedDataMatchesProof,
-  signature: [EthUtils.isValidSignatureString, validatePresentationSignature],
+  type: Utils.isNotEmptyString,
+  created: Utils.isValidRFC3339DateTime,
+  proofPurpose: (value: any) => value === 'authentication',
+  verificationMethod: EthU.isValidAddress,
+  challenge: Utils.isNotEmptyString,
+  domain: Utils.isNotEmptyString,
+  jws: Utils.isNotEmptyString,
 })
 
-const proofMatchesCredential = (value: any, data: any) => {
-  return value.credentialHash.toLowerCase() === hashCredentials(data.verifiableCredential)
+const isPresentationProofValid = (_: any, __: any) => {
+  // TODO verify the proof's JWS with jsonld-signatures
+  return true
 }
 
 export const validateVerifiablePresentationV1 = genValidateFn<VerifiablePresentationV1<FullVCV1>>({
   '@context': Utils.isArrayOfNonEmptyStrings,
   type: [Utils.isArrayOfNonEmptyStrings, (value: any) => value[0] === 'VerifiablePresentation'],
   verifiableCredential: Utils.isArrayOf(Utils.isValid(validateVerifiableCredential)),
-  proof: [proofMatchesCredential, Utils.isValid(validateProof)],
+  holder: [EthUtils.isValidDID],
+  proof: [Utils.isValid(validateProof), isPresentationProofValid],
 })

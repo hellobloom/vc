@@ -1,4 +1,3 @@
-import {TAttestationTypeNames} from '../../attestation'
 import {Stage, IMerkleProofShare} from '../../misc'
 import {BaseVCV1, BaseVCTypeV1, BaseVCSubjectV1, VCSignedClaimNodeV1} from '../shared/v1'
 import {IDataNodeLegacy} from '../shared/v0'
@@ -185,7 +184,7 @@ export type FullVCVerifiedDataBatchV1 = BaseFullVCVerifiedDataV1<'batch'> & {
 
 export type FullVCVerifiedDataV1 = FullVCVerifiedDataLegacyV1 | FullVCVerifiedDataOnChainV1 | FullVCVerifiedDataBatchV1
 
-export type FullVCTypeV1 = [BaseVCTypeV1[0], 'FullCredential', TAttestationTypeNames]
+export type FullVCTypeV1 = [BaseVCTypeV1[0], 'FullCredential', ...string[]]
 
 export type FullVCSubjectV1 = BaseVCSubjectV1 & {
   data: string
@@ -200,7 +199,9 @@ export type FullVCSubjectV1 = BaseVCSubjectV1 & {
 export type FullVCProofV1 = {
   type: string
   created: string
-  creator: string
+  proofPurpose: 'assertionMethod'
+  verificationMethod: string
+  jws: string
   data: FullVCVerifiedDataV1
 }
 
