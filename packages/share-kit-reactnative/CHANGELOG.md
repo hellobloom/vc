@@ -1,3 +1,15 @@
+## 1.1.2
+
+**Improvements**
+
+- Bump to latest [share-kit](https://github.com/hellobloom/attestations-es/tree/master/packages/share-kit)
+
+## 1.1.1
+
+**Bug fixes**:
+
+- Include tslib in dependencies
+
 ## 1.1.0
 
 **Improvements**

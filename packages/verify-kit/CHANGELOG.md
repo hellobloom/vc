@@ -4,6 +4,12 @@
 
 - Implement validation of new VC/VP types from [attestations-common][attestations-common]
 
+## 2.0.1
+
+**Bug fixes**:
+
+- Include tslib in dependencies
+
 ## 2.0.0
 
 **Improvements**

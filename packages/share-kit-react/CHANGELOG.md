@@ -1,3 +1,19 @@
+## 4.5.2
+
+**Improvements**
+
+- Bump to latest [share-kit](https://github.com/hellobloom/attestations-es/tree/master/packages/share-kit)
+
+## 4.5.1
+
+**Bug fixes**:
+
+- Include tslib in dependencies
+
+**Miscellaneous**:
+
+- Bump to latest `@bloomprotocol/qr`
+
 ## 4.5.0
 
 **Improvements**
