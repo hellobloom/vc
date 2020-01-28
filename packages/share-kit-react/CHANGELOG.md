@@ -1,3 +1,13 @@
+## 4.5.1
+
+**Bug fixes**:
+
+- Include tslib in dependencies
+
+**Miscellaneous**:
+
+- Bump to latest `@bloomprotocol/qr`
+
 ## 4.5.0
 
 **Improvements**

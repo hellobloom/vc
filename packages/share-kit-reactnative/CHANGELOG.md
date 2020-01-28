@@ -1,3 +1,9 @@
+## 1.1.1
+
+**Bug fixes**:
+
+- Include tslib in dependencies
+
 ## 1.1.0
 
 **Improvements**

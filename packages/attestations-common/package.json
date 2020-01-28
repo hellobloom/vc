@@ -1,6 +1,6 @@
 {
   "name": "@bloomprotocol/attestations-common",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "dist/index.js",
   "module": "dist/attestations-common.esm.js",
   "typings": "dist/index.d.ts",
@@ -29,7 +29,8 @@
     "ethereumjs-util": "^6.2.0",
     "ethereumjs-wallet": "^0.6.3",
     "js-sha3": "^0.8.0",
-    "randombytes": "^2.1.0"
+    "randombytes": "^2.1.0",
+    "tslib": "^1.10.0"
   },
   "devDependencies": {
     "@bloomprotocol/eslint-config": "^1.0.0-beta.1",
@@ -44,7 +45,6 @@
     "eslint-plugin-prettier": "^3.1.2",
     "prettier": "^1.19.1",
     "tsdx": "^0.12.1",
-    "tslib": "^1.10.0",
     "typescript": "^3.7.4"
   },
   "jest": {

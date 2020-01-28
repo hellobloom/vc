@@ -1,3 +1,13 @@
+## 7.6.1
+
+**Bug fixes**:
+
+- Include tslib in dependencies
+
+**Miscellaneous**:
+
+- Bump to latest `@bloomprotocol/qr`
+
 ## 7.6.0
 
 **Improvements**
