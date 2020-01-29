@@ -1,8 +1,12 @@
 import {validateDateTime} from './RFC3339DateTime'
-import {Validator, ValidateFn, Unvalidated} from './validation'
+import {Validator, ValidateFn, AsyncValidateFn, AsyncValidator, Unvalidated} from './validation'
 
 export const isValid = <T>(valideFn: ValidateFn<T>) => (data: Unvalidated<T>): data is T => {
   return valideFn(data).kind === 'validated'
+}
+
+export const isAsyncValid = <T>(valideFn: AsyncValidateFn<T>) => async (data: Unvalidated<T>): Promise<boolean> => {
+  return (await valideFn(data)).kind === 'validated'
 }
 
 export const isUndefinedOr = (validator: Validator) => (value: any, data: any) => {
@@ -14,6 +18,20 @@ export const isArrayOf = (validator: Validator, rejectEmpty = true): Validator =
   if (!Array.isArray(value)) return false
   if (value.length === 0 && rejectEmpty) return false
   return value.every(value => validator(value, data))
+}
+
+export const isAsyncArrayOf = (validator: AsyncValidator, rejectEmpty = true): AsyncValidator => async (value: any, data: any) => {
+  if (!Array.isArray(value)) return false
+  if (value.length === 0 && rejectEmpty) return false
+
+  let outcome = true
+
+  for (const v of value) {
+    outcome = await validator(v, data)
+    if (!outcome) break
+  }
+
+  return outcome
 }
 
 export const isNotEmptyString: Validator = (value: any) => typeof value === 'string' && value.trim() !== ''

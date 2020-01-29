@@ -1,5 +1,6 @@
 import {
   genValidateFn,
+  genAsyncValidateFn,
   Utils,
   EthUtils,
   VerifiablePresentationV1,
@@ -11,6 +12,11 @@ import {
   FullVCVerifiedDataBatchV1,
 } from '@bloomprotocol/attestations-common'
 import * as EthU from 'ethereumjs-util'
+
+const {EcdsaSecp256k1KeyClass2019, EcdsaSecp256k1Signature2019, defaultDocumentLoader} = require('@transmute/lds-ecdsa-secp256k1-2019')
+const keyto = require('@trust/keyto')
+const jsigs = require('jsonld-signatures')
+const {AuthenticationProofPurpose, AssertionProofPurpose} = jsigs.purposes
 
 export const isValidPositionString = (value: any): boolean => {
   return ['left', 'right'].indexOf(value) > -1
@@ -99,12 +105,31 @@ const validateCredentialProof = genValidateFn<FullVCProofV1>({
   data: isValidVerifiedData,
 })
 
-const isCredentialProofValid = (_: any, __: any) => {
-  // TODO verify the proof's JWS with jsonld-signatures
-  return true
+const isCredentialProofValid = async (value: any, data: any) => {
+  try {
+    const {didDocument} = await new EthUtils.EthereumDIDResolver().resolve(value.verificationMethod)
+    const publicKey = didDocument.publicKey[0]
+
+    const key = new EcdsaSecp256k1KeyClass2019({
+      id: publicKey.id,
+      controller: publicKey.controller,
+      publicKeyJwk: keyto.from(publicKey.controller.replace('did:ethr:', ''), 'blk').toJwk('public'),
+    })
+
+    const res = await jsigs.verify(data, {
+      suite: new EcdsaSecp256k1Signature2019({key}),
+      compactProof: false,
+      documentLoader: defaultDocumentLoader,
+      purpose: new AssertionProofPurpose(),
+    })
+
+    return res.verified === true
+  } catch {
+    return false
+  }
 }
 
-const validateVerifiableCredential = genValidateFn<FullVCV1>({
+const validateVerifiableCredential = genAsyncValidateFn<FullVCV1>({
   '@context': Utils.isArrayOfNonEmptyStrings,
   id: Utils.isNotEmptyString,
   type: [Utils.isArrayOfNonEmptyStrings, (value: any) => value[0] === 'VerifiableCredential' && value[1] === 'FullCredential'],
@@ -125,15 +150,34 @@ const validateProof = genValidateFn<VerifiablePresentationProofV1>({
   jws: Utils.isNotEmptyString,
 })
 
-const isPresentationProofValid = (_: any, __: any) => {
-  // TODO verify the proof's JWS with jsonld-signatures
-  return true
+const isPresentationProofValid = async (value: any, data: any) => {
+  try {
+    const {didDocument} = await new EthUtils.EthereumDIDResolver().resolve(value.verificationMethod)
+    const publicKey = didDocument.publicKey[0]
+
+    const key = new EcdsaSecp256k1KeyClass2019({
+      id: publicKey.id,
+      controller: publicKey.controller,
+      publicKeyJwk: keyto.from(publicKey.controller.replace('did:ethr:', ''), 'blk').toJwk('public'),
+    })
+
+    const res = await jsigs.verify(data, {
+      suite: new EcdsaSecp256k1Signature2019({key}),
+      compactProof: false,
+      documentLoader: defaultDocumentLoader,
+      purpose: new AuthenticationProofPurpose(),
+    })
+
+    return res.verified === true
+  } catch {
+    return false
+  }
 }
 
-export const validateVerifiablePresentationV1 = genValidateFn<VerifiablePresentationV1<FullVCV1>>({
+export const validateVerifiablePresentationV1 = genAsyncValidateFn<VerifiablePresentationV1<FullVCV1>>({
   '@context': Utils.isArrayOfNonEmptyStrings,
   type: [Utils.isArrayOfNonEmptyStrings, (value: any) => value[0] === 'VerifiablePresentation'],
-  verifiableCredential: Utils.isArrayOf(Utils.isValid(validateVerifiableCredential)),
+  verifiableCredential: Utils.isAsyncArrayOf(Utils.isAsyncValid(validateVerifiableCredential)),
   holder: [EthUtils.isValidDID],
   proof: [Utils.isValid(validateProof), isPresentationProofValid],
 })
