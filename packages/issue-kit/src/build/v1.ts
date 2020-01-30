@@ -1,11 +1,13 @@
 import {
-  TAttestationTypeNames,
   EthUtils,
   validateDateTime,
   Utils,
+  VCLegacyAttestationNode,
+  VCLegacySignedDataNodeV1,
   VCClaimNodeV1,
   VCSignedClaimNodeV1,
   VCIssuedClaimNodeV1,
+  SelectivelyDisclosableLegacyVCV1,
   SelectivelyDisclosableVCV1,
   SelectivelyDisclosableBatchVCV1,
 } from '@bloomprotocol/attestations-common'
@@ -14,28 +16,114 @@ import {keccak256} from 'js-sha3'
 import EthWallet from 'ethereumjs-wallet'
 import * as ethUtil from 'ethereumjs-util'
 
-import {MerkleTree} from '../merketreejs'
-import {getMerkleTreeFromLeaves, getBloomMerkleTree, getPadding, validateSignedAgreement} from '../utils'
+import {getMerkleTreeFromLeaves, getBloomMerkleTree, getPadding} from '../utils'
 
-/**
- *
- * @param claim Given the contents of an attestation node, return a
- * Merkle tree
- */
-const getClaimTree = (claim: VCIssuedClaimNodeV1): MerkleTree => {
+const hashClaimTree = (claim: VCIssuedClaimNodeV1): Buffer => {
   const dataHash = EthUtils.hashMessage(Utils.orderedStringify(claim.data))
   const typeHash = EthUtils.hashMessage(Utils.orderedStringify(claim.type))
   const issuanceHash = EthUtils.hashMessage(Utils.orderedStringify(claim.issuance))
   const auxHash = EthUtils.hashMessage(claim.aux)
-  return getMerkleTreeFromLeaves([dataHash, typeHash, issuanceHash, auxHash])
+  const dataTree = getMerkleTreeFromLeaves([dataHash, typeHash, issuanceHash, auxHash])
+  return dataTree.getRoot()
 }
 
-/**
- * Given the contents of an attestation node, return the root hash of the Merkle tree
- */
-const hashClaimTree = (claim: VCIssuedClaimNodeV1): Buffer => {
-  const dataTree = getClaimTree(claim)
+const hashAttestationNode = (attestation: VCLegacyAttestationNode): Buffer => {
+  const dataHash = EthUtils.hashMessage(Utils.orderedStringify(attestation.data))
+  const typeHash = EthUtils.hashMessage(Utils.orderedStringify(attestation.type))
+  const linkHash = EthUtils.hashMessage(Utils.orderedStringify(attestation.link))
+  const auxHash = EthUtils.hashMessage(attestation.aux)
+  const dataTree = getMerkleTreeFromLeaves([dataHash, typeHash, linkHash, auxHash])
+
   return dataTree.getRoot()
+}
+
+const signLegacyVCClaimNodeV1 = ({
+  dataNode,
+  privateKey,
+  globalRevocationLink,
+}: {
+  dataNode: VCClaimNodeV1
+  privateKey: Buffer
+  globalRevocationLink: string
+}): VCLegacySignedDataNodeV1 => {
+  const attestationNode: VCLegacyAttestationNode = {
+    ...dataNode,
+    link: {
+      local: EthUtils.generateNonce(),
+      global: globalRevocationLink,
+      dataHash: EthUtils.hashMessage(Utils.orderedStringify(dataNode.data)),
+      typeHash: EthUtils.hashMessage(Utils.orderedStringify(dataNode.type)),
+    },
+  }
+
+  const attestationHash = hashAttestationNode(attestationNode)
+  const attestationSig = EthUtils.signHash(attestationHash, privateKey)
+
+  return {
+    attestationNode,
+    signedAttestation: attestationSig,
+  }
+}
+
+export const buildSelectivelyDisclosableLegacyVCV1 = async ({
+  dataNodes,
+  subjectDID,
+  privateKey,
+  issuanceDate,
+  expirationDate,
+}: {
+  dataNodes: VCClaimNodeV1[]
+  subjectDID: string
+  privateKey: Buffer
+  issuanceDate: string
+  expirationDate: string
+}): Promise<SelectivelyDisclosableLegacyVCV1> => {
+  const {
+    didDocument: {id: subject},
+  } = await new EthUtils.EthereumDIDResolver().resolve(subjectDID)
+
+  const globalRevocationLink = EthUtils.generateNonce()
+  const signedDataNodes = dataNodes.map(dataNode => signLegacyVCClaimNodeV1({dataNode, privateKey, globalRevocationLink}))
+  const signedDataHashes = signedDataNodes.map(dataNode => EthUtils.hashMessage(dataNode.signedAttestation))
+
+  const paddingNodes = getPadding(signedDataHashes.length)
+  const signedChecksum = EthUtils.signChecksum(signedDataHashes, privateKey)
+  const signedChecksumHash = EthUtils.hashMessage(signedChecksum)
+  const rootHash = getBloomMerkleTree(signedDataHashes, paddingNodes, signedChecksumHash).getRoot()
+  const signedRootHash = EthUtils.signHash(rootHash, privateKey)
+  const rootHashNonce = EthUtils.generateNonce()
+  const layer2Hash = EthUtils.hashMessage(
+    Utils.orderedStringify({
+      rootHash: ethUtil.bufferToHex(rootHash),
+      nonce: rootHashNonce,
+    }),
+  )
+
+  const issuer = EthWallet.fromPrivateKey(privateKey).getAddressString()
+
+  const credential: SelectivelyDisclosableLegacyVCV1 = {
+    '@context': ['https://www.w3.org/2018/credentials/v1'],
+    id: 'placeholder',
+    type: ['VerifiableCredential', 'SelectivelyDisclosableVerifiableLegacyCredential'],
+    issuer: `did:ethr:${issuer}`,
+    issuanceDate,
+    expirationDate,
+    credentialSubject: {
+      id: subject,
+      dataNodes: signedDataNodes,
+    },
+    proof: {
+      layer2Hash,
+      signedRootHash,
+      rootHashNonce,
+      rootHash: ethUtil.bufferToHex(rootHash),
+      checksumSig: signedChecksum,
+      paddingNodes,
+    },
+    version: 'SelectivelyDisclosableLegacyVC-1.0.0',
+  }
+
+  return credential
 }
 
 export const buildClaimNodeV1 = ({
@@ -45,8 +133,8 @@ export const buildClaimNodeV1 = ({
   version,
 }: {
   dataStr: string
-  type: TAttestationTypeNames
-  provider: string
+  type: string
+  provider?: string
   version: string
 }): VCClaimNodeV1 => ({
   data: {
@@ -98,7 +186,7 @@ const signVCClaimNodeV1 = ({
 
   const signedClaimNode: VCSignedClaimNodeV1 = {
     claimNode: issuedClaimNode,
-    issuer,
+    issuer: `did:ethr:${issuer}`,
     issuerSignature,
   }
 
@@ -198,7 +286,7 @@ export const buildSelectivelyDisclosableBatchVCV1 = async ({
   const {
     issuer: issuerDid,
     credentialSubject: {id: subjectDID},
-    proof: {layer2Hash: rootHash},
+    proof: {layer2Hash},
   } = credential
 
   const {
@@ -211,21 +299,22 @@ export const buildSelectivelyDisclosableBatchVCV1 = async ({
 
   // TODO validate checksum
 
-  const recoveredSigner = EthUtils.recoverHashSigner(Buffer.from(credential.proof.rootHash), credential.proof.issuerSignature)
-  if (recoveredSigner !== issuerWallet.getAddressString()) {
-    throw new Error('Invalid issuer sig')
-  }
+  // TODO validate issuer sig
+  // const recoveredSigner = EthUtils.recoverHashSigner(Buffer.from(credential.proof.rootHash), credential.proof.issuerSignature)
+  // if (recoveredSigner !== issuerWallet.getAddressString()) {
+  //   throw new Error('Invalid issuer sig')
+  // }
 
-  if (issuer !== issuerWallet.getAddressString()) {
+  if (issuer.replace('did:ethr:', '') !== issuerWallet.getAddressString()) {
     throw new Error('Private key mismatch')
   }
 
-  if (!validateSignedAgreement(subjectSignature, contractAddress, rootHash, requestNonce, subject)) {
+  if (!EthUtils.validateSignedAgreement(subjectSignature, contractAddress, layer2Hash, requestNonce, subject.replace('did:ethr:', ''))) {
     throw new Error('Invalid subject sig')
   }
 
   const batchIssuerSignature = EthUtils.signHash(
-    ethUtil.toBuffer(EthUtils.hashMessage(Utils.orderedStringify({subject, rootHash}))),
+    ethUtil.toBuffer(EthUtils.hashMessage(Utils.orderedStringify({subject, rootHash: layer2Hash}))),
     privateKey,
   )
   const batchLayer2Hash = EthUtils.hashMessage(

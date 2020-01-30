@@ -32,30 +32,35 @@ export type AsyncValidateFn<T> = (data: Unvalidated<T>) => Promise<ValidationRes
 
 export const genAsyncValidateFn = <T>(validations: AsyncValidations<T>): AsyncValidateFn<T> => async data => {
   try {
-    for (const _fieldName of Object.keys(validations)) {
-      const fieldName = _fieldName as keyof T
+    for (let i = 0; i < Object.keys(validations).length; i++) {
+      const fieldName = Object.keys(validations)[i] as keyof T
+
       if (data[fieldName] === undefined) {
         throw new Error(`Missing ${fieldName}`)
       }
 
       const validator: AsyncValidator | AsyncValidator[] = validations[fieldName]
+      const validators: AsyncValidator[] = validator instanceof Array ? validator : [validator]
 
-      try {
-        let outcome = true
+      for (let i = 0; i < validators.length; i++) {
+        const fn = validators[i]
 
-        if (validator instanceof Array) {
-          for (const fn of validator) {
-            outcome = await fn(data[fieldName], data)
-            if (!outcome) break
-          }
-        } else {
-          outcome = await validator(data[fieldName], data)
+        let outcome: boolean
+        try {
+          outcome = await fn(data[fieldName], data)
+        } catch {
+          throw new Error(`Error while validating ${fieldName}: ${JSON.stringify(data[fieldName])}`)
         }
 
-        if (!outcome) throw new Error(`Invalid ${fieldName}: ${JSON.stringify(data[fieldName])}`)
-      } catch {
-        throw new Error(`Invalid ${fieldName}: ${JSON.stringify(data[fieldName])}`)
+        if (!outcome) {
+          throw new Error(`Invalid ${fieldName}: ${JSON.stringify(data[fieldName])}`)
+        }
       }
+    }
+
+    return {
+      kind: 'validated',
+      data: data as T,
     }
   } catch (error) {
     return {
@@ -63,40 +68,30 @@ export const genAsyncValidateFn = <T>(validations: AsyncValidations<T>): AsyncVa
       message: error.message,
     }
   }
-
-  return {
-    kind: 'validated',
-    data: data as T,
-  }
 }
 
 export const genValidateFn = <T>(validations: Validations<T>): ValidateFn<T> => data => {
   try {
-    for (const _fieldName of Object.keys(validations)) {
+    Object.keys(validations).forEach(_fieldName => {
       const fieldName = _fieldName as keyof T
+
       if (data[fieldName] === undefined) {
         throw new Error(`Missing ${fieldName}`)
       }
 
       const validator: Validator | Validator[] = validations[fieldName]
+      const validators: Validator[] = validator instanceof Array ? validator : [validator]
+
+      let outcome: boolean
 
       try {
-        let outcome = true
-
-        if (validator instanceof Array) {
-          for (const fn of validator) {
-            outcome = fn(data[fieldName], data)
-            if (!outcome) break
-          }
-        } else {
-          outcome = validator(data[fieldName], data)
-        }
-
-        if (!outcome) throw new Error(`Invalid ${fieldName}: ${JSON.stringify(data[fieldName])}`)
+        outcome = validators.every(fn => fn(data[fieldName], data))
       } catch {
-        throw new Error(`Invalid ${fieldName}: ${JSON.stringify(data[fieldName])}`)
+        throw new Error(`Error while validating ${fieldName}: ${JSON.stringify(data[fieldName])}`)
       }
-    }
+
+      if (!outcome) throw new Error(`Invalid ${fieldName}: ${JSON.stringify(data[fieldName])}`)
+    })
   } catch (error) {
     return {
       kind: 'invalid_param',

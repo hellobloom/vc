@@ -9,9 +9,9 @@ import {
 } from '@bloomprotocol/attestations-common'
 import * as EthU from 'ethereumjs-util'
 
-import {validateVerifiablePresentationResponse} from '../../src'
-import {formatMerkleProofForShare} from '../../src/utils'
-import {validateVerifiedDataLegacy, validateVerifiedDataBatch} from '../../src/validate/structure'
+import {validateVerifiablePresentationResponse} from '../../../src'
+import {formatMerkleProofForShare} from '../../../src/utils'
+import {validateVerifiedDataLegacy, validateVerifiedDataBatch} from '../../../src/validate/v0/structure'
 
 // tslint:disable:max-line-length
 const validBatchMerkleTreeComponents: IBloomBatchMerkleTreeComponents = {

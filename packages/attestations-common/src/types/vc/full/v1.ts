@@ -1,6 +1,6 @@
 import {Stage, IMerkleProofShare} from '../../misc'
 import {BaseVCV1, BaseVCTypeV1, BaseVCSubjectV1, VCSignedClaimNodeV1} from '../shared/v1'
-import {IDataNodeLegacy} from '../shared/v0'
+import {VCLegacySignedDataNodeV1} from '../shared/v1'
 
 export type FullVCAuthorizationV1 = {
   /**
@@ -28,13 +28,9 @@ export type FullVCSignedAuthorizationV1 = {
   signature: string
 }
 
-type FullVCVerifiedDataVersion = 'legacy' | 'onChain' | 'batch' | 'batchProof'
+export type FullVCVerifiedDataLegacyV1 = {
+  version: 'legacy'
 
-export type BaseFullVCVerifiedDataV1<V extends FullVCVerifiedDataVersion> = {
-  version: V
-}
-
-export type FullVCVerifiedDataLegacyV1 = BaseFullVCVerifiedDataV1<'legacy'> & {
   /**
    * Blockchain transaction hash which emits the layer2Hash property
    */
@@ -69,7 +65,7 @@ export type FullVCVerifiedDataLegacyV1 = BaseFullVCVerifiedDataV1<'legacy'> & {
   /**
    * Data node containing the raw verified data that was requested
    */
-  target: IDataNodeLegacy
+  target: VCLegacySignedDataNodeV1
 
   /**
    * Ethereum address of the attester that performed the attestation
@@ -77,7 +73,9 @@ export type FullVCVerifiedDataLegacyV1 = BaseFullVCVerifiedDataV1<'legacy'> & {
   attester: string
 }
 
-export type FullVCVerifiedDataOnChainV1 = BaseFullVCVerifiedDataV1<'onChain'> & {
+export type FullVCVerifiedDataOnChainV1 = {
+  version: 'onChain'
+
   /**
    * Blockchain transaction hash which emits the layer2Hash property
    */
@@ -120,7 +118,8 @@ export type FullVCVerifiedDataOnChainV1 = BaseFullVCVerifiedDataV1<'onChain'> & 
   attester: string
 }
 
-export type FullVCVerifiedDataBatchV1 = BaseFullVCVerifiedDataV1<'batch'> & {
+export type FullVCVerifiedDataBatchV1 = {
+  version: 'batch'
   /**
    * Attestation hash formed by hashing subject sig with attester sig
    */

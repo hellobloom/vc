@@ -3,6 +3,7 @@ import {
   FullVCVerifiedDataV1,
   FullVCVerifiedDataLegacyV1,
   FullVCVerifiedDataOnChainV1,
+  FullVCV1,
 } from '@bloomprotocol/attestations-common'
 
 import {TDecodedLog, getDecodedLogValueByName, getDecodedTxEventLogs} from '../../txUtils'
@@ -85,7 +86,7 @@ const validateOnChainProperties = (subject: string, payloadData: FullVCVerifiedD
 export const validateVerifiablePresentationResponseV1 = async (
   data: any,
   options: SharedValidateVerifiablePresentationOptions = {},
-): Promise<ValidationResponse<VerifiablePresentationV1>> => {
+): Promise<ValidationResponse<VerifiablePresentationV1<FullVCV1>>> => {
   const outcome = await validateVerifiablePresentationV1(data)
 
   if (outcome.kind === 'invalid_param') {
@@ -105,6 +106,7 @@ export const validateVerifiablePresentationResponseV1 = async (
         switch (d.proof.data.version) {
           case 'legacy':
           case 'onChain':
+            d.proof.data.version
             try {
               const {errors: txErrors, logs: txLogs} = await retreiveTxData(d.proof.data, options.web3Provider)
 

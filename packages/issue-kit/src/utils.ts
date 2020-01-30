@@ -1,7 +1,6 @@
-import {EthUtils, IFormattedTypedData} from '@bloomprotocol/attestations-common'
+import {EthUtils} from '@bloomprotocol/attestations-common'
 import * as ethUtil from 'ethereumjs-util'
 import {keccak256} from 'js-sha3'
-import * as ethSigUtil from 'eth-sig-util'
 import randomBytes from 'randombytes'
 
 import {MerkleTree} from './merketreejs'
@@ -21,47 +20,6 @@ export const getBloomMerkleTree = (claimHashes: string[], paddingNodes: string[]
   leaves.push(checksumHash)
   leaves = leaves.concat(paddingNodes)
   return getMerkleTreeFromLeaves(leaves)
-}
-
-export const getAttestationAgreement = (
-  contractAddress: string,
-  chainId: number,
-  dataHash: string,
-  requestNonce: string,
-): IFormattedTypedData => {
-  return {
-    types: {
-      EIP712Domain: [
-        {name: 'name', type: 'string'},
-        {name: 'version', type: 'string'},
-        {name: 'chainId', type: 'uint256'},
-        {name: 'verifyingContract', type: 'address'},
-      ],
-      AttestationRequest: [
-        {name: 'dataHash', type: 'bytes32'},
-        {name: 'nonce', type: 'bytes32'},
-      ],
-    },
-    primaryType: 'AttestationRequest',
-    domain: {
-      name: 'Bloom Attestation Logic',
-      version: '2',
-      chainId: chainId,
-      verifyingContract: contractAddress,
-    },
-    message: {
-      dataHash: dataHash,
-      nonce: requestNonce,
-    },
-  }
-}
-
-export const validateSignedAgreement = (subjectSig: string, contractAddress: string, dataHash: string, nonce: string, subject: string) => {
-  const recoveredEthAddress = ethSigUtil.recoverTypedSignature({
-    data: getAttestationAgreement(contractAddress, 1, dataHash, nonce),
-    sig: subjectSig,
-  })
-  return recoveredEthAddress.toLowerCase() === subject.toLowerCase()
 }
 
 /**

@@ -10,6 +10,14 @@ import {
   FullVCAuthorizationV1,
   FullVCProofV1,
   FullVCVerifiedDataBatchV1,
+  VCClaimNodeV1,
+  VCClaimNodeDataV1,
+  VCClaimNodeTypeV1,
+  FullVCVerifiedDataOnChainV1,
+  VCSignedClaimNodeV1,
+  VCLegacySignedDataNodeV1,
+  VCRevocationLinks,
+  VCLegacyAttestationNode,
 } from '@bloomprotocol/attestations-common'
 import * as EthU from 'ethereumjs-util'
 
@@ -33,9 +41,52 @@ export const validateProofShare = genValidateFn({
 
 export const isValidMerkleProofArray = Utils.isArrayOf(Utils.isValid(validateProofShare))
 
-export const isValidClaimNode = Utils.isValid(EthUtils.validateClaimNode)
+const validateClaimNodeData = genValidateFn<VCClaimNodeDataV1>({
+  data: Utils.isNotEmptyString,
+  nonce: Utils.isNotEmptyString,
+  version: Utils.isNotEmptyString,
+})
 
-export const isValidLegacyDataNode = Utils.isValid(EthUtils.validateDataNodeLegacy)
+const validateClaimNodeType = genValidateFn<VCClaimNodeTypeV1>({
+  type: Utils.isNotEmptyString,
+  provider: Utils.isUndefinedOr(Utils.isNotEmptyString),
+  nonce: Utils.isNotEmptyString,
+})
+
+const validateClaimNode = genValidateFn<VCClaimNodeV1>({
+  data: Utils.isValid(validateClaimNodeData),
+  type: Utils.isValid(validateClaimNodeType),
+  aux: [EthUtils.isValidEthHexString, EthUtils.isValidHash],
+})
+
+const validateSignedClaimNode = genValidateFn<VCSignedClaimNodeV1>({
+  claimNode: Utils.isValid(validateClaimNode),
+  issuer: EthUtils.isValidDID,
+  issuerSignature: EthUtils.isValidSignatureString,
+})
+
+const validateRevocationLinks = genValidateFn<VCRevocationLinks>({
+  local: EthUtils.isValidHash,
+  global: EthUtils.isValidHash,
+  dataHash: EthUtils.isValidHash,
+  typeHash: EthUtils.isValidHash,
+})
+
+const validateLegacyAttestationNode = genValidateFn<VCLegacyAttestationNode>({
+  data: Utils.isValid(validateClaimNodeData),
+  type: Utils.isValid(validateClaimNodeType),
+  aux: [EthUtils.isValidEthHexString, EthUtils.isValidHash],
+  link: Utils.isValid(validateRevocationLinks),
+})
+
+const validateLegacySignedDataNode = genValidateFn<VCLegacySignedDataNodeV1>({
+  attestationNode: Utils.isValid(validateLegacyAttestationNode),
+  signedAttestation: EthUtils.isValidSignatureString,
+})
+
+export const isValidClaimNode = Utils.isValid(validateSignedClaimNode)
+
+export const isValidLegacyDataNode = Utils.isValid(validateLegacySignedDataNode)
 
 export const validateVerifiedDataLegacy = genValidateFn({
   version: (value: any) => value === 'legacy',
@@ -46,10 +97,10 @@ export const validateVerifiedDataLegacy = genValidateFn({
   proof: isValidMerkleProofArray,
   stage: isValidStageString,
   target: isValidLegacyDataNode,
-  attester: EthU.isValidAddress,
+  attester: EthUtils.isValidDID,
 })
 
-export const validateVerifiedDataOnChain = genValidateFn({
+export const validateVerifiedDataOnChain = genValidateFn<FullVCVerifiedDataOnChainV1>({
   version: (value: any) => value === 'onChain',
   tx: EthUtils.isValidHash,
   layer2Hash: EthUtils.isValidHash,
@@ -58,7 +109,7 @@ export const validateVerifiedDataOnChain = genValidateFn({
   proof: isValidMerkleProofArray,
   stage: isValidStageString,
   target: isValidClaimNode,
-  attester: EthU.isValidAddress,
+  attester: EthUtils.isValidDID,
 })
 
 export const validateVerifiedDataBatch = genValidateFn<FullVCVerifiedDataBatchV1>({
@@ -73,8 +124,8 @@ export const validateVerifiedDataBatch = genValidateFn<FullVCVerifiedDataBatchV1
   proof: isValidMerkleProofArray,
   stage: isValidStageString,
   target: isValidClaimNode,
-  attester: EthU.isValidAddress,
-  subject: EthU.isValidAddress,
+  attester: EthUtils.isValidDID,
+  subject: EthUtils.isValidDID,
 })
 
 export const isValidVerifiedData = (value: any): boolean => {
@@ -90,7 +141,7 @@ const validateAuthorization = genValidateFn<FullVCAuthorizationV1>({
   revocation: Utils.isNotEmptyString,
 })
 
-const validateCredentialSubject = genValidateFn<FullVCSubjectV1>({
+export const validateCredentialSubject = genValidateFn<FullVCSubjectV1>({
   id: EthUtils.isValidDID,
   data: Utils.isNotEmptyString,
   authorization: Utils.isArrayOf(Utils.isValid(validateAuthorization), false),
@@ -100,7 +151,7 @@ const validateCredentialProof = genValidateFn<FullVCProofV1>({
   type: Utils.isNotEmptyString,
   created: Utils.isValidRFC3339DateTime,
   proofPurpose: (value: any) => value === 'assertionMethod',
-  verificationMethod: EthU.isValidAddress,
+  verificationMethod: EthUtils.isValidDID,
   jws: Utils.isNotEmptyString,
   data: isValidVerifiedData,
 })
@@ -118,7 +169,6 @@ const isCredentialProofValid = async (value: any, data: any) => {
 
     const res = await jsigs.verify(data, {
       suite: new EcdsaSecp256k1Signature2019({key}),
-      compactProof: false,
       documentLoader: defaultDocumentLoader,
       purpose: new AssertionProofPurpose(),
     })
@@ -129,7 +179,7 @@ const isCredentialProofValid = async (value: any, data: any) => {
   }
 }
 
-const validateVerifiableCredential = genAsyncValidateFn<FullVCV1>({
+export const validateVerifiableCredential = genAsyncValidateFn<FullVCV1>({
   '@context': Utils.isArrayOfNonEmptyStrings,
   id: Utils.isNotEmptyString,
   type: [Utils.isArrayOfNonEmptyStrings, (value: any) => value[0] === 'VerifiableCredential' && value[1] === 'FullCredential'],
@@ -144,7 +194,7 @@ const validateProof = genValidateFn<VerifiablePresentationProofV1>({
   type: Utils.isNotEmptyString,
   created: Utils.isValidRFC3339DateTime,
   proofPurpose: (value: any) => value === 'authentication',
-  verificationMethod: EthU.isValidAddress,
+  verificationMethod: EthUtils.isValidDID,
   challenge: Utils.isNotEmptyString,
   domain: Utils.isNotEmptyString,
   jws: Utils.isNotEmptyString,

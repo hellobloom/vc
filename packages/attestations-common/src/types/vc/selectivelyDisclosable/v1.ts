@@ -1,4 +1,31 @@
-import {BaseVCV1, BaseVCTypeV1, BaseVCSubjectV1, VCSignedClaimNodeV1} from '../shared/v1'
+import {BaseVCV1, BaseVCTypeV1, BaseVCSubjectV1, VCSignedClaimNodeV1, VCLegacySignedDataNodeV1} from '../shared/v1'
+
+// Legacy
+
+export type SelectivelyDisclosableLegacyVCTypeV1 = [BaseVCTypeV1[0], 'SelectivelyDisclosableVerifiableLegacyCredential', ...string[]]
+
+export type SelectivelyDisclosableLegacyVCSubjectV1 = BaseVCSubjectV1 & {
+  dataNodes: VCLegacySignedDataNodeV1[]
+}
+
+export type SelectivelyDisclosableLegacyVCProofV1 = {
+  layer2Hash: string
+  signedRootHash: string
+  rootHashNonce: string
+  rootHash: string
+  checksumSig: string
+  paddingNodes: string[]
+}
+
+export type SelectivelyDisclosableLegacyVCV1 = BaseVCV1<
+  SelectivelyDisclosableLegacyVCTypeV1,
+  SelectivelyDisclosableLegacyVCSubjectV1,
+  SelectivelyDisclosableLegacyVCProofV1
+> & {
+  version: 'SelectivelyDisclosableLegacyVC-1.0.0'
+}
+
+// Regular
 
 export type SelectivelyDisclosableVCTypeV1 = [BaseVCTypeV1[0], 'SelectivelyDisclosableVerifiableCredential', ...string[]]
 
@@ -22,6 +49,8 @@ export type SelectivelyDisclosableVCV1 = BaseVCV1<
 > & {
   version: 'SelectivelyDisclosableVC-1.0.0'
 }
+
+// Batch
 
 export type SelectivelyDisclosableBatchVCTypeV1 = [
   SelectivelyDisclosableVCTypeV1[0],

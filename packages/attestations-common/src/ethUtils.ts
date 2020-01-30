@@ -689,7 +689,7 @@ const ethrDidDocumentTmpl = (ethAddress: string): IEthDidDocument => ({
 export class EthereumDIDResolver implements IDidResolver {
   public async resolve(did: string): Promise<IDidResolveResult> {
     if (!isValidDID(did)) {
-      throw Error('unable to resolve did document')
+      throw Error(`unable to resolve did document: ${did}`)
     }
 
     const didDocument = ethrDidDocumentTmpl(did.replace('did:ethr:', ''))

@@ -12,16 +12,9 @@ import * as EthU from 'ethereumjs-util'
 import EthWallet from 'ethereumjs-wallet'
 import * as ethSigUtil from 'eth-sig-util'
 
-import * as Validation from '../../src/validate/structure'
-import {formatMerkleProofForShare, hashCredentials} from '../../src/utils'
-import {
-  buildOnChainCredential,
-  buildBatchCredential,
-  buildPresentationProof,
-  buildVerifiablePresentation,
-  buildVerifiableAuth,
-  buildAuthProof,
-} from '../../src/build'
+import * as Validation from '../../../../src/validate/v0/structure'
+import {formatMerkleProofForShare, hashCredentials} from '../../../../src/utils'
+import {buildOnChainCredential, buildBatchCredential, buildPresentationProof, buildVerifiablePresentation} from '../../../../src/build'
 
 const aliceWallet = EthWallet.fromPrivateKey(new Buffer('c87509a1c067bbde78beb793e6fa76530b6382a4c0241e5e4a9ec0a0f44dc0d3', 'hex'))
 const alicePrivkey = aliceWallet.getPrivateKey()
@@ -132,12 +125,6 @@ const presentation = buildVerifiablePresentation(
   presentationProof,
   presentationSig,
 )
-
-const authToken = EthUtils.generateNonce()
-const authDomain = 'https://bloom.co/receiveData'
-const authProof = buildAuthProof(bobAddress, authToken, authDomain)
-const authSig = EthUtils.signHash(EthU.toBuffer(EthUtils.hashMessage(Utils.orderedStringify(authProof))), bobPrivkey)
-const auth = buildVerifiableAuth(authProof, authSig)
 
 test('Validation.isValidPositionString', () => {
   expect(Validation.isValidPositionString('left')).toBeTruthy()
@@ -271,21 +258,4 @@ test('hashCredentials returns same hash no matter order of array', () => {
   const hashC = hashCredentials([batchCredential, onChainCredential, batchCredential])
   const hashD = hashCredentials([onChainCredential, batchCredential, batchCredential])
   expect(hashC).toBe(hashD)
-})
-
-test('Validation.validateAuthProof', () => {
-  expect(Validation.validateAuthProof(auth.proof)).toBeTruthy()
-  expect(Validation.validateAuthProof(presentation).kind === 'invalid_param').toBeTruthy()
-  expect(Validation.validateAuthProof(auth).kind === 'invalid_param').toBeTruthy()
-})
-
-test('Validation.validateAuthSignature', () => {
-  expect(Validation.validateAuthSignature(authSig, auth)).toBeTruthy()
-  expect(Validation.validateAuthSignature(presentationSig, auth)).toBeFalsy()
-})
-
-test('Validation.validateVerifiableAuth', () => {
-  expect(Validation.validateVerifiableAuth(auth)).toBeTruthy()
-  expect(Validation.validateVerifiableAuth(auth.proof)).toBeTruthy()
-  expect(Validation.validateVerifiableAuth(presentation).kind === 'invalid_param').toBeTruthy()
 })

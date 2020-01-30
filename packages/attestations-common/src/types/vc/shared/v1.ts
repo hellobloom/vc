@@ -1,4 +1,4 @@
-type VCClaimNodeDataV1 = {
+export type VCClaimNodeDataV1 = {
   /**
    * String representation of the attestations data.
    *
@@ -55,6 +55,34 @@ export type VCClaimNodeV1 = {
    * aux either contains a hash of VCClaimNodeAuxSigV1 or just a padding node hash
    */
   aux: string
+}
+
+export type VCRevocationLinks = {
+  /**
+   * Hex string to identify this attestation node in the event of partial revocation
+   */
+  local: string
+  /**
+   * Hex string to identify this attestation in the event of revocation
+   */
+  global: string
+  /**
+   * hash of data node attester is verifying
+   */
+  dataHash: string
+  /**
+   * hash of type node attester is verifying
+   */
+  typeHash: string
+}
+
+export type VCLegacyAttestationNode = VCClaimNodeV1 & {
+  link: VCRevocationLinks
+}
+
+export type VCLegacySignedDataNodeV1 = {
+  attestationNode: VCLegacyAttestationNode
+  signedAttestation: string // Root hash of Attestation tree signed by attester
 }
 
 type VCIssuanceNodeV1 = {
