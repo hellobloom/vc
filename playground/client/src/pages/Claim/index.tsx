@@ -4,7 +4,9 @@ import {useParams, Redirect} from 'react-router-dom'
 import {isUuid} from 'uuidv4'
 import {ClaimElement} from '@bloomprotocol/claim-kit-react'
 import clsx from 'clsx'
-import JSONTree from 'react-json-tree'
+import {JsonEditor} from 'jsoneditor-react'
+
+import 'jsoneditor-react/es/editor.min.css'
 
 import {Shell} from '../../components/Shell'
 import {sitemap} from '../../sitemap'
@@ -88,7 +90,7 @@ export const Claim: React.FC<ClaimProps> = props => {
         </MessageHeader>
         <MessageBody>
           <div className="claim__claimed-data-container">
-            <JSONTree data={claimedData} />
+            <JsonEditor value={claimedData} mode="preview" />
           </div>
         </MessageBody>
       </Message>

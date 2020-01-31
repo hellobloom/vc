@@ -4,8 +4,10 @@ import {TAttestationTypeNames} from '@bloomprotocol/attestations-common'
 import {useParams, Redirect} from 'react-router-dom'
 import {isUuid} from 'uuidv4'
 import bowser from 'bowser'
-import JSONTree from 'react-json-tree'
 import clsx from 'clsx'
+import {JsonEditor} from 'jsoneditor-react'
+
+import 'jsoneditor-react/es/editor.min.css'
 
 import {Shell} from '../../components/Shell'
 import {useShareGetConfig} from '../../query/share'
@@ -89,7 +91,7 @@ export const Share: React.FC<ShareProps> = props => {
         </MessageHeader>
         <MessageBody>
           <div className="share__shared-data-container">
-            <JSONTree data={sharedData} />
+            <JsonEditor value={sharedData} mode="tree" />
           </div>
         </MessageBody>
       </Message>
@@ -190,8 +192,9 @@ export const Share: React.FC<ShareProps> = props => {
         <div
           className={clsx('column is-one-third-desktop is-half-tablet', {
             'is-narrow': isNarrow,
+            'is-full': sharedData,
           })}
-          style={{width: isNarrow ? 'auto' : undefined}}
+          style={{width: isNarrow && !sharedData ? 'auto' : undefined}}
         >
           {children}
         </div>
