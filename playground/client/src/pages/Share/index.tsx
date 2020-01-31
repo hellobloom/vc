@@ -137,7 +137,7 @@ export const Share: React.FC<ShareProps> = props => {
           <Button
             isFullwidth
             onClick={async () => {
-              const response = await shareVCs(data.types, url)
+              const response = await shareVCs(data.types, token, url)
 
               if (response.kind === 'error') {
                 setErrorMessage(response.message)

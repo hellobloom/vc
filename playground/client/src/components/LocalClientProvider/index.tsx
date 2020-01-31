@@ -2,6 +2,9 @@ import React, {useContext} from 'react'
 import createPersistedState from 'use-persisted-state'
 import EthWallet from 'ethereumjs-wallet'
 import {SDBatchVCV1} from '@bloomprotocol/attestations-common'
+import wretch from 'wretch'
+
+import {buildBatchFullVCV1, buildVerifiablePresentation} from './utils'
 
 const usePrivateKeyState = createPersistedState('attestations-playground.privateKey')
 const useSDVCsState = createPersistedState('attestations-playground.sdvcs')
@@ -21,7 +24,7 @@ type LocalClientContextProps = {
   sdvcs: any[]
   wallet: EthWallet
   regen: () => void
-  shareVCs: (types: string[], to: string) => Promise<RequestResponse>
+  shareVCs: (types: string[], token: string, to: string) => Promise<RequestResponse>
   claimVC: (from: string) => Promise<RequestResponse>
 }
 
@@ -37,25 +40,66 @@ export const LocalClientProvider: React.FC = props => {
   const [privateKey, setPrivateKey] = usePrivateKeyState<string>(() => EthWallet.generate().getPrivateKeyString())
   const [sdvcs, setSDVCs] = useSDVCsState<SDBatchVCV1[]>(() => [])
 
+  const wallet = EthWallet.fromPrivateKey(Buffer.from(privateKey.replace('0x', ''), 'hex'))
+
   return (
     <LocalClientContext.Provider
       value={{
-        wallet: EthWallet.fromPrivateKey(Buffer.from(privateKey.replace('0x', ''), 'hex')),
+        wallet,
         sdvcs,
         regen: () => {
           setPrivateKey(EthWallet.generate().getPrivateKeyString())
           setSDVCs([])
         },
-        shareVCs: async (types, to) => {
-          // TODO:
-          // - Generate list of sdvcs from given types
-          // - Use wallet to construct full vc and send them to the given url
-          // - We'll need a way to tell the user if they don't have the necessary cred types stored
+        shareVCs: async (types, token, to) => {
+          const missing: string[] = []
+          const sdvcs: SDBatchVCV1[] = []
 
-          return {
-            kind: 'error',
-            message: 'Something went wrong',
+          types.forEach(type => {
+            const foundVC = sdvcs.find(sdvc => sdvc.type.includes(type))
+
+            if (foundVC) {
+              sdvcs.push(foundVC)
+            } else {
+              missing.push(type)
+            }
+          })
+
+          if (sdvcs.length !== sdvcs.length || missing.length > 0) {
+            return {
+              kind: 'error',
+              message: `You are missing the folowing credentials:\n${missing.join('\n')}`,
+            }
           }
+
+          const fullVcs = await Promise.all(
+            sdvcs.map(async sdvc => {
+              return await buildBatchFullVCV1({
+                subject: `did:ethr:${wallet.getAddressString()}`,
+                stage: 'mainnet',
+                target: sdvc.credentialSubject.claimNodes[0],
+                sdvc: sdvc,
+                authorization: [],
+                wallet,
+              })
+            }),
+          )
+
+          const vp = buildVerifiablePresentation({wallet, fullCredentials: fullVcs, token, domain: to})
+
+          try {
+            await wretch()
+              .url(to)
+              .put(vp)
+              .json()
+          } catch {
+            return {
+              kind: 'error',
+              message: 'Something went wrong while sharing credentials',
+            }
+          }
+
+          return {kind: 'success'}
         },
         claimVC: async from => {
           // TODO:
