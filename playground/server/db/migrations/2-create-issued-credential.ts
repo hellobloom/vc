@@ -13,9 +13,22 @@ module.exports = {
         allowNull: false,
         type: DataTypes.ARRAY(DataTypes.JSONB),
       },
+      claimed: {
+        allowNull: false,
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+      },
       claimVersion: {
         allowNull: false,
         type: DataTypes.ENUM('v1'),
+      },
+      credential: {
+        allowNull: true,
+        type: DataTypes.JSONB,
+      },
+      batchCredential: {
+        allowNull: true,
+        type: DataTypes.JSONB,
       },
       createdAt: {
         allowNull: false,

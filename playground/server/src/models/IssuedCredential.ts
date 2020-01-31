@@ -45,6 +45,10 @@ export const initIssuedCredential = (sequelize: Sequelize) => {
         allowNull: true,
         type: DataTypes.JSONB,
       },
+      batchCredential: {
+        allowNull: true,
+        type: DataTypes.JSONB,
+      },
       createdAt: {
         allowNull: false,
         type: DataTypes.DATE,

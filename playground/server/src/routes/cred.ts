@@ -42,7 +42,7 @@ export const applyCredRoutes = (app: fastify.FastifyInstance) => {
     },
   )
 
-  app.post<{id: string}>(
+  app.get<{id: string}>(
     '/api/v1/cred/:id/get-config',
     {
       schema: {
