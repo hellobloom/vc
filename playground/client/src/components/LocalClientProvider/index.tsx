@@ -56,6 +56,7 @@ export const LocalClientProvider: React.FC = props => {
           const sdvcs: SDBatchVCV1[] = []
 
           types.forEach(type => {
+            // TODO: is this the way we should be checking?
             const foundVC = sdvcs.find(sdvc => sdvc.type.includes(type))
 
             if (foundVC) {
@@ -65,7 +66,7 @@ export const LocalClientProvider: React.FC = props => {
             }
           })
 
-          if (sdvcs.length !== sdvcs.length || missing.length > 0) {
+          if (missing.length > 0) {
             return {
               kind: 'error',
               message: `You are missing the folowing credentials:\n${missing.join('\n')}`,
@@ -73,16 +74,17 @@ export const LocalClientProvider: React.FC = props => {
           }
 
           const fullVcs = await Promise.all(
-            sdvcs.map(async sdvc => {
-              return await buildBatchFullVCV1({
-                subject: `did:ethr:${wallet.getAddressString()}`,
-                stage: 'mainnet',
-                target: sdvc.credentialSubject.claimNodes[0],
-                sdvc: sdvc,
-                authorization: [],
-                wallet,
-              })
-            }),
+            sdvcs.map(
+              async sdvc =>
+                await buildBatchFullVCV1({
+                  subject: `did:ethr:${wallet.getAddressString()}`,
+                  stage: 'mainnet',
+                  target: sdvc.credentialSubject.claimNodes[0],
+                  sdvc: sdvc,
+                  authorization: [],
+                  wallet,
+                }),
+            ),
           )
 
           const vp = buildVerifiablePresentation({wallet, fullCredentials: fullVcs, token, domain: to})
