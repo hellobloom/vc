@@ -1,4 +1,4 @@
-import {ISignedClaimNode, IVerifiableCredential} from './types'
+import {ISignedClaimNode, IVerifiableCredential} from '../../types'
 
 export type TContextField = string | {type: string; data: string}
 
