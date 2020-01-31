@@ -1,5 +1,5 @@
 import * as B from './base'
-import {IBaseAttEmail, IBaseAttEmailData} from '../AttestationData'
+import {IBaseAttEmail, IBaseAttEmailData} from '../attestationData/v0'
 
 export const extractEmail = (a: B.MaybeDS<IBaseAttEmail>, valType: string): string | null => {
   switch (valType) {

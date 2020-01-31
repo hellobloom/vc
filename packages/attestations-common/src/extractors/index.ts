@@ -29,7 +29,7 @@ import {
   IBaseAttIncome,
   IBaseAttAssets,
   IBaseAttGender,
-} from '../AttestationData'
+} from '../attestationData/v0'
 import {TAttestationTypeNames} from '../types'
 
 export const extract = (dataStr: string, attType: TAttestationTypeNames, valType: string, errCallback?: (err: any) => void) => {

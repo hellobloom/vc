@@ -1,5 +1,5 @@
 import * as B from './base'
-import {IBaseAttSanctionScreenData, IBaseAttSanctionScreen} from '../AttestationData'
+import {IBaseAttSanctionScreenData, IBaseAttSanctionScreen} from '../attestationData/v0'
 
 const dataFields: Array<keyof IBaseAttSanctionScreenData> = ['id', 'name', 'dob', 'search_summary']
 const searchSummaryFields: Array<keyof NonNullable<IBaseAttSanctionScreenData['search_summary']>> = [
