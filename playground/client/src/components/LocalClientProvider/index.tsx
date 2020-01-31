@@ -2,12 +2,13 @@ import React, {useContext} from 'react'
 import createPersistedState from 'use-persisted-state'
 import EthWallet from 'ethereumjs-wallet'
 
-const useWalletState = createPersistedState('wallet')
-const useSDVCsState = createPersistedState('sdvcs')
+const usePrivateKeyState = createPersistedState('attestations-playground.privateKey')
+const useSDVCsState = createPersistedState('attestations-playground.sdvcs')
 
 type LocalClientContextProps = {
   sdvcs: any[]
   wallet: EthWallet
+  regen: () => void
   addSDVC: (sdvc: {}) => void
   shareVCs: (types: string[], to: string) => void
 }
@@ -15,19 +16,24 @@ type LocalClientContextProps = {
 const LocalClientContext = React.createContext<LocalClientContextProps>({
   sdvcs: [],
   wallet: EthWallet.generate(),
+  regen: () => {},
   addSDVC: () => {},
   shareVCs: () => {},
 })
 
 export const LocalClientProvider: React.FC = props => {
-  const [wallet] = useWalletState<EthWallet>(() => EthWallet.generate())
+  const [privateKey, setPrivateKey] = usePrivateKeyState<string>(() => EthWallet.generate().getPrivateKeyString())
   const [sdvcs, setSDVCs] = useSDVCsState<any[]>(() => [])
 
   return (
     <LocalClientContext.Provider
       value={{
-        wallet,
+        wallet: EthWallet.fromPrivateKey(Buffer.from(privateKey.replace('0x', ''), 'hex')),
         sdvcs,
+        regen: () => {
+          setPrivateKey(EthWallet.generate().getPrivateKeyString())
+          setSDVCs([])
+        },
         addSDVC: sdvc => {
           setSDVCs([...sdvcs, sdvc])
         },

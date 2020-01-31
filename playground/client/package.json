@@ -19,6 +19,7 @@
     "bulma": "^0.8.0",
     "clsx": "^1.0.4",
     "common-tags": "^1.8.0",
+    "ethereumjs-wallet": "^0.6.3",
     "jsoneditor": "^7.5.0",
     "jsoneditor-react": "^3.0.0",
     "ramda": "^0.26.1",
