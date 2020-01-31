@@ -1,4 +1,4 @@
-export type VCClaimNodeDataV1<D extends {} = {}> = {
+export type VCClaimNodeDataV1 = {
   /**
    * String representation of the attestations data.
    *
@@ -9,7 +9,7 @@ export type VCClaimNodeDataV1<D extends {} = {}> = {
    * Any attestation that isn't a single string value will be
    * a JSON string representing the attestation data.
    */
-  data: D
+  data: string
   /**
    * Attestation data nonce
    */
@@ -48,8 +48,8 @@ export type VCClaimNodeAuxSigV1 = {
   nonce: string
 }
 
-export type VCClaimNodeV1<D extends {} = {}> = {
-  data: VCClaimNodeDataV1<D>
+export type VCClaimNodeV1 = {
+  data: VCClaimNodeDataV1
   type: VCClaimNodeTypeV1
   /**
    * aux either contains a hash of VCClaimNodeAuxSigV1 or just a padding node hash
@@ -76,12 +76,12 @@ export type VCRevocationLinks = {
   typeHash: string
 }
 
-export type VCLegacyAttestationNode<D extends {} = {}> = VCClaimNodeV1<D> & {
+export type VCLegacyAttestationNode = VCClaimNodeV1 & {
   link: VCRevocationLinks
 }
 
-export type VCLegacySignedDataNodeV1<D extends {} = {}> = {
-  attestationNode: VCLegacyAttestationNode<D>
+export type VCLegacySignedDataNodeV1 = {
+  attestationNode: VCLegacyAttestationNode
   signedAttestation: string // Root hash of Attestation tree signed by attester
 }
 
@@ -114,12 +114,12 @@ type VCIssuanceNodeV1 = {
   expirationDate: string
 }
 
-export type VCIssuedClaimNodeV1<D extends {} = {}> = VCClaimNodeV1<D> & {
+export type VCIssuedClaimNodeV1 = VCClaimNodeV1 & {
   issuance: VCIssuanceNodeV1
 }
 
-export type VCSignedClaimNodeV1<D extends {} = {}> = {
-  claimNode: VCIssuedClaimNodeV1<D>
+export type VCSignedClaimNodeV1 = {
+  claimNode: VCIssuedClaimNodeV1
   issuer: string
   issuerSignature: string
 }

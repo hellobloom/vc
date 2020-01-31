@@ -120,11 +120,13 @@ const buildLegacyFullVCProofV1 = async ({
       }),
     }),
     documentLoader: defaultDocumentLoader,
-    expansionMap: false,
     purpose: new AssertionProofPurpose(),
   })
 
   const {proof} = signed
+
+  console.log({signed})
+  console.log({proof})
 
   return {
     ...proof,
@@ -171,11 +173,13 @@ const buildOnChainFullVCProofV1 = async ({
       }),
     }),
     documentLoader: defaultDocumentLoader,
-    expansionMap: false,
     purpose: new AssertionProofPurpose(),
   })
 
   const {proof} = signed
+
+  console.log({signed})
+  console.log({proof})
 
   return {
     ...proof,
@@ -298,7 +302,6 @@ const buildBatchFullVCProofV1 = async ({
       }),
     }),
     documentLoader: defaultDocumentLoader,
-    expansionMap: false,
     purpose: new AssertionProofPurpose(),
   })
 
@@ -375,7 +378,6 @@ const buildVerifiablePresentationV1Proof = async ({
       }),
     }),
     documentLoader: defaultDocumentLoader,
-    expansionMap: false,
     purpose: new AuthenticationProofPurpose({
       challenge: token,
       domain: domain,
