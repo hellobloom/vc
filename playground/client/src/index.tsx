@@ -6,13 +6,16 @@ import 'bulma/css/bulma.css'
 
 import App from './App'
 import * as serviceWorker from './serviceWorker'
+import {LocalClientProvider} from './components/LocalClientProvider'
 
 import './index.css'
 
 ReactDOM.render(
-  <ReactQueryConfigProvider config={{refetchAllOnWindowFocus: false, retry: 0}}>
-    <App />
-  </ReactQueryConfigProvider>,
+  <LocalClientProvider>
+    <ReactQueryConfigProvider config={{refetchAllOnWindowFocus: false, retry: 0}}>
+      <App />
+    </ReactQueryConfigProvider>
+  </LocalClientProvider>,
   document.getElementById('root'),
 )
 

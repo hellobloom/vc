@@ -17,6 +17,8 @@ import {Message, MessageHeader, MessageBody, MessageSkin} from '../../components
 import {Card, CardContent} from '../../components/Card'
 
 import './index.scss'
+import {Button} from '../../components/Button'
+import {useLocalClient} from '../../components/LocalClientProvider'
 
 const useGetSharedTypes = (ready: boolean) => {
   const [sharedData, setSharedData] = useState<[] | null | undefined>()
@@ -69,6 +71,7 @@ export const Share: React.FC<ShareProps> = props => {
   const {id: token} = useParams<{id: string}>()
   const {data, error} = useShareGetConfig({id: token})
   const sharedData = useGetSharedTypes(data !== null)
+  const {shareVCs} = useLocalClient()
 
   if (!isUuid(token)) return <Redirect to={'/not-found'} />
 
@@ -100,15 +103,18 @@ export const Share: React.FC<ShareProps> = props => {
     )
   } else {
     let cardContent: React.ReactNode
+    let localClientButton: React.ReactNode | undefined
 
     if (data) {
+      const url = `${host}/api/v1/share/recieve-${data.responseVersion}`
+
       cardContent = (
         <RequestElement
           shouldRenderButton={() => isMobile}
           requestData={{
             action: Action.attestation,
             token,
-            url: `${host}/api/v1/share/recieve-${data.responseVersion}`,
+            url,
             org_name: 'Attestation Playground',
             org_logo_url: 'https://bloom.co/images/notif/bloom-logo.png',
             org_usage_policy_url: 'https://bloom.co/legal/terms',
@@ -122,14 +128,27 @@ export const Share: React.FC<ShareProps> = props => {
           }}
         />
       )
+
+      localClientButton = (
+        <Button
+          onClick={() => {
+            shareVCs(data.types, url)
+          }}
+        >
+          Share From Local Client
+        </Button>
+      )
     } else {
       cardContent = <BouncingDots />
     }
 
     children = (
-      <Card>
-        <CardContent>{cardContent}</CardContent>
-      </Card>
+      <React.Fragment>
+        <Card>
+          <CardContent>{cardContent}</CardContent>
+        </Card>
+        {localClientButton}
+      </React.Fragment>
     )
   }
 
