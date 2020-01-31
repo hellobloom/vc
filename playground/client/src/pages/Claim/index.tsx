@@ -129,7 +129,7 @@ export const Claim: React.FC<ClaimProps> = props => {
         <Button
           isFullwidth
           onClick={async () => {
-            const response = await claimVC(url)
+            const response = await claimVC(url, token)
 
             if (response.kind === 'error') {
               setErrorMessage(response.message)
