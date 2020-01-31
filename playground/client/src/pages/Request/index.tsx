@@ -258,23 +258,21 @@ export const Request: React.FC<RequestProps> = props => {
         </div>
         <div className="field">
           <div className="control">
-            <label className="radio" {...{disabled: true}}>
+            <label className="radio">
               <input
                 checked={responseVersion === 'v0'}
                 type="radio"
                 name="response-version"
-                disabled
                 value="v0"
                 onChange={handleResponseVersionChange}
               />
               {' V0'}
             </label>
-            <label className="radio" {...{disabled: true}}>
+            <label className="radio">
               <input
                 checked={responseVersion === 'v1'}
                 type="radio"
                 name="response-version"
-                disabled
                 value="v1"
                 onChange={handleResponseVersionChange}
               />
