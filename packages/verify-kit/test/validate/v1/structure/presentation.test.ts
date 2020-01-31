@@ -1,9 +1,9 @@
 import {EthUtils, Utils, IProof, FullVC} from '@bloomprotocol/attestations-common'
 import {
   buildClaimNodeV1,
-  buildSelectivelyDisclosableLegacyVCV1,
-  buildSelectivelyDisclosableVCV1,
-  buildSelectivelyDisclosableBatchVCV1,
+  buildSDLegacyVCV1,
+  buildSDVCV1,
+  buildSDBatchVCV1,
 } from '@bloomprotocol/issue-kit'
 import * as EthU from 'ethereumjs-util'
 import EthWallet from 'ethereumjs-wallet'
@@ -39,8 +39,8 @@ const buildPhoneClaimNode = () => {
   })
 }
 
-const createSelectivelyDisclosableLegacyVCV1 = async ({issuer, holder}: {issuer: Buffer; holder: Holder}) => {
-  return await buildSelectivelyDisclosableLegacyVCV1({
+const createSDLegacyVCV1 = async ({issuer, holder}: {issuer: Buffer; holder: Holder}) => {
+  return await buildSDLegacyVCV1({
     dataNodes: [buildPhoneClaimNode(), buildEmailClaimNode()],
     subjectDID: `did:ethr:${holder.publicStringHex}`,
     issuanceDate: '2016-02-01T00:00:00.000Z',
@@ -50,7 +50,7 @@ const createSelectivelyDisclosableLegacyVCV1 = async ({issuer, holder}: {issuer:
 }
 
 const createLegacyFullVCV1 = async ({issuer, holder}: {issuer: Buffer; holder: Holder}) => {
-  const sdvc = await createSelectivelyDisclosableLegacyVCV1({
+  const sdvc = await createSDLegacyVCV1({
     issuer,
     holder,
   })
@@ -68,8 +68,8 @@ const createLegacyFullVCV1 = async ({issuer, holder}: {issuer: Buffer; holder: H
   return fullVC
 }
 
-const createSelectivelyDisclosableVCV1 = async ({issuer, holder}: {issuer: Buffer; holder: Holder}) => {
-  return await buildSelectivelyDisclosableVCV1({
+const createSDVCV1 = async ({issuer, holder}: {issuer: Buffer; holder: Holder}) => {
+  return await buildSDVCV1({
     claimNodes: [buildPhoneClaimNode(), buildEmailClaimNode()],
     subjectDID: `did:ethr:${holder.publicStringHex}`,
     issuanceDate: '2016-02-01T00:00:00.000Z',
@@ -79,7 +79,7 @@ const createSelectivelyDisclosableVCV1 = async ({issuer, holder}: {issuer: Buffe
 }
 
 const createFullVCV1 = async ({issuer, holder}: {issuer: Buffer; holder: Holder}) => {
-  const sdvc = await createSelectivelyDisclosableVCV1({issuer, holder})
+  const sdvc = await createSDVCV1({issuer, holder})
 
   const fullVC = await buildOnChainFullVCV1({
     subject: `did:ethr:${holder.publicStringHex}`,
@@ -95,7 +95,7 @@ const createFullVCV1 = async ({issuer, holder}: {issuer: Buffer; holder: Holder}
 }
 
 const createBatchFullVCV1 = async ({issuer, holder}: {issuer: Buffer; holder: Holder}) => {
-  const sdvc = await createSelectivelyDisclosableVCV1({issuer, holder})
+  const sdvc = await createSDVCV1({issuer, holder})
 
   const contractAddress = '0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC'
   const requestNonce = EthUtils.generateNonce()
@@ -104,7 +104,7 @@ const createBatchFullVCV1 = async ({issuer, holder}: {issuer: Buffer; holder: Ho
     data: EthUtils.getAttestationAgreement(contractAddress, 1, sdvc.proof.layer2Hash, requestNonce),
   })
 
-  const batchVC = await buildSelectivelyDisclosableBatchVCV1({
+  const batchVC = await buildSDBatchVCV1({
     credential: sdvc,
     privateKey: issuer,
     contractAddress,
@@ -159,12 +159,12 @@ test('Validation.isValidMerkleProofArray', () => {
 })
 
 test('Validation.isValidLegacyDataNode', async () => {
-  const legacySdvc = await createSelectivelyDisclosableLegacyVCV1({
+  const legacySdvc = await createSDLegacyVCV1({
     issuer: issuerPrivKey,
     holder: getHolder(bobWallet),
   })
 
-  const sdvc = await createSelectivelyDisclosableVCV1({
+  const sdvc = await createSDVCV1({
     issuer: issuerPrivKey,
     holder: getHolder(bobWallet),
   })

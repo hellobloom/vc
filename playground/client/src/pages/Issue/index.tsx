@@ -210,7 +210,7 @@ export const Issue: React.FC<IssueProps> = props => {
                 <pre>
                   <code>
                     {codeBlock`
-                    const vc = buildSelectivelyDisclosableVCV1({
+                    const vc = buildSDVCV1({
                       claimNodes: [
                         ${claimNodes
                           .map(node => {

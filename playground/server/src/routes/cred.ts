@@ -1,7 +1,7 @@
 import fastify from 'fastify'
 import S from 'fluent-schema'
-import {buildClaimNodeV1, buildSelectivelyDisclosableVCV1, buildSelectivelyDisclosableBatchVCV1} from '@bloomprotocol/issue-kit'
-import {SelectivelyDisclosableVCV1} from '@bloomprotocol/attestations-common'
+import {buildClaimNodeV1, buildSDVCV1, buildSDBatchVCV1} from '@bloomprotocol/issue-kit'
+import {SDVCV1} from '@bloomprotocol/attestations-common'
 
 import {IssuedCredential} from '@server/models'
 import {claimCookieKey} from '@server/cookies'
@@ -112,7 +112,7 @@ export const applyCredRoutes = (app: fastify.FastifyInstance) => {
         }),
       )
 
-      const vc = await buildSelectivelyDisclosableVCV1({
+      const vc = await buildSDVCV1({
         claimNodes,
         subjectDID: '',
         issuanceDate: '',
@@ -138,7 +138,7 @@ export const applyCredRoutes = (app: fastify.FastifyInstance) => {
     {id: string},
     fastify.DefaultHeaders,
     {
-      credential: SelectivelyDisclosableVCV1
+      credential: SDVCV1
       subjectSignature: string
     }
   >(
@@ -219,7 +219,7 @@ export const applyCredRoutes = (app: fastify.FastifyInstance) => {
       const cred = await IssuedCredential.findOne({where: {id: req.params.id}})
       if (!cred) return reply.status(404).send({})
 
-      const batchVc = await buildSelectivelyDisclosableBatchVCV1({
+      const batchVc = await buildSDBatchVCV1({
         credential: req.body.credential,
         privateKey: Buffer.from([]),
         contractAddress: '',

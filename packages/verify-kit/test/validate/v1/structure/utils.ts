@@ -3,13 +3,13 @@ import {
   FullVCProofV1,
   VCLegacySignedDataNodeV1,
   VCSignedClaimNodeV1,
-  SelectivelyDisclosableVCV1,
-  SelectivelyDisclosableBatchVCV1,
+  SDVCV1,
+  SDBatchVCV1,
   FullVCSignedAuthorizationV1,
   FullVCV1,
   VerifiablePresentationProofV1,
   VerifiablePresentationV1,
-  SelectivelyDisclosableLegacyVCV1,
+  SDLegacyVCV1,
 } from '@bloomprotocol/attestations-common'
 import * as EthU from 'ethereumjs-util'
 import EthWallet from 'ethereumjs-wallet'
@@ -45,13 +45,13 @@ export const getHolder = (wallet: EthWallet): Holder => {
   }
 }
 
-export const getMerkleTreeFromSelectivlelyDisclosableLegacyVCV1 = (vc: SelectivelyDisclosableLegacyVCV1) => {
+export const getMerkleTreeFromSelectivlelyDisclosableLegacyVCV1 = (vc: SDLegacyVCV1) => {
   vc.credentialSubject.dataNodes
   const signedDataHashes = vc.credentialSubject.dataNodes.map(dataNode => EthUtils.hashMessage(dataNode.signedAttestation))
   return EthUtils.getBloomMerkleTree(signedDataHashes, vc.proof.paddingNodes, EthUtils.hashMessage(vc.proof.checksumSig))
 }
 
-export const getMerkleTreeFromSelectivelyDisclosableVCV1 = (vc: SelectivelyDisclosableVCV1 | SelectivelyDisclosableBatchVCV1) => {
+export const getMerkleTreeFromSDVCV1 = (vc: SDVCV1 | SDBatchVCV1) => {
   const signedDataHashes = vc.credentialSubject.claimNodes.map(claimNode => EthUtils.hashMessage(claimNode.issuerSignature))
   return EthUtils.getBloomMerkleTree(signedDataHashes, vc.proof.paddingNodes, EthUtils.hashMessage(vc.proof.checksumSignature))
 }
@@ -67,7 +67,7 @@ const buildBaseFullVCV1 = async ({
   subject: string
   authorization: FullVCSignedAuthorizationV1[]
   target: VCSignedClaimNodeV1
-  sdvc: SelectivelyDisclosableVCV1 | SelectivelyDisclosableBatchVCV1
+  sdvc: SDVCV1 | SDBatchVCV1
 }): Promise<FullVCV1> => {
   const unsignedVC: Omit<FullVCV1, 'proof'> = {
     '@context': ['https://www.w3.org/2018/credentials/v1'],
@@ -103,7 +103,7 @@ const buildLegacyFullVCProofV1 = async ({
   tx: string
   stage: 'mainnet' | 'rinkeby' | 'local'
   target: VCLegacySignedDataNodeV1
-  sdvc: SelectivelyDisclosableLegacyVCV1
+  sdvc: SDLegacyVCV1
   holder: Holder
 }): Promise<FullVCProofV1> => {
   const bloomMerkleTree = getMerkleTreeFromSelectivlelyDisclosableLegacyVCV1(sdvc)
@@ -156,10 +156,10 @@ const buildOnChainFullVCProofV1 = async ({
   tx: string
   stage: 'mainnet' | 'rinkeby' | 'local'
   target: VCSignedClaimNodeV1
-  sdvc: SelectivelyDisclosableVCV1
+  sdvc: SDVCV1
   holder: Holder
 }): Promise<FullVCProofV1> => {
-  const bloomMerkleTree = getMerkleTreeFromSelectivelyDisclosableVCV1(sdvc)
+  const bloomMerkleTree = getMerkleTreeFromSDVCV1(sdvc)
   const merkleproof = formatMerkleProofForShare(bloomMerkleTree.getProof(EthU.toBuffer(EthUtils.hashMessage(target.issuerSignature))))
   const {didDocument} = await new EthUtils.EthereumDIDResolver().resolve(`did:ethr:${holder.publicStringHex}`)
   const publicKey = didDocument.publicKey[0]
@@ -210,7 +210,7 @@ export const buildLegacyFullVCV1 = async ({
   tx: string
   stage: 'mainnet' | 'rinkeby' | 'local'
   target: VCLegacySignedDataNodeV1
-  sdvc: SelectivelyDisclosableLegacyVCV1
+  sdvc: SDLegacyVCV1
   authorization: FullVCSignedAuthorizationV1[]
   holder: Holder
 }): Promise<FullVCV1> => {
@@ -255,7 +255,7 @@ export const buildOnChainFullVCV1 = async ({
   tx: string
   stage: 'mainnet' | 'rinkeby' | 'local'
   target: VCSignedClaimNodeV1
-  sdvc: SelectivelyDisclosableVCV1
+  sdvc: SDVCV1
   authorization: FullVCSignedAuthorizationV1[]
   holder: Holder
 }): Promise<FullVCV1> =>
@@ -285,10 +285,10 @@ const buildBatchFullVCProofV1 = async ({
   unsignedVC: Omit<FullVCV1, 'proof'>
   stage: 'mainnet' | 'rinkeby' | 'local'
   target: VCSignedClaimNodeV1
-  sdvc: SelectivelyDisclosableBatchVCV1
+  sdvc: SDBatchVCV1
   holder: Holder
 }): Promise<FullVCProofV1> => {
-  const bloomMerkleTree = getMerkleTreeFromSelectivelyDisclosableVCV1(sdvc)
+  const bloomMerkleTree = getMerkleTreeFromSDVCV1(sdvc)
   const merkleproof = formatMerkleProofForShare(bloomMerkleTree.getProof(EthU.toBuffer(EthUtils.hashMessage(target.issuerSignature))))
   const {didDocument} = await new EthUtils.EthereumDIDResolver().resolve(`did:ethr:${holder.publicStringHex}`)
   const publicKey = didDocument.publicKey[0]
@@ -336,7 +336,7 @@ export const buildBatchFullVCV1 = async ({
   subject: string
   stage: 'mainnet' | 'rinkeby' | 'local'
   target: VCSignedClaimNodeV1
-  sdvc: SelectivelyDisclosableBatchVCV1
+  sdvc: SDBatchVCV1
   authorization: FullVCSignedAuthorizationV1[]
   holder: Holder
 }): Promise<FullVCV1> =>

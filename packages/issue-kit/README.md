@@ -6,8 +6,8 @@ Utilities to issue verifiable credentials.
   - [Installation](#installation)
   - [Usage](#usage)
     - [`buildClaimNodeV1`](#buildclaimnodev1)
-    - [`buildSelectivelyDisclosableVCV1`](#buildselectivelydisclosablevcv1)
-    - [`buildSelectivelyDisclosableBatchVCV1`](#buildselectivelydisclosablebatchvcv1)
+    - [`buildSDVCV1`](#buildselectivelydisclosablevcv1)
+    - [`buildSDBatchVCV1`](#buildselectivelydisclosablebatchvcv1)
 
 ## Installation
 
@@ -32,18 +32,18 @@ const claimNode = buildClaimNodeV1({
 })
 ```
 
-### `buildSelectivelyDisclosableVCV1`
+### `buildSDVCV1`
 
-Create a verifiable credential (`SelectivelyDisclosableVCV1`) of selectively discloseable claim nodes.
+Create a verifiable credential (`SDVCV1`) of selectively discloseable claim nodes.
 
 ```typescript
 import {VCClaimNodeV1} from '@bloomprotocol/attestations-common'
-import {buildSelectivelyDisclosableVCV1} from '@bloomprotocol/issue-kit'
+import {buildSDVCV1} from '@bloomprotocol/issue-kit'
 
 const claimNodes: VCClaimNodeV1[] = [...]
 const privateKey = '...'
 
-const credential = buildSelectivelyDisclosableVCV1({
+const credential = buildSDVCV1({
   claimNodes,
   subject,
   issuanceDate: '',
@@ -52,17 +52,17 @@ const credential = buildSelectivelyDisclosableVCV1({
 })
 ```
 
-### `buildSelectivelyDisclosableBatchVCV1`
+### `buildSDBatchVCV1`
 
-Convert a `SelectivelyDisclosableVCV1` to a `SelectivelyDisclosableBatchVCV1`
+Convert a `SDVCV1` to a `SDBatchVCV1`
 
 ```typescript
 import {VCClaimNodeV1} from '@bloomprotocol/attestations-common'
-import {buildSelectivelyDisclosableVCV1, buildSelectivelyDisclosableBatchVCV1} from '@bloomprotocol/issue-kit'
+import {buildSDVCV1, buildSDBatchVCV1} from '@bloomprotocol/issue-kit'
 
 const claimNodes: VCClaimNodeV1[] = [...]
 const privateKey = '...'
-const credential = buildSelectivelyDisclosableVCV1({
+const credential = buildSDVCV1({
   claimNodes,
   subject,
   issuanceDate: '',
@@ -73,7 +73,7 @@ const credential = buildSelectivelyDisclosableVCV1({
 // This will likely be split between two separate API endpoints
 const subjectSignature = getSubjectsSignatureForCred(credential)
 
-const batchCredential = buildSelectivelyDisclosableBatchVCV1({
+const batchCredential = buildSDBatchVCV1({
   credential,
   contractAddress: '...',
   subjectSignature,

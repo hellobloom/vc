@@ -1,5 +1,5 @@
 import {Sequelize, Model, DataTypes, UUIDV4} from 'sequelize'
-import {SelectivelyDisclosableVC, SelectivelyDisclosableBatchVC} from '@bloomprotocol/attestations-common'
+import {SDVC, SDBatchVC} from '@bloomprotocol/attestations-common'
 
 export class IssuedCredential extends Model {
   id!: string
@@ -10,9 +10,9 @@ export class IssuedCredential extends Model {
 
   claimed!: boolean
 
-  credential?: SelectivelyDisclosableVC
+  credential?: SDVC
 
-  batchCredential?: SelectivelyDisclosableBatchVC
+  batchCredential?: SDBatchVC
 
   createdAt!: Date
 

@@ -2,13 +2,13 @@ import {BaseVCV1, BaseVCTypeV1, BaseVCSubjectV1, VCSignedClaimNodeV1, VCLegacySi
 
 // Legacy
 
-export type SelectivelyDisclosableLegacyVCTypeV1 = [BaseVCTypeV1[0], 'SelectivelyDisclosableVerifiableLegacyCredential', ...string[]]
+export type SDLegacyVCTypeV1 = [BaseVCTypeV1[0], 'SDVerifiableLegacyCredential', ...string[]]
 
-export type SelectivelyDisclosableLegacyVCSubjectV1 = BaseVCSubjectV1 & {
+export type SDLegacyVCSubjectV1 = BaseVCSubjectV1 & {
   dataNodes: VCLegacySignedDataNodeV1[]
 }
 
-export type SelectivelyDisclosableLegacyVCProofV1 = {
+export type SDLegacyVCProofV1 = {
   layer2Hash: string
   signedRootHash: string
   rootHashNonce: string
@@ -17,23 +17,23 @@ export type SelectivelyDisclosableLegacyVCProofV1 = {
   paddingNodes: string[]
 }
 
-export type SelectivelyDisclosableLegacyVCV1 = BaseVCV1<
-  SelectivelyDisclosableLegacyVCTypeV1,
-  SelectivelyDisclosableLegacyVCSubjectV1,
-  SelectivelyDisclosableLegacyVCProofV1
+export type SDLegacyVCV1 = BaseVCV1<
+  SDLegacyVCTypeV1,
+  SDLegacyVCSubjectV1,
+  SDLegacyVCProofV1
 > & {
-  version: 'SelectivelyDisclosableLegacyVC-1.0.0'
+  version: 'SDLegacyVC-1.0.0'
 }
 
 // Regular
 
-export type SelectivelyDisclosableVCTypeV1 = [BaseVCTypeV1[0], 'SelectivelyDisclosableVerifiableCredential', ...string[]]
+export type SDVCTypeV1 = [BaseVCTypeV1[0], 'SDVerifiableCredential', ...string[]]
 
-export type SelectivelyDisclosableVCSubjectV1 = BaseVCSubjectV1 & {
+export type SDVCSubjectV1 = BaseVCSubjectV1 & {
   claimNodes: VCSignedClaimNodeV1[]
 }
 
-export type SelectivelyDisclosableVCProofV1 = {
+export type SDVCProofV1 = {
   issuerSignature: string
   layer2Hash: string
   checksumSignature: string
@@ -42,26 +42,26 @@ export type SelectivelyDisclosableVCProofV1 = {
   rootHashNonce: string
 }
 
-export type SelectivelyDisclosableVCV1<
-  Subject extends SelectivelyDisclosableVCSubjectV1 = SelectivelyDisclosableVCSubjectV1,
-  Type extends SelectivelyDisclosableVCTypeV1 = SelectivelyDisclosableVCTypeV1,
-  Proof extends SelectivelyDisclosableVCProofV1 = SelectivelyDisclosableVCProofV1
+export type SDVCV1<
+  Subject extends SDVCSubjectV1 = SDVCSubjectV1,
+  Type extends SDVCTypeV1 = SDVCTypeV1,
+  Proof extends SDVCProofV1 = SDVCProofV1
 > = BaseVCV1<Type, Subject, Proof> & {
-  version: 'SelectivelyDisclosableVC-1.0.0'
+  version: 'SDVC-1.0.0'
 }
 
 // Batch
 
-export type SelectivelyDisclosableBatchVCTypeV1 = [
-  SelectivelyDisclosableVCTypeV1[0],
-  SelectivelyDisclosableVCTypeV1[1],
-  'SelectivelyDisclosableBatchVerifiableCredential',
+export type SDBatchVCTypeV1 = [
+  SDVCTypeV1[0],
+  SDVCTypeV1[1],
+  'SDBatchVerifiableCredential',
   ...string[],
 ]
 
-export type SelectivelyDisclosableBatchVCSubjectV1 = SelectivelyDisclosableVCSubjectV1
+export type SDBatchVCSubjectV1 = SDVCSubjectV1
 
-export type SelectivelyDisclosableBatchVCProofV1 = SelectivelyDisclosableVCProofV1 & {
+export type SDBatchVCProofV1 = SDVCProofV1 & {
   batchIssuerSignature: string
   batchLayer2Hash: string
   contractAddress: string
@@ -69,10 +69,10 @@ export type SelectivelyDisclosableBatchVCProofV1 = SelectivelyDisclosableVCProof
   subjectSignature: string
 }
 
-export type SelectivelyDisclosableBatchVCV1<
-  Subject extends SelectivelyDisclosableBatchVCSubjectV1 = SelectivelyDisclosableBatchVCSubjectV1,
-  Type extends SelectivelyDisclosableBatchVCTypeV1 = SelectivelyDisclosableBatchVCTypeV1,
-  Proof extends SelectivelyDisclosableBatchVCProofV1 = SelectivelyDisclosableBatchVCProofV1
+export type SDBatchVCV1<
+  Subject extends SDBatchVCSubjectV1 = SDBatchVCSubjectV1,
+  Type extends SDBatchVCTypeV1 = SDBatchVCTypeV1,
+  Proof extends SDBatchVCProofV1 = SDBatchVCProofV1
 > = BaseVCV1<Type, Subject, Proof> & {
-  version: 'SelectivelyDisclosableBatchVC-1.0.0'
+  version: 'SDBatchVC-1.0.0'
 }

@@ -7,9 +7,9 @@ import {
   VCClaimNodeV1,
   VCSignedClaimNodeV1,
   VCIssuedClaimNodeV1,
-  SelectivelyDisclosableLegacyVCV1,
-  SelectivelyDisclosableVCV1,
-  SelectivelyDisclosableBatchVCV1,
+  SDLegacyVCV1,
+  SDVCV1,
+  SDBatchVCV1,
 } from '@bloomprotocol/attestations-common'
 import {uuid} from 'uuidv4'
 import {keccak256} from 'js-sha3'
@@ -65,7 +65,7 @@ const signLegacyVCClaimNodeV1 = ({
   }
 }
 
-export const buildSelectivelyDisclosableLegacyVCV1 = async ({
+export const buildSDLegacyVCV1 = async ({
   dataNodes,
   subjectDID,
   privateKey,
@@ -77,7 +77,7 @@ export const buildSelectivelyDisclosableLegacyVCV1 = async ({
   privateKey: Buffer
   issuanceDate: string
   expirationDate: string
-}): Promise<SelectivelyDisclosableLegacyVCV1> => {
+}): Promise<SDLegacyVCV1> => {
   const {
     didDocument: {id: subject},
   } = await new EthUtils.EthereumDIDResolver().resolve(subjectDID)
@@ -101,10 +101,10 @@ export const buildSelectivelyDisclosableLegacyVCV1 = async ({
 
   const issuer = EthWallet.fromPrivateKey(privateKey).getAddressString()
 
-  const credential: SelectivelyDisclosableLegacyVCV1 = {
+  const credential: SDLegacyVCV1 = {
     '@context': ['https://www.w3.org/2018/credentials/v1'],
     id: 'placeholder',
-    type: ['VerifiableCredential', 'SelectivelyDisclosableVerifiableLegacyCredential'],
+    type: ['VerifiableCredential', 'SDVerifiableLegacyCredential'],
     issuer: `did:ethr:${issuer}`,
     issuanceDate,
     expirationDate,
@@ -120,7 +120,7 @@ export const buildSelectivelyDisclosableLegacyVCV1 = async ({
       checksumSig: signedChecksum,
       paddingNodes,
     },
-    version: 'SelectivelyDisclosableLegacyVC-1.0.0',
+    version: 'SDLegacyVC-1.0.0',
   }
 
   return credential
@@ -193,7 +193,7 @@ const signVCClaimNodeV1 = ({
   return signedClaimNode
 }
 
-export const buildSelectivelyDisclosableVCV1 = async ({
+export const buildSDVCV1 = async ({
   claimNodes,
   subjectDID,
   issuanceDate,
@@ -243,10 +243,10 @@ export const buildSelectivelyDisclosableVCV1 = async ({
   )
   const issuer = EthWallet.fromPrivateKey(privateKey).getAddressString()
 
-  const credential: SelectivelyDisclosableVCV1 = {
+  const credential: SDVCV1 = {
     '@context': ['https://www.w3.org/2018/credentials/v1'],
     id: 'placeholder',
-    type: ['VerifiableCredential', 'SelectivelyDisclosableVerifiableCredential'],
+    type: ['VerifiableCredential', 'SDVerifiableCredential'],
     issuer: `did:ethr:${issuer}`,
     issuanceDate,
     expirationDate,
@@ -262,20 +262,20 @@ export const buildSelectivelyDisclosableVCV1 = async ({
       rootHashNonce,
       rootHash: ethUtil.bufferToHex(rootHash),
     },
-    version: 'SelectivelyDisclosableVC-1.0.0',
+    version: 'SDVC-1.0.0',
   }
 
   return credential
 }
 
-export const buildSelectivelyDisclosableBatchVCV1 = async ({
+export const buildSDBatchVCV1 = async ({
   credential,
   privateKey,
   contractAddress,
   subjectSignature,
   requestNonce,
 }: {
-  credential: SelectivelyDisclosableVCV1
+  credential: SDVCV1
   privateKey: Buffer
   contractAddress: string
   subjectSignature: string
@@ -324,9 +324,9 @@ export const buildSelectivelyDisclosableBatchVCV1 = async ({
     }),
   )
 
-  const batchCredential: SelectivelyDisclosableBatchVCV1 = {
+  const batchCredential: SDBatchVCV1 = {
     ...credential,
-    type: [credential.type[0], credential.type[1], 'SelectivelyDisclosableBatchVerifiableCredential', ...credential.type.slice(2)],
+    type: [credential.type[0], credential.type[1], 'SDBatchVerifiableCredential', ...credential.type.slice(2)],
     proof: {
       ...credential.proof,
       contractAddress,
@@ -335,7 +335,7 @@ export const buildSelectivelyDisclosableBatchVCV1 = async ({
       requestNonce,
       subjectSignature,
     },
-    version: 'SelectivelyDisclosableBatchVC-1.0.0',
+    version: 'SDBatchVC-1.0.0',
   }
 
   return batchCredential
