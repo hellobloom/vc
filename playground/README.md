@@ -30,16 +30,24 @@ npm i
 lerna bootstrap
 ```
 
+### Playground Setup
+
+```
+cd playground
+npm i
+```
+
 ### Setup Environment
 
 ```
 cd server
 cp .env.sample .env
+cd ../
 ```
 
 ### Run
 
 ```
-./bin/reset-dev
-./bin/dev
+npm run reset-dev
+npm run dev
 ```
