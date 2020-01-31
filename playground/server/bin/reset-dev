@@ -17,4 +17,4 @@ createdb attestations-playground-dev
 bin/migrate
 
 # Stop rabbitmq service, ignore errors
-rabbitmqctl stop || true
+sudo rabbitmqctl stop || true
