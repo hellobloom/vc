@@ -204,4 +204,8 @@ export type FullVCProofV1 = {
   data: FullVCVerifiedDataV1
 }
 
-export type FullVCV1 = BaseVCV1<FullVCTypeV1, FullVCSubjectV1, FullVCProofV1>
+export type FullVCV1<
+  Subject extends FullVCSubjectV1 = FullVCSubjectV1,
+  Type extends FullVCTypeV1 = FullVCTypeV1,
+  Proof extends FullVCProofV1 = FullVCProofV1
+> = BaseVCV1<Type, Subject, Proof>

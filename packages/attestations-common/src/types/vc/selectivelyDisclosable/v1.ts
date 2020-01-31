@@ -42,11 +42,11 @@ export type SelectivelyDisclosableVCProofV1 = {
   rootHashNonce: string
 }
 
-export type SelectivelyDisclosableVCV1 = BaseVCV1<
-  SelectivelyDisclosableVCTypeV1,
-  SelectivelyDisclosableVCSubjectV1,
-  SelectivelyDisclosableVCProofV1
-> & {
+export type SelectivelyDisclosableVCV1<
+  Subject extends SelectivelyDisclosableVCSubjectV1 = SelectivelyDisclosableVCSubjectV1,
+  Type extends SelectivelyDisclosableVCTypeV1 = SelectivelyDisclosableVCTypeV1,
+  Proof extends SelectivelyDisclosableVCProofV1 = SelectivelyDisclosableVCProofV1
+> = BaseVCV1<Type, Subject, Proof> & {
   version: 'SelectivelyDisclosableVC-1.0.0'
 }
 
@@ -69,10 +69,10 @@ export type SelectivelyDisclosableBatchVCProofV1 = SelectivelyDisclosableVCProof
   subjectSignature: string
 }
 
-export type SelectivelyDisclosableBatchVCV1 = BaseVCV1<
-  SelectivelyDisclosableBatchVCTypeV1,
-  SelectivelyDisclosableBatchVCSubjectV1,
-  SelectivelyDisclosableBatchVCProofV1
-> & {
+export type SelectivelyDisclosableBatchVCV1<
+  Subject extends SelectivelyDisclosableBatchVCSubjectV1 = SelectivelyDisclosableBatchVCSubjectV1,
+  Type extends SelectivelyDisclosableBatchVCTypeV1 = SelectivelyDisclosableBatchVCTypeV1,
+  Proof extends SelectivelyDisclosableBatchVCProofV1 = SelectivelyDisclosableBatchVCProofV1
+> = BaseVCV1<Type, Subject, Proof> & {
   version: 'SelectivelyDisclosableBatchVC-1.0.0'
 }
