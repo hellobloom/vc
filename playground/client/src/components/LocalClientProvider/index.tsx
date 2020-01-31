@@ -126,7 +126,7 @@ export const LocalClientProvider: React.FC = props => {
           try {
             ;({credential: sdvc, batchUrl, contractAddress} = await wretch()
               .url(appendQuery(from, {'share-kit-from': 'qr'}))
-              .post()
+              .post({subject: `did:ethr:${wallet.getAddressString()}`})
               .json<{credential: SDVCV1; batchUrl: string; contractAddress: string}>())
           } catch {
             return {
