@@ -4,16 +4,21 @@ import {Validator, ValidateFn, AsyncValidateFn, AsyncValidator, Unvalidated} fro
 export const isValid = <T>(valideFn: ValidateFn<T>) => (data: Unvalidated<T>): data is T => {
   const outcome = valideFn(data)
 
-  if (outcome.kind === 'validated') {
-    return true
-  } else {
+  if (outcome.kind !== 'validated') {
     console.log(outcome.message, data)
-    return false
   }
+
+  return outcome.kind === 'validated'
 }
 
 export const isAsyncValid = <T>(valideFn: AsyncValidateFn<T>) => async (data: Unvalidated<T>): Promise<boolean> => {
-  return (await valideFn(data)).kind === 'validated'
+  const outcome = await valideFn(data)
+
+  if (outcome.kind !== 'validated') {
+    console.log(outcome.message, data)
+  }
+
+  return outcome.kind === 'validated'
 }
 
 export const isUndefinedOr = (validator: Validator) => (value: any, data: any) => {

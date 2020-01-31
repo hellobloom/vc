@@ -28,7 +28,7 @@ export type FullVCSignedAuthorizationV1 = {
   signature: string
 }
 
-export type FullVCVerifiedDataLegacyV1 = {
+export type FullVCVerifiedDataLegacyV1<D extends {} = {}> = {
   version: 'legacy'
 
   /**
@@ -65,7 +65,7 @@ export type FullVCVerifiedDataLegacyV1 = {
   /**
    * Data node containing the raw verified data that was requested
    */
-  target: VCLegacySignedDataNodeV1
+  target: VCLegacySignedDataNodeV1<D>
 
   /**
    * Ethereum address of the attester that performed the attestation
@@ -73,7 +73,7 @@ export type FullVCVerifiedDataLegacyV1 = {
   attester: string
 }
 
-export type FullVCVerifiedDataOnChainV1 = {
+export type FullVCVerifiedDataOnChainV1<D extends {} = {}> = {
   version: 'onChain'
 
   /**
@@ -110,7 +110,7 @@ export type FullVCVerifiedDataOnChainV1 = {
   /**
    * Data node containing the raw verified data that was requested
    */
-  target: VCSignedClaimNodeV1
+  target: VCSignedClaimNodeV1<D>
 
   /**
    * Ethereum address of the attester that performed the attestation
@@ -118,7 +118,7 @@ export type FullVCVerifiedDataOnChainV1 = {
   attester: string
 }
 
-export type FullVCVerifiedDataBatchV1 = {
+export type FullVCVerifiedDataBatchV1<D extends {} = {}> = {
   version: 'batch'
   /**
    * Attestation hash formed by hashing subject sig with attester sig
@@ -168,7 +168,7 @@ export type FullVCVerifiedDataBatchV1 = {
   /**
    * Data node containing the raw verified data that was requested
    */
-  target: VCSignedClaimNodeV1
+  target: VCSignedClaimNodeV1<D>
 
   /**
    * Ethereum address of the attester that performed the attestation
@@ -181,27 +181,38 @@ export type FullVCVerifiedDataBatchV1 = {
   subject: string
 }
 
-export type FullVCVerifiedDataV1 = FullVCVerifiedDataLegacyV1 | FullVCVerifiedDataOnChainV1 | FullVCVerifiedDataBatchV1
+export type FullVCVerifiedDataV1<D extends {} = {}> =
+  | FullVCVerifiedDataLegacyV1<D>
+  | FullVCVerifiedDataOnChainV1<D>
+  | FullVCVerifiedDataBatchV1<D>
 
-export type FullVCTypeV1 = [BaseVCTypeV1[0], 'FullCredential', ...string[]]
+export type FullVCTypeV1<T extends string> = [BaseVCTypeV1[0], 'FullCredential', T]
 
-export type FullVCSubjectV1 = BaseVCSubjectV1 & {
-  data: string
-  /**
-   * Array of signed authorization objects
-   * Only included if subject is different from sharer
-   * otherwise empty array
-   */
-  authorization: FullVCSignedAuthorizationV1[]
-}
+export type FullVCSubjectV1<T = {}> = T &
+  BaseVCSubjectV1 & {
+    /**
+     * Array of signed authorization objects
+     * Only included if subject is different from sharer
+     * otherwise empty array
+     */
+    authorization: FullVCSignedAuthorizationV1[]
+  }
 
-export type FullVCProofV1 = {
+export type FullVCProofV1<D extends {} = {}> = {
   type: string
   created: string
   proofPurpose: 'assertionMethod'
   verificationMethod: string
   jws: string
-  data: FullVCVerifiedDataV1
+  data: FullVCVerifiedDataV1<D>
 }
 
-export type FullVCV1 = BaseVCV1<FullVCTypeV1, FullVCSubjectV1, FullVCProofV1>
+export type FullVCV1<T extends string = string, D extends FullVCSubjectV1 = FullVCSubjectV1> = BaseVCV1<
+  FullVCTypeV1<T>,
+  FullVCSubjectV1<D>,
+  FullVCProofV1<D>
+>
+
+// To make specific types of full VCs pass data through the generics
+// type AlumniVCV1 = FullVCV1<'AlumniCredential', {alumniOf: string}>
+// Not sure if the last two generics should be condensed to one or not

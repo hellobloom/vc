@@ -190,7 +190,7 @@ test('Validation.isValidClaimNode', async () => {
   expect(Validation.isValidClaimNode(fullVC.proof.data.target as any)).toBeTruthy()
 })
 
-test('Validation.isValidVerifiedData', async () => {
+it('Validation.isValidVerifiedData', async () => {
   expect.assertions(2)
 
   const fullVC = await createFullVCV1({
@@ -224,7 +224,7 @@ test('Validation.validateCredentialSubject', async () => {
   expect(Utils.isValid(Validation.validateCredentialSubject)(batchFullVC.credentialSubject)).toBeTruthy()
 })
 
-test('Validation.validateVerifiableCredential', async () => {
+fit('Validation.validateVerifiableCredential', async () => {
   expect.assertions(2)
 
   const fullVC = await createFullVCV1({

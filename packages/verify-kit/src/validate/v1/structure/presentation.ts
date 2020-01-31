@@ -129,9 +129,9 @@ export const validateVerifiedDataBatch = genValidateFn<FullVCVerifiedDataBatchV1
 })
 
 export const isValidVerifiedData = (value: any): boolean => {
-  if (Utils.isValid(validateVerifiedDataLegacy)(value)) return true
+  // if (Utils.isValid(validateVerifiedDataLegacy)(value)) return true
   if (Utils.isValid(validateVerifiedDataOnChain)(value)) return true
-  if (Utils.isValid(validateVerifiedDataBatch)(value)) return true
+  // if (Utils.isValid(validateVerifiedDataBatch)(value)) return true
   return false
 }
 
@@ -151,7 +151,14 @@ const validateCredentialProof = genValidateFn<FullVCProofV1>({
   type: Utils.isNotEmptyString,
   created: Utils.isValidRFC3339DateTime,
   proofPurpose: (value: any) => value === 'assertionMethod',
-  verificationMethod: EthUtils.isValidDID,
+  verificationMethod: [
+    Utils.isNotEmptyString,
+    (value: string) => {
+      if (!value.endsWith('#owner')) return false
+
+      return EthUtils.isValidDID(value.substr(0, value.length - 6))
+    },
+  ],
   jws: Utils.isNotEmptyString,
   data: isValidVerifiedData,
 })
@@ -170,6 +177,7 @@ const isCredentialProofValid = async (value: any, data: any) => {
     const res = await jsigs.verify(data, {
       suite: new EcdsaSecp256k1Signature2019({key}),
       documentLoader: defaultDocumentLoader,
+      expansionMap: false,
       purpose: new AssertionProofPurpose(),
     })
 
@@ -215,6 +223,7 @@ const isPresentationProofValid = async (value: any, data: any) => {
       suite: new EcdsaSecp256k1Signature2019({key}),
       compactProof: false,
       documentLoader: defaultDocumentLoader,
+      expansionMap: false,
       purpose: new AuthenticationProofPurpose(),
     })
 
