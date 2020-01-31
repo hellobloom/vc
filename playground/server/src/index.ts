@@ -1,6 +1,8 @@
 import fastify from 'fastify'
 import helmet from 'fastify-helmet'
 import cookie from 'fastify-cookie'
+import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc'
 
 import {getEnv} from '@server/env'
 import {applyApiRoutes} from '@server/routes'
@@ -8,6 +10,8 @@ import {applySocketWorker} from '@server/socket/worker'
 import {initModels} from '@server/models'
 
 const main = async () => {
+  dayjs.extend(utc)
+
   initModels()
 
   const env = getEnv()

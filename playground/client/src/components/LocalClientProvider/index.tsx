@@ -1,10 +1,11 @@
 import React, {useContext} from 'react'
 import createPersistedState from 'use-persisted-state'
 import EthWallet from 'ethereumjs-wallet'
-import {SDBatchVCV1} from '@bloomprotocol/attestations-common'
+import {SDBatchVCV1, SDVCV1, EthUtils} from '@bloomprotocol/attestations-common'
 import wretch from 'wretch'
+import * as ethSigUtil from 'eth-sig-util'
 
-import {buildBatchFullVCV1, buildVerifiablePresentation} from './utils'
+import {buildBatchFullVCV1, buildVerifiablePresentation, appendQuery} from './utils'
 
 const usePrivateKeyState = createPersistedState('attestations-playground.privateKey')
 const useSDVCsState = createPersistedState('attestations-playground.sdvcs')
@@ -25,7 +26,7 @@ type LocalClientContextProps = {
   wallet: EthWallet
   regen: () => void
   shareVCs: (types: string[], token: string, to: string) => Promise<RequestResponse>
-  claimVC: (from: string) => Promise<RequestResponse>
+  claimVC: (from: string, token: string) => Promise<RequestResponse>
 }
 
 const LocalClientContext = React.createContext<LocalClientContextProps>({
@@ -52,15 +53,29 @@ export const LocalClientProvider: React.FC = props => {
           setSDVCs([])
         },
         shareVCs: async (types, token, to) => {
+          if (sdvcs.length === 0) {
+            return {
+              kind: 'error',
+              message: 'You do not have any credentials stored locally',
+            }
+          }
+
+          if (types.length === 0) {
+            return {
+              kind: 'error',
+              message: 'Must request at least one credential type to share',
+            }
+          }
+
           const missing: string[] = []
-          const sdvcs: SDBatchVCV1[] = []
+          const foundSdvcs: SDBatchVCV1[] = []
 
           types.forEach(type => {
             // TODO: is this the way we should be checking?
-            const foundVC = sdvcs.find(sdvc => sdvc.type.includes(type))
+            const foundVC = foundSdvcs.find(sdvc => sdvc.type.includes(type))
 
             if (foundVC) {
-              sdvcs.push(foundVC)
+              foundSdvcs.push(foundVC)
             } else {
               missing.push(type)
             }
@@ -74,7 +89,7 @@ export const LocalClientProvider: React.FC = props => {
           }
 
           const fullVcs = await Promise.all(
-            sdvcs.map(
+            foundSdvcs.map(
               async sdvc =>
                 await buildBatchFullVCV1({
                   subject: `did:ethr:${wallet.getAddressString()}`,
@@ -91,8 +106,8 @@ export const LocalClientProvider: React.FC = props => {
 
           try {
             await wretch()
-              .url(to)
-              .put(vp)
+              .url(appendQuery(to, {'share-kit-from': 'qr'}))
+              .post(vp)
               .json()
           } catch {
             return {
@@ -103,17 +118,44 @@ export const LocalClientProvider: React.FC = props => {
 
           return {kind: 'success'}
         },
-        claimVC: async from => {
-          // TODO:
-          // - POST to the given URL
-          // - Get the SDVCV1 back
-          // - Sign it and send it back to the second URL
-          // - Get the SDBatchVCV1 back and store it to local storage
+        claimVC: async (from, token) => {
+          let sdvc: SDVCV1
+          let batchUrl: string
+          let contractAddress: string
 
-          return {
-            kind: 'error',
-            message: 'Something went wrong',
+          try {
+            ;({credential: sdvc, batchUrl, contractAddress} = await wretch()
+              .url(appendQuery(from, {'share-kit-from': 'qr'}))
+              .post()
+              .json<{credential: SDVCV1; batchUrl: string; contractAddress: string}>())
+          } catch {
+            return {
+              kind: 'error',
+              message: 'Something went wrong while fetching the VC to claim',
+            }
           }
+
+          let sdBatchVc: SDBatchVCV1
+
+          const subjectSignature = ethSigUtil.signTypedData(wallet.getPrivateKey(), {
+            data: EthUtils.getAttestationAgreement(contractAddress, 1, sdvc.proof.layer2Hash, token),
+          })
+
+          try {
+            ;({sdBatchVc} = await wretch()
+              .url(batchUrl)
+              .post({credential: sdvc, subjectSignature})
+              .json<{sdBatchVc: SDBatchVCV1}>())
+          } catch {
+            return {
+              kind: 'error',
+              message: 'Something went wrong while batching the VC to claim',
+            }
+          }
+
+          setSDVCs([...sdvcs, sdBatchVc])
+
+          return {kind: 'success'}
         },
       }}
     >

@@ -13,9 +13,13 @@ import {
 } from '@bloomprotocol/attestations-common'
 import * as EthU from 'ethereumjs-util'
 import EthWallet from 'ethereumjs-wallet'
+import extend from 'extend'
+
 const {EcdsaSecp256k1KeyClass2019, EcdsaSecp256k1Signature2019, defaultDocumentLoader} = require('@transmute/lds-ecdsa-secp256k1-2019')
 const keyto = require('@trust/keyto')
 const jsigs = require('jsonld-signatures')
+const url = require('url')
+
 const {AuthenticationProofPurpose, AssertionProofPurpose} = jsigs.purposes
 
 const getMerkleTreeFromSDVCV1 = (vc: SDVCV1 | SDBatchVCV1) => {
@@ -200,4 +204,21 @@ export const buildVerifiablePresentation = async ({
     ...unsignedVP,
     proof,
   }
+}
+
+export const appendQuery = (uri: string, queryToAppend: {[key: string]: string | null}) => {
+  const parts = url.parse(uri, true)
+  const parsedQuery = extend(true, {}, parts.query, queryToAppend)
+
+  const queryString = Object.keys(parsedQuery)
+    .map(key => {
+      const value = parsedQuery[key]
+      return value === null ? encodeURIComponent(key) : encodeURIComponent(key) + '=' + encodeURIComponent(value)
+    })
+    .join('&')
+
+  parts.query = null
+  parts.search = queryString ? '?' + queryString : null
+
+  return url.format(parts)
 }

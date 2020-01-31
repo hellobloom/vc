@@ -281,6 +281,7 @@ export const Request: React.FC<RequestProps> = props => {
           </div>
         </div>
         <Button
+          isDisabled={allRequestedTypes.length === 0}
           skin={ButtonSkin.link}
           onClick={async () => {
             const {id} = await api.share.create({types: allRequestedTypes, responseVersion})
