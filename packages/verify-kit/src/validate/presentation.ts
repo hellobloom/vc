@@ -25,15 +25,13 @@ export const validateVerifiablePresentationResponse = async <V extends Version =
   {version, ...options}: ValidateVerifiablePresentationOptions<V> = {},
 ): Promise<ValidationResponse<VersionToResponse[V]>> => {
   if (typeof version === 'undefined' || version === 'v0') {
-    return (await validateVerifiablePresentationResponseV0(
-      data,
-      options as ValidateVerifiablePresentationResponseOptionsV0,
-    )) as ValidationResponse<VersionToResponse[V]>
+    return (await validateVerifiablePresentationResponseV0(data, options as VersionToOptions[V])) as ValidationResponse<
+      VersionToResponse[V]
+    >
   } else if (version === 'v1') {
-    return (await validateVerifiablePresentationResponseV1(
-      data,
-      options as ValidateVerifiablePresentationResponseOptionsV1,
-    )) as ValidationResponse<VersionToResponse[V]>
+    return (await validateVerifiablePresentationResponseV1(data, options as VersionToOptions[V])) as ValidationResponse<
+      VersionToResponse[V]
+    >
   } else {
     return {
       kind: 'invalid',
