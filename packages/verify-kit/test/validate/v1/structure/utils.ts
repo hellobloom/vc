@@ -1,12 +1,12 @@
 import {
   EthUtils,
-  FullVCProofV1,
+  AtomicVCProofV1,
   VCLegacySignedDataNodeV1,
   VCSignedClaimNodeV1,
   SDVCV1,
   SDBatchVCV1,
-  FullVCSignedAuthorizationV1,
-  FullVCV1,
+  AtomicVCSignedAuthorizationV1,
+  AtomicVCV1,
   VerifiablePresentationProofV1,
   VerifiablePresentationV1,
   SDLegacyVCV1,
@@ -56,23 +56,23 @@ export const getMerkleTreeFromSDVCV1 = (vc: SDVCV1 | SDBatchVCV1) => {
   return EthUtils.getBloomMerkleTree(signedDataHashes, vc.proof.paddingNodes, EthUtils.hashMessage(vc.proof.checksumSignature))
 }
 
-const buildBaseFullVCV1 = async ({
+const buildBaseAtomicVCV1 = async ({
   buildProof,
   subject,
   authorization,
   target,
   sdvc,
 }: {
-  buildProof: (unsignedVC: Omit<FullVCV1, 'proof'>) => Promise<FullVCProofV1>
+  buildProof: (unsignedVC: Omit<AtomicVCV1, 'proof'>) => Promise<AtomicVCProofV1>
   subject: string
-  authorization: FullVCSignedAuthorizationV1[]
+  authorization: AtomicVCSignedAuthorizationV1[]
   target: VCSignedClaimNodeV1
   sdvc: SDVCV1 | SDBatchVCV1
-}): Promise<FullVCV1> => {
-  const unsignedVC: Omit<FullVCV1, 'proof'> = {
+}): Promise<AtomicVCV1> => {
+  const unsignedVC: Omit<AtomicVCV1, 'proof'> = {
     '@context': ['https://www.w3.org/2018/credentials/v1'],
     id: 'placeholder',
-    type: ['VerifiableCredential', 'FullCredential', target.claimNode.type.type],
+    type: ['VerifiableCredential', 'AtomicCredential', target.claimNode.type.type],
     issuer: sdvc.issuer,
     issuanceDate: target.claimNode.issuance.issuanceDate,
     expirationDate: target.claimNode.issuance.expirationDate,
@@ -91,7 +91,7 @@ const buildBaseFullVCV1 = async ({
   }
 }
 
-const buildLegacyFullVCProofV1 = async ({
+const buildLegacyAtomicVCProofV1 = async ({
   unsignedVC,
   tx,
   stage,
@@ -99,13 +99,13 @@ const buildLegacyFullVCProofV1 = async ({
   sdvc,
   holder,
 }: {
-  unsignedVC: Omit<FullVCV1, 'proof'>
+  unsignedVC: Omit<AtomicVCV1, 'proof'>
   tx: string
   stage: 'mainnet' | 'rinkeby' | 'local'
   target: VCLegacySignedDataNodeV1
   sdvc: SDLegacyVCV1
   holder: Holder
-}): Promise<FullVCProofV1> => {
+}): Promise<AtomicVCProofV1> => {
   const bloomMerkleTree = getMerkleTreeFromSelectivlelyDisclosableLegacyVCV1(sdvc)
   const merkleproof = formatMerkleProofForShare(bloomMerkleTree.getProof(EthU.toBuffer(EthUtils.hashMessage(target.signedAttestation))))
   const {didDocument} = await new EthUtils.EthereumDIDResolver().resolve(`did:ethr:${holder.publicStringHex}`)
@@ -144,7 +144,7 @@ const buildLegacyFullVCProofV1 = async ({
   }
 }
 
-const buildOnChainFullVCProofV1 = async ({
+const buildOnChainAtomicVCProofV1 = async ({
   unsignedVC,
   tx,
   stage,
@@ -152,13 +152,13 @@ const buildOnChainFullVCProofV1 = async ({
   sdvc,
   holder,
 }: {
-  unsignedVC: Omit<FullVCV1, 'proof'>
+  unsignedVC: Omit<AtomicVCV1, 'proof'>
   tx: string
   stage: 'mainnet' | 'rinkeby' | 'local'
   target: VCSignedClaimNodeV1
   sdvc: SDVCV1
   holder: Holder
-}): Promise<FullVCProofV1> => {
+}): Promise<AtomicVCProofV1> => {
   const bloomMerkleTree = getMerkleTreeFromSDVCV1(sdvc)
   const merkleproof = formatMerkleProofForShare(bloomMerkleTree.getProof(EthU.toBuffer(EthUtils.hashMessage(target.issuerSignature))))
   const {didDocument} = await new EthUtils.EthereumDIDResolver().resolve(`did:ethr:${holder.publicStringHex}`)
@@ -197,7 +197,7 @@ const buildOnChainFullVCProofV1 = async ({
   }
 }
 
-export const buildLegacyFullVCV1 = async ({
+export const buildLegacyAtomicVCV1 = async ({
   subject,
   tx,
   stage,
@@ -211,13 +211,13 @@ export const buildLegacyFullVCV1 = async ({
   stage: 'mainnet' | 'rinkeby' | 'local'
   target: VCLegacySignedDataNodeV1
   sdvc: SDLegacyVCV1
-  authorization: FullVCSignedAuthorizationV1[]
+  authorization: AtomicVCSignedAuthorizationV1[]
   holder: Holder
-}): Promise<FullVCV1> => {
-  const unsignedVC: Omit<FullVCV1, 'proof'> = {
+}): Promise<AtomicVCV1> => {
+  const unsignedVC: Omit<AtomicVCV1, 'proof'> = {
     '@context': ['https://www.w3.org/2018/credentials/v1'],
     id: 'placeholder',
-    type: ['VerifiableCredential', 'FullCredential', target.attestationNode.type.type],
+    type: ['VerifiableCredential', 'AtomicCredential', target.attestationNode.type.type],
     issuer: sdvc.issuer,
     issuanceDate: sdvc.issuanceDate,
     credentialSubject: {
@@ -227,7 +227,7 @@ export const buildLegacyFullVCV1 = async ({
     },
   }
 
-  const proof = await buildLegacyFullVCProofV1({
+  const proof = await buildLegacyAtomicVCProofV1({
     tx,
     stage,
     target,
@@ -242,7 +242,7 @@ export const buildLegacyFullVCV1 = async ({
   }
 }
 
-export const buildOnChainFullVCV1 = async ({
+export const buildOnChainAtomicVCV1 = async ({
   subject,
   tx,
   stage,
@@ -256,16 +256,16 @@ export const buildOnChainFullVCV1 = async ({
   stage: 'mainnet' | 'rinkeby' | 'local'
   target: VCSignedClaimNodeV1
   sdvc: SDVCV1
-  authorization: FullVCSignedAuthorizationV1[]
+  authorization: AtomicVCSignedAuthorizationV1[]
   holder: Holder
-}): Promise<FullVCV1> =>
-  await buildBaseFullVCV1({
+}): Promise<AtomicVCV1> =>
+  await buildBaseAtomicVCV1({
     subject,
     authorization,
     target,
     sdvc,
     buildProof: async unsignedVC =>
-      await buildOnChainFullVCProofV1({
+      await buildOnChainAtomicVCProofV1({
         tx,
         stage,
         target,
@@ -275,19 +275,19 @@ export const buildOnChainFullVCV1 = async ({
       }),
   })
 
-const buildBatchFullVCProofV1 = async ({
+const buildBatchAtomicVCProofV1 = async ({
   unsignedVC,
   stage,
   target,
   sdvc,
   holder,
 }: {
-  unsignedVC: Omit<FullVCV1, 'proof'>
+  unsignedVC: Omit<AtomicVCV1, 'proof'>
   stage: 'mainnet' | 'rinkeby' | 'local'
   target: VCSignedClaimNodeV1
   sdvc: SDBatchVCV1
   holder: Holder
-}): Promise<FullVCProofV1> => {
+}): Promise<AtomicVCProofV1> => {
   const bloomMerkleTree = getMerkleTreeFromSDVCV1(sdvc)
   const merkleproof = formatMerkleProofForShare(bloomMerkleTree.getProof(EthU.toBuffer(EthUtils.hashMessage(target.issuerSignature))))
   const {didDocument} = await new EthUtils.EthereumDIDResolver().resolve(`did:ethr:${holder.publicStringHex}`)
@@ -325,7 +325,7 @@ const buildBatchFullVCProofV1 = async ({
   }
 }
 
-export const buildBatchFullVCV1 = async ({
+export const buildBatchAtomicVCV1 = async ({
   subject,
   stage,
   target,
@@ -337,16 +337,16 @@ export const buildBatchFullVCV1 = async ({
   stage: 'mainnet' | 'rinkeby' | 'local'
   target: VCSignedClaimNodeV1
   sdvc: SDBatchVCV1
-  authorization: FullVCSignedAuthorizationV1[]
+  authorization: AtomicVCSignedAuthorizationV1[]
   holder: Holder
-}): Promise<FullVCV1> =>
-  await buildBaseFullVCV1({
+}): Promise<AtomicVCV1> =>
+  await buildBaseAtomicVCV1({
     subject,
     authorization,
     target,
     sdvc,
     buildProof: async unsignedVC =>
-      await buildBatchFullVCProofV1({
+      await buildBatchAtomicVCProofV1({
         unsignedVC,
         stage,
         target,
@@ -389,19 +389,19 @@ const buildVerifiablePresentationV1Proof = async ({
 
 export const buildVerifiablePresentation = async ({
   holder,
-  fullCredentials,
+  atomicCredentials,
   token,
   domain,
 }: {
-  fullCredentials: FullVCV1[]
+  atomicCredentials: AtomicVCV1[]
   token: string
   domain: string
   holder: Holder
 }): Promise<VerifiablePresentationV1> => {
-  const unsignedVP: Omit<VerifiablePresentationV1<FullVCV1>, 'proof'> = {
+  const unsignedVP: Omit<VerifiablePresentationV1<AtomicVCV1>, 'proof'> = {
     '@context': ['https://www.w3.org/2018/credentials/v1'],
     type: ['VerifiablePresentation'],
-    verifiableCredential: fullCredentials,
+    verifiableCredential: atomicCredentials,
     holder: `did:ethr:${holder.publicStringHex}`,
   }
 
