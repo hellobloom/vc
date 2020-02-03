@@ -17,11 +17,7 @@ export type SDLegacyVCProofV1 = {
   paddingNodes: string[]
 }
 
-export type SDLegacyVCV1 = BaseVCV1<
-  SDLegacyVCTypeV1,
-  SDLegacyVCSubjectV1,
-  SDLegacyVCProofV1
-> & {
+export type SDLegacyVCV1 = BaseVCV1<SDLegacyVCSubjectV1, SDLegacyVCTypeV1, SDLegacyVCProofV1> & {
   version: 'SDLegacyVC-1.0.0'
 }
 
@@ -46,18 +42,13 @@ export type SDVCV1<
   Subject extends SDVCSubjectV1 = SDVCSubjectV1,
   Type extends SDVCTypeV1 = SDVCTypeV1,
   Proof extends SDVCProofV1 = SDVCProofV1
-> = BaseVCV1<Type, Subject, Proof> & {
+> = BaseVCV1<Subject, Type, Proof> & {
   version: 'SDVC-1.0.0'
 }
 
 // Batch
 
-export type SDBatchVCTypeV1 = [
-  SDVCTypeV1[0],
-  SDVCTypeV1[1],
-  'SDBatchVerifiableCredential',
-  ...string[],
-]
+export type SDBatchVCTypeV1 = [SDVCTypeV1[0], SDVCTypeV1[1], 'SDBatchVerifiableCredential', ...string[]]
 
 export type SDBatchVCSubjectV1 = SDVCSubjectV1
 
@@ -73,6 +64,6 @@ export type SDBatchVCV1<
   Subject extends SDBatchVCSubjectV1 = SDBatchVCSubjectV1,
   Type extends SDBatchVCTypeV1 = SDBatchVCTypeV1,
   Proof extends SDBatchVCProofV1 = SDBatchVCProofV1
-> = BaseVCV1<Type, Subject, Proof> & {
+> = BaseVCV1<Subject, Type, Proof> & {
   version: 'SDBatchVC-1.0.0'
 }

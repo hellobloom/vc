@@ -1,4 +1,4 @@
-import {IVerifiableCredential} from '../vc/full/v0'
+import {IVerifiableCredential} from '../vc/atomic/v0'
 
 export interface IPresentationProof {
   // type string describing share kit style proof
