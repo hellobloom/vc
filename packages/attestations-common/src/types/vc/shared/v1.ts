@@ -57,14 +57,11 @@ export type BaseVCSubjectV1 = {
   identifier: string
 }
 
-export type BaseVCProofUnsignedV1 = {
+export type BaseVCProofV1 = {
   type: string
   created: string
   proofPurpose: string
   verificationMethod: string
-}
-
-export type BaseVCProofSignedV1 = BaseVCProofUnsignedV1 & {
   jws: string
 }
 
@@ -80,8 +77,8 @@ export type BaseVCRevocationSimpleV1 = {
 export type BaseVCV1<
   Subject extends BaseVCSubjectV1 = BaseVCSubjectV1,
   Type extends BaseVCTypeV1 = BaseVCTypeV1,
-  Proof extends BaseVCProofUnsignedV1 = BaseVCProofUnsignedV1,
-  Revocation extends BaseVCRevocationV1 = BaseVCRevocationSimpleV1
+  Proof extends BaseVCProofV1 = BaseVCProofV1,
+  Revocation extends BaseVCRevocationV1 = BaseVCRevocationV1
 > = {
   '@context': TContext
   id?: string

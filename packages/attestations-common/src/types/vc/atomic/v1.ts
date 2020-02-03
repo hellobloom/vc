@@ -1,14 +1,14 @@
-import {BaseVCV1, BaseVCTypeV1, BaseVCSubjectV1, BaseVCProofSignedV1, BaseVCRevocationV1, BaseVCRevocationSimpleV1} from '../shared/v1'
+import {BaseVCV1, BaseVCTypeV1, BaseVCSubjectV1, BaseVCProofV1, BaseVCRevocationV1} from '../shared/v1'
 
-export type AtomicVCSubjectV1 = BaseVCSubjectV1
+export type AtomicVCSubjectV1<D extends {} = {}> = BaseVCSubjectV1 & D
 
-export type AtomicVCProofV1 = BaseVCProofSignedV1 & {
+export type AtomicVCProofV1 = Omit<BaseVCProofV1, 'proofPurpose'> & {
   proofPurpose: 'assertionMethod'
 }
 
 export type AtomicVCV1<
   Subject extends AtomicVCSubjectV1 = AtomicVCSubjectV1,
-  Type extends AtomicVCTypeV1 = AtomicVCTypeV1,
+  Type extends BaseVCTypeV1 = BaseVCTypeV1,
   Proof extends AtomicVCProofV1 = AtomicVCProofV1,
-  Revocation extends BaseVCRevocationV1 = BaseVCRevocationSimpleV1
+  Revocation extends BaseVCRevocationV1 = BaseVCRevocationV1
 > = BaseVCV1<Subject, Type, Proof, Revocation>
