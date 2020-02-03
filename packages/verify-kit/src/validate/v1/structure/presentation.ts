@@ -4,16 +4,16 @@ import {
   Utils,
   EthUtils,
   VerifiablePresentationV1,
-  FullVCV1,
+  AtomicVCV1,
   VerifiablePresentationProofV1,
-  FullVCSubjectV1,
-  FullVCAuthorizationV1,
-  FullVCProofV1,
-  FullVCVerifiedDataBatchV1,
+  AtomicVCSubjectV1,
+  AtomicVCAuthorizationV1,
+  AtomicVCProofV1,
+  AtomicVCVerifiedDataBatchV1,
   VCClaimNodeV1,
   VCClaimNodeDataV1,
   VCClaimNodeTypeV1,
-  FullVCVerifiedDataOnChainV1,
+  AtomicVCVerifiedDataOnChainV1,
   VCSignedClaimNodeV1,
   VCLegacySignedDataNodeV1,
   VCRevocationLinks,
@@ -100,7 +100,7 @@ export const validateVerifiedDataLegacy = genValidateFn({
   attester: EthUtils.isValidDID,
 })
 
-export const validateVerifiedDataOnChain = genValidateFn<FullVCVerifiedDataOnChainV1>({
+export const validateVerifiedDataOnChain = genValidateFn<AtomicVCVerifiedDataOnChainV1>({
   version: (value: any) => value === 'onChain',
   tx: EthUtils.isValidHash,
   layer2Hash: EthUtils.isValidHash,
@@ -112,7 +112,7 @@ export const validateVerifiedDataOnChain = genValidateFn<FullVCVerifiedDataOnCha
   attester: EthUtils.isValidDID,
 })
 
-export const validateVerifiedDataBatch = genValidateFn<FullVCVerifiedDataBatchV1>({
+export const validateVerifiedDataBatch = genValidateFn<AtomicVCVerifiedDataBatchV1>({
   version: (value: any) => value === 'batch',
   batchLayer2Hash: EthUtils.isValidHash,
   batchAttesterSig: EthUtils.isValidSignatureString,
@@ -135,19 +135,19 @@ export const isValidVerifiedData = (value: any): boolean => {
   return false
 }
 
-const validateAuthorization = genValidateFn<FullVCAuthorizationV1>({
+const validateAuthorization = genValidateFn<AtomicVCAuthorizationV1>({
   subject: EthU.isValidAddress,
   recipient: EthU.isValidAddress,
   revocation: Utils.isNotEmptyString,
 })
 
-export const validateCredentialSubject = genValidateFn<FullVCSubjectV1>({
+export const validateCredentialSubject = genValidateFn<AtomicVCSubjectV1>({
   id: EthUtils.isValidDID,
   data: Utils.isNotEmptyString,
   authorization: Utils.isArrayOf(Utils.isValid(validateAuthorization), false),
 })
 
-const validateCredentialProof = genValidateFn<FullVCProofV1>({
+const validateCredentialProof = genValidateFn<AtomicVCProofV1>({
   type: Utils.isNotEmptyString,
   created: Utils.isValidRFC3339DateTime,
   proofPurpose: (value: any) => value === 'assertionMethod',
@@ -179,10 +179,10 @@ const isCredentialProofValid = async (value: any, data: any) => {
   }
 }
 
-export const validateVerifiableCredential = genAsyncValidateFn<FullVCV1>({
+export const validateVerifiableCredential = genAsyncValidateFn<AtomicVCV1>({
   '@context': Utils.isArrayOfNonEmptyStrings,
   id: Utils.isNotEmptyString,
-  type: [Utils.isArrayOfNonEmptyStrings, (value: any) => value[0] === 'VerifiableCredential' && value[1] === 'FullCredential'],
+  type: [Utils.isArrayOfNonEmptyStrings, (value: any) => value[0] === 'VerifiableCredential' && value[1] === 'AtomicCredential'],
   issuer: EthUtils.isValidDID,
   issuanceDate: Utils.isValidRFC3339DateTime,
   expirationDate: Utils.isUndefinedOr(Utils.isValidRFC3339DateTime),
@@ -224,7 +224,7 @@ const isPresentationProofValid = async (value: any, data: any) => {
   }
 }
 
-export const validateVerifiablePresentationV1 = genAsyncValidateFn<VerifiablePresentationV1<FullVCV1>>({
+export const validateVerifiablePresentationV1 = genAsyncValidateFn<VerifiablePresentationV1<AtomicVCV1>>({
   '@context': Utils.isArrayOfNonEmptyStrings,
   type: [Utils.isArrayOfNonEmptyStrings, (value: any) => value[0] === 'VerifiablePresentation'],
   verifiableCredential: Utils.isAsyncArrayOf(Utils.isAsyncValid(validateVerifiableCredential)),

@@ -1,9 +1,9 @@
 import {
   VerifiablePresentationV1,
-  FullVCVerifiedDataV1,
-  FullVCVerifiedDataLegacyV1,
-  FullVCVerifiedDataOnChainV1,
-  FullVCV1,
+  AtomicVCVerifiedDataV1,
+  AtomicVCVerifiedDataLegacyV1,
+  AtomicVCVerifiedDataOnChainV1,
+  AtomicVCV1,
 } from '@bloomprotocol/attestations-common'
 
 import {TDecodedLog, getDecodedLogValueByName, getDecodedTxEventLogs} from '../../txUtils'
@@ -16,7 +16,7 @@ type RetrieveTxDataOutput = {
 }
 
 export const retreiveTxData = async (
-  payloadData: FullVCVerifiedDataLegacyV1 | FullVCVerifiedDataOnChainV1,
+  payloadData: AtomicVCVerifiedDataLegacyV1 | AtomicVCVerifiedDataOnChainV1,
   web3Provider: string,
 ): Promise<RetrieveTxDataOutput> => {
   const txHash = payloadData.tx
@@ -43,7 +43,7 @@ export const retreiveTxData = async (
   }
 }
 
-const validateOnChainProperties = (subject: string, payloadData: FullVCVerifiedDataV1, logs: TDecodedLog[]): ValidationError[] => {
+const validateOnChainProperties = (subject: string, payloadData: AtomicVCVerifiedDataV1, logs: TDecodedLog[]): ValidationError[] => {
   const errors: ValidationError[] = []
   // verify subject shared dataHash matches chain by using it as a part of the find logic
   const matchingTraitAttestedLogs =
@@ -88,7 +88,7 @@ export type ValidateVerifiablePresentationResponseOptionsV1 = SharedValidateVeri
 export const validateVerifiablePresentationResponseV1 = async (
   data: any,
   options: ValidateVerifiablePresentationResponseOptionsV1 = {},
-): Promise<ValidationResponse<VerifiablePresentationV1<FullVCV1>>> => {
+): Promise<ValidationResponse<VerifiablePresentationV1<AtomicVCV1>>> => {
   const outcome = await validateVerifiablePresentationV1(data)
 
   if (outcome.kind === 'invalid_param') {

@@ -1,10 +1,5 @@
-import {EthUtils, Utils, IProof, FullVC} from '@bloomprotocol/attestations-common'
-import {
-  buildClaimNodeV1,
-  buildSDLegacyVCV1,
-  buildSDVCV1,
-  buildSDBatchVCV1,
-} from '@bloomprotocol/issue-kit'
+import {EthUtils, Utils, IProof, AtomicVCV1} from '@bloomprotocol/attestations-common'
+import {buildClaimNodeV1, buildSDLegacyVCV1, buildSDVCV1, buildSDBatchVCV1} from '@bloomprotocol/issue-kit'
 import * as EthU from 'ethereumjs-util'
 import EthWallet from 'ethereumjs-wallet'
 import * as ethSigUtil from 'eth-sig-util'
@@ -12,7 +7,7 @@ import * as ethSigUtil from 'eth-sig-util'
 import * as Validation from '../../../../src/validate/v1/structure'
 import {formatMerkleProofForShare} from '../../../../src/utils'
 
-import {Holder, getHolder, buildBatchFullVCV1, buildOnChainFullVCV1, buildVerifiablePresentation, buildLegacyFullVCV1} from './utils'
+import {Holder, getHolder, buildBatchAtomicVCV1, buildOnChainAtomicVCV1, buildVerifiablePresentation, buildLegacyAtomicVCV1} from './utils'
 
 const issuerWallet = EthWallet.fromPrivateKey(Buffer.from('efca4cdd31923b50f4214af5d2ae10e7ac45a5019e9431cc195482d707485378', 'hex'))
 const issuerPrivKey = issuerWallet.getPrivateKey()
@@ -49,13 +44,13 @@ const createSDLegacyVCV1 = async ({issuer, holder}: {issuer: Buffer; holder: Hol
   })
 }
 
-const createLegacyFullVCV1 = async ({issuer, holder}: {issuer: Buffer; holder: Holder}) => {
+const createLegacyAtomicVCV1 = async ({issuer, holder}: {issuer: Buffer; holder: Holder}) => {
   const sdvc = await createSDLegacyVCV1({
     issuer,
     holder,
   })
 
-  const fullVC = buildLegacyFullVCV1({
+  const atomicVc = buildLegacyAtomicVCV1({
     subject: `did:ethr:${holder.publicStringHex}`,
     tx: '0xf1d6b6b64e63737a4ef023fadc57e16793cfae5d931a3c301d14e375e54fabf6',
     stage: 'mainnet',
@@ -65,7 +60,7 @@ const createLegacyFullVCV1 = async ({issuer, holder}: {issuer: Buffer; holder: H
     holder,
   })
 
-  return fullVC
+  return atomicVc
 }
 
 const createSDVCV1 = async ({issuer, holder}: {issuer: Buffer; holder: Holder}) => {
@@ -78,10 +73,10 @@ const createSDVCV1 = async ({issuer, holder}: {issuer: Buffer; holder: Holder}) 
   })
 }
 
-const createFullVCV1 = async ({issuer, holder}: {issuer: Buffer; holder: Holder}) => {
+const createAtomicVCV1 = async ({issuer, holder}: {issuer: Buffer; holder: Holder}) => {
   const sdvc = await createSDVCV1({issuer, holder})
 
-  const fullVC = await buildOnChainFullVCV1({
+  const atomicVc = await buildOnChainAtomicVCV1({
     subject: `did:ethr:${holder.publicStringHex}`,
     tx: '0xf1d6b6b64e63737a4ef023fadc57e16793cfae5d931a3c301d14e375e54fabf6',
     stage: 'mainnet',
@@ -91,10 +86,10 @@ const createFullVCV1 = async ({issuer, holder}: {issuer: Buffer; holder: Holder}
     holder,
   })
 
-  return fullVC
+  return atomicVc
 }
 
-const createBatchFullVCV1 = async ({issuer, holder}: {issuer: Buffer; holder: Holder}) => {
+const createBatchAtomicVCV1 = async ({issuer, holder}: {issuer: Buffer; holder: Holder}) => {
   const sdvc = await createSDVCV1({issuer, holder})
 
   const contractAddress = '0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC'
@@ -112,7 +107,7 @@ const createBatchFullVCV1 = async ({issuer, holder}: {issuer: Buffer; holder: Ho
     requestNonce,
   })
 
-  const batchFullVC = buildBatchFullVCV1({
+  const batchAtomicVC = buildBatchAtomicVCV1({
     subject: `did:ethr:${holder.publicStringHex}`,
     stage: 'mainnet',
     target: batchVC.credentialSubject.claimNodes[0],
@@ -121,12 +116,12 @@ const createBatchFullVCV1 = async ({issuer, holder}: {issuer: Buffer; holder: Ho
     holder,
   })
 
-  return batchFullVC
+  return batchAtomicVC
 }
 
-const createVerifiablePresentationV1 = ({fullVCs, holder}: {fullVCs: FullVC[]; holder: Holder}) => {
+const createVerifiablePresentationV1 = ({atomicVcs, holder}: {atomicVcs: AtomicVCV1[]; holder: Holder}) => {
   return buildVerifiablePresentation({
-    fullCredentials: fullVCs,
+    atomicCredentials: atomicVcs,
     token: EthUtils.generateNonce(),
     domain: 'https://bloom.co/receiveData',
     holder,
@@ -176,116 +171,116 @@ test('Validation.isValidLegacyDataNode', async () => {
 test('Validation.isValidClaimNode', async () => {
   expect.assertions(2)
 
-  const legacyFullVC = await createLegacyFullVCV1({
+  const legacyAtomicVC = await createLegacyAtomicVCV1({
     issuer: issuerPrivKey,
     holder: getHolder(bobWallet),
   })
 
-  const fullVC = await createFullVCV1({
+  const atomicVc = await createAtomicVCV1({
     issuer: issuerPrivKey,
     holder: getHolder(bobWallet),
   })
 
-  expect(Validation.isValidClaimNode(legacyFullVC.proof.data.target as any)).toBeFalsy()
-  expect(Validation.isValidClaimNode(fullVC.proof.data.target as any)).toBeTruthy()
+  expect(Validation.isValidClaimNode(legacyAtomicVC.proof.data.target as any)).toBeFalsy()
+  expect(Validation.isValidClaimNode(atomicVc.proof.data.target as any)).toBeTruthy()
 })
 
 test('Validation.isValidVerifiedData', async () => {
   expect.assertions(2)
 
-  const fullVC = await createFullVCV1({
+  const atomicVc = await createAtomicVCV1({
     issuer: issuerPrivKey,
     holder: getHolder(bobWallet),
   })
 
-  const batchFullVC = await createBatchFullVCV1({
+  const batchAtomicVC = await createBatchAtomicVCV1({
     issuer: issuerPrivKey,
     holder: getHolder(bobWallet),
   })
 
-  expect(Validation.isValidVerifiedData(fullVC.proof.data)).toBeTruthy()
-  expect(Validation.isValidVerifiedData(batchFullVC.proof.data)).toBeTruthy()
+  expect(Validation.isValidVerifiedData(atomicVc.proof.data)).toBeTruthy()
+  expect(Validation.isValidVerifiedData(batchAtomicVC.proof.data)).toBeTruthy()
 })
 
 test('Validation.validateCredentialSubject', async () => {
   expect.assertions(2)
 
-  const fullVC = await createFullVCV1({
+  const atomicVc = await createAtomicVCV1({
     issuer: issuerPrivKey,
     holder: getHolder(bobWallet),
   })
 
-  const batchFullVC = await createBatchFullVCV1({
+  const batchAtomicVC = await createBatchAtomicVCV1({
     issuer: issuerPrivKey,
     holder: getHolder(bobWallet),
   })
 
-  expect(Utils.isValid(Validation.validateCredentialSubject)(fullVC.credentialSubject)).toBeTruthy()
-  expect(Utils.isValid(Validation.validateCredentialSubject)(batchFullVC.credentialSubject)).toBeTruthy()
+  expect(Utils.isValid(Validation.validateCredentialSubject)(atomicVc.credentialSubject)).toBeTruthy()
+  expect(Utils.isValid(Validation.validateCredentialSubject)(batchAtomicVC.credentialSubject)).toBeTruthy()
 })
 
 test('Validation.validateVerifiableCredential', async () => {
   expect.assertions(2)
 
-  const fullVC = await createFullVCV1({
+  const atomicVc = await createAtomicVCV1({
     issuer: issuerPrivKey,
     holder: getHolder(bobWallet),
   })
 
-  const batchFullVC = await createBatchFullVCV1({
+  const batchAtomicVC = await createBatchAtomicVCV1({
     issuer: issuerPrivKey,
     holder: getHolder(bobWallet),
   })
 
-  await expect(Utils.isAsyncValid(Validation.validateVerifiableCredential)(fullVC)).resolves.toBeTruthy()
-  await expect(Utils.isAsyncValid(Validation.validateVerifiableCredential)(batchFullVC)).resolves.toBeTruthy()
+  await expect(Utils.isAsyncValid(Validation.validateVerifiableCredential)(atomicVc)).resolves.toBeTruthy()
+  await expect(Utils.isAsyncValid(Validation.validateVerifiableCredential)(batchAtomicVC)).resolves.toBeTruthy()
 })
 
 test('Validation.validateVerifiablePresentationV1', async () => {
   expect.assertions(5)
 
-  const legacyFullVC = await createLegacyFullVCV1({
+  const legacyAtomicVC = await createLegacyAtomicVCV1({
     issuer: issuerPrivKey,
     holder: getHolder(bobWallet),
   })
 
-  const fullVC = await createFullVCV1({
+  const atomicVc = await createAtomicVCV1({
     issuer: issuerPrivKey,
     holder: getHolder(bobWallet),
   })
 
-  const batchFullVC = await createBatchFullVCV1({
+  const batchAtomicVC = await createBatchAtomicVCV1({
     issuer: issuerPrivKey,
     holder: getHolder(bobWallet),
   })
 
-  const alicesFullVC = await createFullVCV1({
+  const alicesAtomicVC = await createAtomicVCV1({
     issuer: issuerPrivKey,
     holder: getHolder(aliceWallet),
   })
 
   const legacyVerifiablePresentation = await createVerifiablePresentationV1({
-    fullVCs: [legacyFullVC],
+    atomicVcs: [legacyAtomicVC],
     holder: getHolder(bobWallet),
   })
 
   const verifiablePresentation = await createVerifiablePresentationV1({
-    fullVCs: [fullVC],
+    atomicVcs: [atomicVc],
     holder: getHolder(bobWallet),
   })
 
   const batchVerifiablePresentation = await createVerifiablePresentationV1({
-    fullVCs: [batchFullVC],
+    atomicVcs: [batchAtomicVC],
     holder: getHolder(bobWallet),
   })
 
   const mixedVerifiablePresentation = await createVerifiablePresentationV1({
-    fullVCs: [legacyFullVC, fullVC, batchFullVC],
+    atomicVcs: [legacyAtomicVC, atomicVc, batchAtomicVC],
     holder: getHolder(bobWallet),
   })
 
   const invalidVerifiablePresentation = await createVerifiablePresentationV1({
-    fullVCs: [fullVC, alicesFullVC],
+    atomicVcs: [atomicVc, alicesAtomicVC],
     holder: getHolder(bobWallet),
   })
 
