@@ -20,6 +20,7 @@
     "babel-register": "^6.26.0",
     "cookie": "^0.4.0",
     "cookie-signature": "^1.1.0",
+    "dayjs": "1.8.19",
     "dotenv": "^8.2.0",
     "fastify": "2.11.0",
     "fastify-cookie": "3.5.0",

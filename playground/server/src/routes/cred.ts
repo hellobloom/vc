@@ -1,12 +1,15 @@
 import fastify from 'fastify'
 import S from 'fluent-schema'
 import {buildClaimNodeV1, buildSDVCV1, buildSDBatchVCV1} from '@bloomprotocol/issue-kit'
-import {SDVCV1} from '@bloomprotocol/attestations-common'
+import {SDVCV1, EthUtils} from '@bloomprotocol/attestations-common'
+import dayjs from 'dayjs'
 
 import {IssuedCredential} from '@server/models'
 import {claimCookieKey} from '@server/cookies'
 import {sendNotification} from '@server/socket/sender'
 import {getEnv} from '@server/env'
+
+const contractAddress = '0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC'
 
 export const applyCredRoutes = (app: fastify.FastifyInstance) => {
   app.post<
@@ -96,9 +99,16 @@ export const applyCredRoutes = (app: fastify.FastifyInstance) => {
         params: S.object()
           .prop('id', S.string().format('uuid'))
           .required(['id']),
+        body: S.object()
+          .prop('subject', S.string())
+          .required(['subject']),
       },
     },
     async (req, reply) => {
+      if (!EthUtils.isValidDID(req.body.subject)) {
+        return reply.status(400).send({})
+      }
+
       const cred = await IssuedCredential.findOne({where: {id: req.params.id}})
       if (!cred) return reply.status(404).send({})
       if (cred.claimed) return reply.status(400).send({})
@@ -114,9 +124,12 @@ export const applyCredRoutes = (app: fastify.FastifyInstance) => {
 
       const vc = await buildSDVCV1({
         claimNodes,
-        subjectDID: '',
-        issuanceDate: '',
-        expirationDate: '',
+        subjectDID: req.body.subject,
+        issuanceDate: dayjs.utc().toISOString(),
+        expirationDate: dayjs
+          .utc()
+          .add(2, 'month')
+          .toISOString(),
         privateKey: Buffer.from(''),
       })
 
@@ -126,9 +139,10 @@ export const applyCredRoutes = (app: fastify.FastifyInstance) => {
 
       return reply.status(200).send({
         credential: vc,
-        batch_url: `${env.appServerUrl || env.host}/api/v1/cred/${req.params.id}/claim-v1/batch?issue-kit-from${
+        batchUrl: `${env.appServerUrl || env.host}/api/v1/cred/${req.params.id}/claim-v1/batch?issue-kit-from${
           req.query['issue-kit-from']
         }`,
+        contractAddress,
       })
     },
   )
@@ -222,9 +236,9 @@ export const applyCredRoutes = (app: fastify.FastifyInstance) => {
       const batchVc = await buildSDBatchVCV1({
         credential: req.body.credential,
         privateKey: Buffer.from([]),
-        contractAddress: '',
+        contractAddress,
         subjectSignature: req.body.subjectSignature,
-        requestNonce: '',
+        requestNonce: req.params.id,
       })
 
       if (req.query['issue-kit-from'] === 'qr') {

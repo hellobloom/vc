@@ -4,8 +4,10 @@ import {TAttestationTypeNames} from '@bloomprotocol/attestations-common'
 import {useParams, Redirect} from 'react-router-dom'
 import {isUuid} from 'uuidv4'
 import bowser from 'bowser'
-import JSONTree from 'react-json-tree'
 import clsx from 'clsx'
+import {JsonEditor} from 'jsoneditor-react'
+
+import 'jsoneditor-react/es/editor.min.css'
 
 import {Shell} from '../../components/Shell'
 import {useShareGetConfig} from '../../query/share'
@@ -15,10 +17,11 @@ import {api} from '../../api'
 import {resetSocketConnection, socketOn, socketOff} from '../../utils/socket'
 import {Message, MessageHeader, MessageBody, MessageSkin} from '../../components/Message'
 import {Card, CardContent} from '../../components/Card'
-
-import './index.scss'
 import {Button} from '../../components/Button'
 import {useLocalClient} from '../../components/LocalClientProvider'
+import {Delete} from '../../components/Delete'
+
+import './index.scss'
 
 const useGetSharedTypes = (ready: boolean) => {
   const [sharedData, setSharedData] = useState<[] | null | undefined>()
@@ -72,6 +75,7 @@ export const Share: React.FC<ShareProps> = props => {
   const {data, error} = useShareGetConfig({id: token})
   const sharedData = useGetSharedTypes(data !== null)
   const {shareVCs} = useLocalClient()
+  const [errorMessage, setErrorMessage] = useState<string>()
 
   if (!isUuid(token)) return <Redirect to={'/not-found'} />
 
@@ -87,7 +91,7 @@ export const Share: React.FC<ShareProps> = props => {
         </MessageHeader>
         <MessageBody>
           <div className="share__shared-data-container">
-            <JSONTree data={sharedData} />
+            <JsonEditor value={sharedData} mode="tree" />
           </div>
         </MessageBody>
       </Message>
@@ -110,6 +114,7 @@ export const Share: React.FC<ShareProps> = props => {
 
       cardContent = (
         <RequestElement
+          className="share__qr-container"
           shouldRenderButton={() => isMobile}
           requestData={{
             action: Action.attestation,
@@ -129,15 +134,22 @@ export const Share: React.FC<ShareProps> = props => {
         />
       )
 
-      localClientButton = (
-        <Button
-          onClick={() => {
-            shareVCs(data.types, url)
-          }}
-        >
-          Share From Local Client
-        </Button>
-      )
+      if (data.responseVersion === 'v1') {
+        localClientButton = (
+          <Button
+            isFullwidth
+            onClick={async () => {
+              const response = await shareVCs(data.types, token, url)
+
+              if (response.kind === 'error') {
+                setErrorMessage(response.message)
+              }
+            }}
+          >
+            Share From Local Client
+          </Button>
+        )
+      }
     } else {
       cardContent = <BouncingDots />
     }
@@ -145,12 +157,30 @@ export const Share: React.FC<ShareProps> = props => {
     children = (
       <React.Fragment>
         <Card>
-          <CardContent>{cardContent}</CardContent>
+          <CardContent>
+            {cardContent}
+            {localClientButton && (
+              <React.Fragment>
+                <div className="is-divider" data-content="OR" />
+                {localClientButton}
+              </React.Fragment>
+            )}
+            {errorMessage && (
+              <Message className="share__error-message" skin={MessageSkin.danger}>
+                <MessageHeader>
+                  <p>Error while sharing credentials:</p>
+                  <Delete onClick={() => setErrorMessage(undefined)} aria-label="clear message" />
+                </MessageHeader>
+                <MessageBody>{errorMessage}</MessageBody>
+              </Message>
+            )}
+          </CardContent>
         </Card>
-        {localClientButton}
       </React.Fragment>
     )
   }
+
+  const isNarrow = (!data || data.responseVersion === 'v0') && !sharedData
 
   return (
     <Shell titleSuffix="Share">
@@ -159,7 +189,15 @@ export const Share: React.FC<ShareProps> = props => {
         Share requested credentials with a {isMobile ? 'click of a button' : 'scan of a QR code'}.
       </p>
       <div className="columns is-mobile is-centered">
-        <div className={clsx('column', {'is-narrow': !sharedData})}>{children}</div>
+        <div
+          className={clsx('column is-one-third-desktop is-half-tablet', {
+            'is-narrow': isNarrow,
+            'is-full': sharedData,
+          })}
+          style={{width: isNarrow && !sharedData ? 'auto' : undefined}}
+        >
+          {children}
+        </div>
       </div>
     </Shell>
   )

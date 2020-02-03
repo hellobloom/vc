@@ -83,9 +83,11 @@ const validateOnChainProperties = (subject: string, payloadData: FullVCVerifiedD
   return errors
 }
 
+export type ValidateVerifiablePresentationResponseOptionsV1 = SharedValidateVerifiablePresentationOptions
+
 export const validateVerifiablePresentationResponseV1 = async (
   data: any,
-  options: SharedValidateVerifiablePresentationOptions = {},
+  options: ValidateVerifiablePresentationResponseOptionsV1 = {},
 ): Promise<ValidationResponse<VerifiablePresentationV1<FullVCV1>>> => {
   const outcome = await validateVerifiablePresentationV1(data)
 

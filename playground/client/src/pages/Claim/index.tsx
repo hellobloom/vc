@@ -4,7 +4,9 @@ import {useParams, Redirect} from 'react-router-dom'
 import {isUuid} from 'uuidv4'
 import {ClaimElement} from '@bloomprotocol/claim-kit-react'
 import clsx from 'clsx'
-import JSONTree from 'react-json-tree'
+import {JsonEditor} from 'jsoneditor-react'
+
+import 'jsoneditor-react/es/editor.min.css'
 
 import {Shell} from '../../components/Shell'
 import {sitemap} from '../../sitemap'
@@ -14,6 +16,9 @@ import {Message, MessageHeader, MessageBody, MessageSkin} from '../../components
 import {useCredGetConfig} from '../../query/cred'
 import {resetSocketConnection, socketOn, socketOff} from '../../utils/socket'
 import {api} from '../../api'
+import {useLocalClient} from '../../components/LocalClientProvider'
+import {Button} from '../../components/Button'
+import {Delete} from '../../components/Delete'
 
 import './index.scss'
 
@@ -68,6 +73,8 @@ export const Claim: React.FC<ClaimProps> = props => {
   const {id: token} = useParams<{id: string}>()
   const {data, error} = useCredGetConfig({id: token})
   const claimedData = useGetClaimedTypes(data !== null)
+  const {claimVC} = useLocalClient()
+  const [errorMessage, setErrorMessage] = useState<string>()
 
   if (!isUuid(token)) return <Redirect to={'/not-found'} />
 
@@ -83,7 +90,7 @@ export const Claim: React.FC<ClaimProps> = props => {
         </MessageHeader>
         <MessageBody>
           <div className="claim__claimed-data-container">
-            <JSONTree data={claimedData} />
+            <JsonEditor value={claimedData} mode="preview" />
           </div>
         </MessageBody>
       </Message>
@@ -99,15 +106,19 @@ export const Claim: React.FC<ClaimProps> = props => {
     )
   } else {
     let cardContent: React.ReactNode
+    let localClientButton: React.ReactNode | undefined
 
     if (data) {
+      const url = `${host}/api/v1/cred/${token}/claim-${data.claimVersion}`
+
       cardContent = (
         <ClaimElement
+          className="claim__qr-container"
           shouldRenderButton={isMobile}
           claimData={{
             version: 1,
             token,
-            url: `${host}/api/v1/cred/${token}/claim-${data.claimVersion}`,
+            url,
           }}
           qrOptions={{size: 256}}
           buttonOptions={{
@@ -115,14 +126,48 @@ export const Claim: React.FC<ClaimProps> = props => {
           }}
         />
       )
+
+      localClientButton = (
+        <Button
+          isFullwidth
+          onClick={async () => {
+            const response = await claimVC(url, token)
+
+            if (response.kind === 'error') {
+              setErrorMessage(response.message)
+            }
+          }}
+        >
+          Claim With Local Client
+        </Button>
+      )
     } else {
       cardContent = <BouncingDots />
     }
 
     children = (
-      <Card>
-        <CardContent>{cardContent}</CardContent>
-      </Card>
+      <React.Fragment>
+        <Card>
+          <CardContent>
+            {cardContent}
+            {localClientButton && (
+              <React.Fragment>
+                <div className="is-divider" data-content="OR" />
+                {localClientButton}
+              </React.Fragment>
+            )}
+            {errorMessage && (
+              <Message className="claim__error-message" skin={MessageSkin.danger}>
+                <MessageHeader>
+                  <p>Error while claiming the credential:</p>
+                  <Delete onClick={() => setErrorMessage(undefined)} aria-label="clear message" />
+                </MessageHeader>
+                <MessageBody>{errorMessage}</MessageBody>
+              </Message>
+            )}
+          </CardContent>
+        </Card>
+      </React.Fragment>
     )
   }
 
@@ -131,7 +176,7 @@ export const Claim: React.FC<ClaimProps> = props => {
       <h1 className="title is-1 has-text-weight-bold has-text-centered">Claim Credential</h1>
       <p className="subtitle has-text-centered">Claim a credential with a {isMobile ? 'click of a button' : 'scan of a QR code'}.</p>
       <div className="columns is-mobile is-centered">
-        <div className={clsx('column', {'is-narrow': !claimedData})}>{children}</div>
+        <div className={clsx('column is-one-third-desktop is-half-tablet')}>{children}</div>
       </div>
     </Shell>
   )
