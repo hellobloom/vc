@@ -1,11 +1,9 @@
-import {EthUtils, Utils, IProof, AtomicVCV1} from '@bloomprotocol/attestations-common'
+import {EthUtils, Utils, AtomicVCV1} from '@bloomprotocol/attestations-common'
 import {buildClaimNodeV1, buildSDLegacyVCV1, buildSDVCV1, buildSDBatchVCV1} from '@bloomprotocol/issue-kit'
-import * as EthU from 'ethereumjs-util'
 import EthWallet from 'ethereumjs-wallet'
 import * as ethSigUtil from 'eth-sig-util'
 
 import * as Validation from '../../../../src/validate/v1/structure'
-import {formatMerkleProofForShare} from '../../../../src/utils'
 
 import {Holder, getHolder, buildBatchAtomicVCV1, buildOnChainAtomicVCV1, buildVerifiablePresentation, buildLegacyAtomicVCV1} from './utils'
 
@@ -127,80 +125,6 @@ const createVerifiablePresentationV1 = ({atomicVcs, holder}: {atomicVcs: AtomicV
     holder,
   })
 }
-
-test('Validation.isValidPositionString', () => {
-  expect(Validation.isValidPositionString('left')).toBeTruthy()
-  expect(Validation.isValidPositionString('right')).toBeTruthy()
-  expect(Validation.isValidPositionString('')).toBeFalsy()
-  expect(Validation.isValidPositionString('up')).toBeFalsy()
-})
-
-test('Validation.isValidStageString', () => {
-  expect(Validation.isValidStageString('mainnet')).toBeTruthy()
-  expect(Validation.isValidStageString('rinkeby')).toBeTruthy()
-  expect(Validation.isValidStageString('local')).toBeTruthy()
-  expect(Validation.isValidStageString('')).toBeFalsy()
-  expect(Validation.isValidStageString('home')).toBeFalsy()
-})
-
-test('Validation.isValidMerkleProofArray', () => {
-  const testLeaves = EthUtils.getPadding(1)
-  const validMerkleTree = EthUtils.getMerkleTreeFromLeaves(testLeaves)
-  const validMerkleProof = validMerkleTree.getProof(EthU.toBuffer(testLeaves[1])) as IProof[]
-  const shareableMerkleProof = formatMerkleProofForShare(validMerkleProof)
-  expect(Validation.isValidMerkleProofArray(validMerkleProof, undefined)).toBeFalsy()
-  expect(Validation.isValidMerkleProofArray(shareableMerkleProof, undefined)).toBeTruthy()
-  expect(Validation.isValidMerkleProofArray([], undefined)).toBeFalsy()
-})
-
-test('Validation.isValidLegacyDataNode', async () => {
-  const legacySdvc = await createSDLegacyVCV1({
-    issuer: issuerPrivKey,
-    holder: getHolder(bobWallet),
-  })
-
-  const sdvc = await createSDVCV1({
-    issuer: issuerPrivKey,
-    holder: getHolder(bobWallet),
-  })
-
-  expect(Validation.isValidLegacyDataNode(legacySdvc.credentialSubject.dataNodes[0])).toBeTruthy()
-  expect(Validation.isValidLegacyDataNode(sdvc.credentialSubject.claimNodes[0] as any)).toBeFalsy()
-})
-
-test('Validation.isValidClaimNode', async () => {
-  expect.assertions(2)
-
-  const legacyAtomicVC = await createLegacyAtomicVCV1({
-    issuer: issuerPrivKey,
-    holder: getHolder(bobWallet),
-  })
-
-  const atomicVc = await createAtomicVCV1({
-    issuer: issuerPrivKey,
-    holder: getHolder(bobWallet),
-  })
-
-  expect(Validation.isValidClaimNode(legacyAtomicVC.proof.data.target as any)).toBeFalsy()
-  expect(Validation.isValidClaimNode(atomicVc.proof.data.target as any)).toBeTruthy()
-})
-
-test('Validation.isValidVerifiedData', async () => {
-  expect.assertions(2)
-
-  const atomicVc = await createAtomicVCV1({
-    issuer: issuerPrivKey,
-    holder: getHolder(bobWallet),
-  })
-
-  const batchAtomicVC = await createBatchAtomicVCV1({
-    issuer: issuerPrivKey,
-    holder: getHolder(bobWallet),
-  })
-
-  expect(Validation.isValidVerifiedData(atomicVc.proof.data)).toBeTruthy()
-  expect(Validation.isValidVerifiedData(batchAtomicVC.proof.data)).toBeTruthy()
-})
 
 test('Validation.validateCredentialSubject', async () => {
   expect.assertions(2)

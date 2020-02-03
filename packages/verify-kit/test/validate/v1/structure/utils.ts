@@ -7,8 +7,8 @@ import {
   SDBatchVCV1,
   AtomicVCSignedAuthorizationV1,
   AtomicVCV1,
-  VerifiablePresentationProofV1,
-  VerifiablePresentationV1,
+  VPProofV1,
+  VPV1,
   SDLegacyVCV1,
 } from '@bloomprotocol/attestations-common'
 import * as EthU from 'ethereumjs-util'
@@ -111,7 +111,7 @@ const buildLegacyAtomicVCProofV1 = async ({
   const {didDocument} = await new EthUtils.EthereumDIDResolver().resolve(`did:ethr:${holder.publicStringHex}`)
   const publicKey = didDocument.publicKey[0]
 
-  const signed = jsigs.sign(unsignedVC, {
+  const {proof} = await jsigs.sign(unsignedVC, {
     suite: new EcdsaSecp256k1Signature2019({
       key: new EcdsaSecp256k1KeyClass2019({
         id: publicKey.id,
@@ -122,11 +122,6 @@ const buildLegacyAtomicVCProofV1 = async ({
     documentLoader: defaultDocumentLoader,
     purpose: new AssertionProofPurpose(),
   })
-
-  const {proof} = signed
-
-  console.log({signed})
-  console.log({proof})
 
   return {
     ...proof,
@@ -355,17 +350,17 @@ export const buildBatchAtomicVCV1 = async ({
       }),
   })
 
-const buildVerifiablePresentationV1Proof = async ({
+const buildVPProofV1 = async ({
   unsignedVP,
   token,
   domain,
   holder,
 }: {
-  unsignedVP: Omit<VerifiablePresentationV1, 'proof'>
+  unsignedVP: Omit<VPV1, 'proof'>
   token: string
   domain: string
   holder: Holder
-}): Promise<VerifiablePresentationProofV1> => {
+}): Promise<VPProofV1> => {
   const {didDocument} = await new EthUtils.EthereumDIDResolver().resolve(`did:ethr:${holder.publicStringHex}`)
   const publicKey = didDocument.publicKey[0]
 
@@ -397,15 +392,15 @@ export const buildVerifiablePresentation = async ({
   token: string
   domain: string
   holder: Holder
-}): Promise<VerifiablePresentationV1> => {
-  const unsignedVP: Omit<VerifiablePresentationV1<AtomicVCV1>, 'proof'> = {
+}): Promise<VPV1> => {
+  const unsignedVP: Omit<VPV1<AtomicVCV1>, 'proof'> = {
     '@context': ['https://www.w3.org/2018/credentials/v1'],
     type: ['VerifiablePresentation'],
     verifiableCredential: atomicCredentials,
     holder: `did:ethr:${holder.publicStringHex}`,
   }
 
-  const proof = await buildVerifiablePresentationV1Proof({unsignedVP, holder, token, domain})
+  const proof = await buildVPProofV1({unsignedVP, holder, token, domain})
 
   return {
     ...unsignedVP,

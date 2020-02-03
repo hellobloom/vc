@@ -16,7 +16,7 @@ import {keccak256} from 'js-sha3'
 import EthWallet from 'ethereumjs-wallet'
 import * as ethUtil from 'ethereumjs-util'
 
-import {getMerkleTreeFromLeaves, getBloomMerkleTree, getPadding} from '../utils'
+import {getMerkleTreeFromLeaves, getBloomMerkleTree, getPadding} from '../../utils'
 
 const hashClaimTree = (claim: VCIssuedClaimNodeV1): Buffer => {
   const dataHash = EthUtils.hashMessage(Utils.orderedStringify(claim.data))
