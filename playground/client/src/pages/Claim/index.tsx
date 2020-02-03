@@ -1,12 +1,9 @@
-import React, {useState, useEffect, useCallback} from 'react'
+import React, {useState, useEffect} from 'react'
 import bowser from 'bowser'
 import {useParams, Redirect} from 'react-router-dom'
 import {isUuid} from 'uuidv4'
 import {ClaimElement} from '@bloomprotocol/claim-kit-react'
 import clsx from 'clsx'
-import {JsonEditor} from 'jsoneditor-react'
-
-import 'jsoneditor-react/es/editor.min.css'
 
 import {Shell} from '../../components/Shell'
 import {sitemap} from '../../sitemap'
@@ -19,6 +16,7 @@ import {api} from '../../api'
 import {useLocalClient} from '../../components/LocalClientProvider'
 import {Button} from '../../components/Button'
 import {Delete} from '../../components/Delete'
+import {JsonEditor} from '../../components/JsonEditor'
 
 import './index.scss'
 
@@ -48,11 +46,11 @@ const useGetClaimedTypes = (ready: boolean) => {
     }
   }, [])
 
-  const socketCallback = useCallback(async verifiableCredential => {
-    setClaimedData(verifiableCredential)
-  }, [])
-
   useEffect(() => {
+    const socketCallback = (verifiableCredential: any) => {
+      setClaimedData(verifiableCredential)
+    }
+
     if (ready) {
       resetSocketConnection()
       socketOn('notif/cred-claimed', socketCallback)
@@ -61,7 +59,7 @@ const useGetClaimedTypes = (ready: boolean) => {
     return () => {
       socketOff('notif/cred-claimed', socketCallback)
     }
-  }, [ready, socketCallback])
+  }, [ready])
 
   return claimedData
 }
@@ -76,7 +74,7 @@ export const Claim: React.FC<ClaimProps> = props => {
   const {claimVC} = useLocalClient()
   const [errorMessage, setErrorMessage] = useState<string>()
 
-  if (!isUuid(token)) return <Redirect to={'/not-found'} />
+  if (!isUuid(token)) return <Redirect to="/not-found" />
 
   const host = process.env.REACT_APP_SERVER_URL || `${window.location.protocol}//${window.location.host}`
 
@@ -90,7 +88,7 @@ export const Claim: React.FC<ClaimProps> = props => {
         </MessageHeader>
         <MessageBody>
           <div className="claim__claimed-data-container">
-            <JsonEditor value={claimedData} mode="preview" />
+            <JsonEditor value={claimedData} />
           </div>
         </MessageBody>
       </Message>

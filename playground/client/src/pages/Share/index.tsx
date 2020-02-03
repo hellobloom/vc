@@ -5,9 +5,6 @@ import {useParams, Redirect} from 'react-router-dom'
 import {isUuid} from 'uuidv4'
 import bowser from 'bowser'
 import clsx from 'clsx'
-import {JsonEditor} from 'jsoneditor-react'
-
-import 'jsoneditor-react/es/editor.min.css'
 
 import {Shell} from '../../components/Shell'
 import {useShareGetConfig} from '../../query/share'
@@ -20,6 +17,7 @@ import {Card, CardContent} from '../../components/Card'
 import {Button} from '../../components/Button'
 import {useLocalClient} from '../../components/LocalClientProvider'
 import {Delete} from '../../components/Delete'
+import {JsonEditor} from '../../components/JsonEditor'
 
 import './index.scss'
 
@@ -77,7 +75,7 @@ export const Share: React.FC<ShareProps> = props => {
   const {shareVCs} = useLocalClient()
   const [errorMessage, setErrorMessage] = useState<string>()
 
-  if (!isUuid(token)) return <Redirect to={'/not-found'} />
+  if (!isUuid(token)) return <Redirect to="/not-found" />
 
   const host = process.env.REACT_APP_SERVER_URL || `${window.location.protocol}//${window.location.host}`
 
@@ -91,7 +89,7 @@ export const Share: React.FC<ShareProps> = props => {
         </MessageHeader>
         <MessageBody>
           <div className="share__shared-data-container">
-            <JsonEditor value={sharedData} mode="tree" />
+            <JsonEditor value={sharedData} />
           </div>
         </MessageBody>
       </Message>

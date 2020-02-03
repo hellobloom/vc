@@ -1,11 +1,8 @@
 import React, {useState} from 'react'
 import {Link} from 'react-router-dom'
 import {FC} from 'react-forward-props'
-import {JsonEditor} from 'jsoneditor-react'
 import {useId} from '@reach/auto-id'
 import {stripIndent, codeBlock} from 'common-tags'
-
-import 'jsoneditor-react/es/editor.min.css'
 
 import {Shell} from '../../components/Shell'
 import {Message, MessageSkin, MessageHeader, MessageBody} from '../../components/Message'
@@ -14,6 +11,7 @@ import {sitemap} from '../../sitemap'
 import {Button, ButtonSkin} from '../../components/Button'
 import {Card, CardHeader, CardHeaderTitle, CardContent, CardFooter, CardFooterItem} from '../../components/Card'
 import {api} from '../../api'
+import {JsonEditor} from '../../components/JsonEditor'
 
 import './index.scss'
 
@@ -88,7 +86,7 @@ const ClaimNodeBuilder: FC<'div', ClaimNodeBuilderProps> = props => {
           Data
         </label>
         <div className="control">
-          <JsonEditor id={`${props.id}-data`} value={props.data} onChange={props.onDataChange} mode="tree" />
+          <JsonEditor id={`${props.id}-data`} value={props.data} onChange={props.onDataChange} />
         </div>
       </div>
     </div>
