@@ -50,40 +50,6 @@ export type VCRevocationLinks = {
   typeHash: string
 }
 
-export type VCLegacyAttestationNode = VCClaimNodeV1 & {
-  link: VCRevocationLinks
-}
-
-export type VCLegacySignedDataNodeV1 = {
-  attestationNode: VCLegacyAttestationNode
-  signedAttestation: string // Root hash of Attestation tree signed by attester
-}
-
-type VCIssuanceNodeV1 = {
-  /** Hex string to identify this attestation node in the event of partial revocation */
-  localRevocationToken: string
-  /** Hex string to identify this attestation in the event of revocation */
-  globalRevocationToken: string
-  /** hash of data node attester is verifying */
-  dataHash: string
-  /** hash of type node attester is verifying */
-  typeHash: string
-  /** RFC3339 timestamp of when the claim was issued https://tools.ietf.org/html/rfc3339 */
-  issuanceDate: string
-  /** RFC3339 timestamp of when the claim should expire https://tools.ietf.org/html/rfc3339 */
-  expirationDate: string
-}
-
-export type VCIssuedClaimNodeV1 = VCClaimNodeV1 & {
-  issuance: VCIssuanceNodeV1
-}
-
-export type VCSignedClaimNodeV1 = {
-  claimNode: VCIssuedClaimNodeV1
-  issuer: string
-  issuerSignature: string
-}
-
 export type BaseVCTypeV1 = ['VerifiableCredential', ...string[]]
 
 export type BaseVCSubjectV1 = {
@@ -101,10 +67,20 @@ export type BaseVCProofSignedV1 = BaseVCProofUnsignedV1 & {
   jws: string
 }
 
+export type BaseVCRevocationV1 = {
+  '@context': string
+}
+
+export type BaseVCRevocationSimpleV1 = {
+  '@context': string
+  token: string
+}
+
 export type BaseVCV1<
   Subject extends BaseVCSubjectV1 = BaseVCSubjectV1,
   Type extends BaseVCTypeV1 = BaseVCTypeV1,
-  Proof extends BaseVCProofUnsignedV1 = BaseVCProofUnsignedV1
+  Proof extends BaseVCProofUnsignedV1 = BaseVCProofUnsignedV1,
+  Revocation extends BaseVCRevocationV1 = BaseVCRevocationSimpleV1
 > = {
   '@context': string[]
   id?: string
@@ -113,6 +89,7 @@ export type BaseVCV1<
   issuanceDate: string
   expirationDate?: string
   credentialSubject: Subject
+  revocation: Revocation
   proof: Proof
 }
 
