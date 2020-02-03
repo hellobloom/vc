@@ -1,4 +1,4 @@
-import {IBaseAtt, IBaseAttDataObj, TDateOrTime, TPersonalName} from '../attestationData/v0'
+import {IBaseAtt, IBaseAttDataObj, TDateOrTime, TPersonalName} from '../types/data/v0'
 
 export type MaybeDS<T> = string | T
 

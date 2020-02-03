@@ -1,5 +1,5 @@
-import * as AttestationData from './attestationData/v0'
-import * as AttestationDataV1 from './attestationData/v1'
+import * as AttestationData from './types/data/v0'
+import * as AttestationDataV1 from './types/data/v1'
 import * as EthUtils from './ethUtils'
 import * as Utils from './utils'
 

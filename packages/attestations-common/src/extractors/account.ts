@@ -1,5 +1,5 @@
 import * as B from './base'
-import {IBaseAttAccount, IBaseAttAccountData, TPersonalNameObj} from '../attestationData/v0'
+import {IBaseAttAccount, IBaseAttAccountData, TPersonalNameObj} from '../types/data/v0'
 
 export const fields: Array<keyof IBaseAttAccountData> = ['id', 'email', 'name', 'start_date', 'end_date']
 

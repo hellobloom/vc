@@ -1,4 +1,4 @@
-import {BaseVCV1} from '../../types/vc/shared/v1'
+import {BaseVCV1} from '../../vc/shared/v1'
 
 // Base types
 export type TLangString = {value: string; lang: string}

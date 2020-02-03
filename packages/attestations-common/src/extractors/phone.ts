@@ -1,5 +1,5 @@
 import * as B from './base'
-import {IBaseAttPhone, TPhoneNumberObj} from '../attestationData/v0'
+import {IBaseAttPhone, TPhoneNumberObj} from '../types/data/v0'
 
 export const extractPhone = (a: B.MaybeDS<IBaseAttPhone>, valType: string): string | null => {
   switch (valType) {
