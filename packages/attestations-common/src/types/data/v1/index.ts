@@ -2,56 +2,6 @@ import {AtomicVCV1} from '../../vc/atomic/v1'
 //import {Organization, PostalAddress, Text, Event, Person} from 'schema-dts'
 import {Organization} from 'schema-dts'
 
-/*
-// Base types
-// export type TLangString = {value: string; lang: string}
-export type TLangString = {[locale: string]: string}
-export type TMaybeArray<T> = T | Array<T>
-
-// credentialSubject types
-
-// Entity type - for the existence of a legal entity
-export type VCEntityCS = {
-  identifier: string
-  entity: VCEntityCSEntity
-  //registrationchanges for CN and registered activities for Singapore
-  registrationEvents: Array<Event>
-  representative: TMaybeArray<Person>
-  bankruptcy: Array<{
-    caseId: string
-    caseType: string
-    date: string
-    status: string
-  }>
-  legalRecords: {}
-}
-
-export type TAddress = Text | PostalAddress
-
-export type VCEntityCSEntity = Organization & {
-  name: TMaybeArray<Text>
-  legalName: TMaybeArray<Text>
-  address: TMaybeArray<TAddress>
-  description: Text
-  identifier: string
-  type: string
-  state: string
-  //example of how to address multiple languages like pinyin and chinese
-  registrationDate: string
-  expirationDate: string
-  registrationAuthority: string // ACRA in Singapore
-  telephone: string
-  faxNumber: string
-  email: string
-  url: string
-  aliases: {
-    type: string
-  }
-}
-
-export type VCEntity = AtomicVCV1<VCEntityCS, ['VerifiableCredential', 'AtomicCredential', 'EntityCredential']>
-  */
-
 // Coerce Organization to object
 export type OrganizationObj = Organization & {identifier: string}
 
