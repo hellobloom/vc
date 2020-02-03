@@ -3,28 +3,18 @@ import {Stage, IMerkleProofShare} from '../../misc'
 import {ISignedClaimNode, IDataNodeLegacy} from '../shared/v0'
 
 export interface IAuthorization {
-  /**
-   * Address of keypair granting authorization
-   */
+  /** Address of keypair granting authorization */
   subject: string
-  /**
-   * Address of keypair receiving authorization
-   */
+  /** Address of keypair receiving authorization */
   recipient: string
-  /**
-   * Hex string to identify this authorization in the event of revocation
-   */
+  /** Hex string to identify this authorization in the event of revocation */
   revocation: string
 }
 
 export interface ISignedAuthorization {
-  /**
-   * Hash of IAuthorization
-   */
+  /** Hash of IAuthorization */
   authorization: IAuthorization
-  /**
-   * Signed hashed authorization
-   */
+  /** Signed hashed authorization */
   signature: string
 }
 
@@ -37,155 +27,69 @@ export enum DataVersions {
 
 export interface IVerifiedDataLegacy {
   version: DataVersions.legacy
-
-  /**
-   * Blockchain transaction hash which emits the layer2Hash property
-   */
+  /** Blockchain transaction hash which emits the layer2Hash property */
   tx: string
-
-  /**
-   * Attestation hash that lives on chain and is formed by hashing the merkle
-   * tree root hash with a nonce.
-   */
+  /** Attestation hash that lives on chain and is formed by hashing the merkle tree root hash with a nonce.  */
   layer2Hash: string
-
-  /**
-   * Merkle tree root hash
-   */
+  /** Merkle tree root hash */
   rootHash: string
-
-  /**
-   * Nonce used to hash the `rootHash` to create the `layer2Hash`
-   */
+  /** Nonce used to hash the `rootHash` to create the `layer2Hash` */
   rootHashNonce: string
-
-  /**
-   * Merkle tree leaf proof
-   */
+  /** Merkle tree leaf proof */
   proof: IMerkleProofShare[]
-
-  /**
-   * The Ethereum network name on which the tx can be found
-   */
+  /** The Ethereum network name on which the tx can be found */
   stage: Stage
-
-  /**
-   * Data node containing the raw verified data that was requested
-   */
+  /** Data node containing the raw verified data that was requested */
   target: IDataNodeLegacy
-
-  /**
-   * Ethereum address of the attester that performed the attestation
-   */
+  /** Ethereum address of the attester that performed the attestation */
   attester: string
 }
 
 export interface IVerifiedDataOnChain {
   version: DataVersions.onChain
-
-  /**
-   * Blockchain transaction hash which emits the layer2Hash property
-   */
+  /** Blockchain transaction hash which emits the layer2Hash property */
   tx: string
-
-  /**
-   * Attestation hash that lives on chain and is formed by hashing the merkle
-   * tree root hash with a nonce.
-   */
+  /** Attestation hash that lives on chain and is formed by hashing the merkle tree root hash with a nonce.  */
   layer2Hash: string
-
-  /**
-   * Merkle tree root hash
-   */
+  /** Merkle tree root hash */
   rootHash: string
-
-  /**
-   * Nonce used to hash the `rootHash` to create the `layer2Hash`
-   */
+  /** Nonce used to hash the `rootHash` to create the `layer2Hash` */
   rootHashNonce: string
-
-  /**
-   * Merkle tree leaf proof
-   */
+  /** Merkle tree leaf proof */
   proof: IMerkleProofShare[]
-
-  /**
-   * The Ethereum network name on which the tx can be found
-   */
+  /** The Ethereum network name on which the tx can be found */
   stage: Stage
-
-  /**
-   * Data node containing the raw verified data that was requested
-   */
+  /** Data node containing the raw verified data that was requested */
   target: ISignedClaimNode
-
-  /**
-   * Ethereum address of the attester that performed the attestation
-   */
+  /** Ethereum address of the attester that performed the attestation */
   attester: string
 }
 
 export interface IVerifiedDataBatch {
   version: DataVersions.batch
-
-  /**
-   * Attestation hash formed by hashing subject sig with attester sig
-   */
+  /** Attestation hash formed by hashing subject sig with attester sig */
   batchLayer2Hash: string
-
-  /**
-   * Attester signature of layer2Hash and subject address
-   */
+  /** Attester signature of layer2Hash and subject address */
   batchAttesterSig: string
-
-  /**
-   * Subject signature of attestation agreement
-   */
+  /** Subject signature of attestation agreement */
   subjectSig: string
-
-  /**
-   * Nonce used in subject sig
-   */
+  /** Nonce used in subject sig */
   requestNonce: string
-
-  /**
-   * Hash of rootHash and rootHashNonce
-   */
+  /** Hash of rootHash and rootHashNonce */
   layer2Hash: string
-
-  /**
-   * Merkle tree root hash
-   */
+  /** Merkle tree root hash */
   rootHash: string
-
-  /**
-   * Nonce used to hash the `rootHash` to create the `layer2Hash`
-   */
+  /** Nonce used to hash the `rootHash` to create the `layer2Hash` */
   rootHashNonce: string
-
-  /**
-   * Merkle tree leaf proof
-   */
+  /** Merkle tree leaf proof */
   proof: IMerkleProofShare[]
-
-  /**
-   * The Ethereum network name on which the tx can be found
-   */
+  /** The Ethereum network name on which the tx can be found */
   stage: Stage
-
-  /**
-   * Data node containing the raw verified data that was requested
-   */
+  /** Data node containing the raw verified data that was requested */
   target: ISignedClaimNode
-
-  /**
-   * Ethereum address of the attester that performed the attestation
-   */
+  /** Ethereum address of the attester that performed the attestation */
   attester: string
-
-  /**
-   * Subject of atteststation
-   */
+  /** Subject of attestation */
   subject: string
 }
 
@@ -215,14 +119,10 @@ export interface IVerifiableCredential {
   issuanceDate: string
 
   credentialSubject: {
-    // original subject of attestation
+    /** original subject of attestation */
     subject: string
     data: string
-    /**
-     * Array of signed authorization objects
-     * Only included if subject is different from sharer
-     * otherwise empty array
-     */
+    /** Array of signed authorization objects.  Only included if subject is different from sharer, otherwise empty array */
     authorization: ISignedAuthorization[]
   }
 

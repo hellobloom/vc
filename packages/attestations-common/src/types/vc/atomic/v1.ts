@@ -1,7 +1,5 @@
 import {BaseVCV1, BaseVCTypeV1, BaseVCSubjectV1, BaseVCProofSignedV1, BaseVCRevocationV1, BaseVCRevocationSimpleV1} from '../shared/v1'
 
-export type AtomicVCTypeV1 = [BaseVCTypeV1[0], 'AtomicCredential', ...string[]]
-
 export type AtomicVCSubjectV1 = BaseVCSubjectV1
 
 export type AtomicVCProofV1 = BaseVCProofSignedV1 & {

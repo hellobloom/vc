@@ -1,10 +1,11 @@
-import {BaseVCV1} from '../../vc/shared/v1'
+import {AtomicVCV1} from '../../vc/atomic/v1'
 
 // Base types
 export type TLangString = {value: string; lang: string}
 
 // credentialSubject types
 
+/** Entity type - for the existence of a legal entity */
 export type TCSEntity = {
   id: string
   entity: {
@@ -46,4 +47,4 @@ export type TCSEntity = {
   legalRecords: {}
 }
 
-export type TCEntity = BaseVCV1<TCSEntity>
+export type TCEntity = AtomicVCV1<TCSEntity, ['VerifiableCredential', 'AtomicCredential', 'EntityCredential']>
