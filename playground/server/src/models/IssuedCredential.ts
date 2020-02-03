@@ -1,18 +1,18 @@
 import {Sequelize, Model, DataTypes, UUIDV4} from 'sequelize'
-import {SDVC, SDBatchVC} from '@bloomprotocol/attestations-common'
+import {AtomicVCV1} from '@bloomprotocol/attestations-common'
 
 export class IssuedCredential extends Model {
   id!: string
 
-  claimNodes!: {type: string; version: string; provider: string; data: {}}[]
+  type!: string
+
+  data!: {}
 
   claimVersion!: 'v1'
 
   claimed!: boolean
 
-  credential?: SDVC
-
-  batchCredential?: SDBatchVC
+  vc?: AtomicVCV1
 
   createdAt!: Date
 
@@ -28,9 +28,13 @@ export const initIssuedCredential = (sequelize: Sequelize) => {
         allowNull: false,
         defaultValue: UUIDV4,
       },
-      claimNodes: {
+      type: {
         allowNull: false,
-        type: DataTypes.ARRAY(DataTypes.JSONB),
+        type: DataTypes.STRING(),
+      },
+      data: {
+        allowNull: false,
+        type: DataTypes.JSONB,
       },
       claimVersion: {
         allowNull: false,
@@ -41,11 +45,7 @@ export const initIssuedCredential = (sequelize: Sequelize) => {
         type: DataTypes.BOOLEAN,
         defaultValue: false,
       },
-      credential: {
-        allowNull: true,
-        type: DataTypes.JSONB,
-      },
-      batchCredential: {
+      vc: {
         allowNull: true,
         type: DataTypes.JSONB,
       },

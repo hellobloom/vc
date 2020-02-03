@@ -9,24 +9,24 @@ module.exports = {
         type: DataTypes.UUID,
         defaultValue: Sequelize.fn('uuid_generate_v4'),
       },
-      claimNodes: {
+      type: {
         allowNull: false,
-        type: DataTypes.ARRAY(DataTypes.JSONB),
+        type: DataTypes.STRING(),
+      },
+      data: {
+        allowNull: false,
+        type: DataTypes.JSONB,
+      },
+      claimVersion: {
+        allowNull: false,
+        type: DataTypes.ENUM('v1'),
       },
       claimed: {
         allowNull: false,
         type: DataTypes.BOOLEAN,
         defaultValue: false,
       },
-      claimVersion: {
-        allowNull: false,
-        type: DataTypes.ENUM('v1'),
-      },
-      credential: {
-        allowNull: true,
-        type: DataTypes.JSONB,
-      },
-      batchCredential: {
+      vc: {
         allowNull: true,
         type: DataTypes.JSONB,
       },

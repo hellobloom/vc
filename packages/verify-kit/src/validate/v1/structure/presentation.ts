@@ -8,6 +8,7 @@ import {
   AtomicVCV1,
   AtomicVCSubjectV1,
   AtomicVCProofV1,
+  BaseVCRevocationV1,
 } from '@bloomprotocol/attestations-common'
 
 const {EcdsaSecp256k1KeyClass2019, EcdsaSecp256k1Signature2019, defaultDocumentLoader} = require('@transmute/lds-ecdsa-secp256k1-2019')
@@ -17,6 +18,10 @@ const {AuthenticationProofPurpose, AssertionProofPurpose} = jsigs.purposes
 
 export const validateCredentialSubject = genValidateFn<AtomicVCSubjectV1>({
   id: EthUtils.isValidDID,
+})
+
+const validateCredentialRevocation = genValidateFn<BaseVCRevocationV1>({
+  '@context': Utils.isNotEmptyString,
 })
 
 const validateCredentialProof = genValidateFn<AtomicVCProofV1>({
@@ -54,7 +59,7 @@ const isCredentialProofValid = async (value: any, data: any) => {
 export const validateVerifiableCredential = genAsyncValidateFn<AtomicVCV1>({
   '@context': Utils.isArrayOfNonEmptyStrings,
   id: Utils.isUndefinedOr(Utils.isNotEmptyString),
-  type: [Utils.isArrayOfNonEmptyStrings, (value: any) => value[0] === 'VerifiableCredential' && value[1] === 'AtomicCredential'],
+  type: [Utils.isArrayOfNonEmptyStrings, (value: any) => value[0] === 'VerifiableCredential'],
   issuer: EthUtils.isValidDID,
   issuanceDate: Utils.isValidRFC3339DateTime,
   expirationDate: Utils.isUndefinedOr(Utils.isValidRFC3339DateTime),
@@ -62,6 +67,7 @@ export const validateVerifiableCredential = genAsyncValidateFn<AtomicVCV1>({
     Utils.isValid(validateCredentialSubject),
     // TODO: validate rest of credentialSubject based on the `type` array
   ],
+  revocation: Utils.isValid(validateCredentialRevocation),
   proof: [Utils.isValid(validateCredentialProof), isCredentialProofValid],
 })
 

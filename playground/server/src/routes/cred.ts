@@ -1,15 +1,11 @@
 import fastify from 'fastify'
 import S from 'fluent-schema'
-import {buildClaimNodeV1, buildSDVCV1, buildSDBatchVCV1} from '@bloomprotocol/issue-kit'
-import {SDVCV1, EthUtils} from '@bloomprotocol/attestations-common'
+import {buildAtomicVCV1} from '@bloomprotocol/issue-kit'
+import {EthUtils} from '@bloomprotocol/attestations-common'
 import dayjs from 'dayjs'
 
 import {IssuedCredential} from '@server/models'
 import {claimCookieKey} from '@server/cookies'
-import {sendNotification} from '@server/socket/sender'
-import {getEnv} from '@server/env'
-
-const contractAddress = '0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC'
 
 export const applyCredRoutes = (app: fastify.FastifyInstance) => {
   app.post<
@@ -17,29 +13,21 @@ export const applyCredRoutes = (app: fastify.FastifyInstance) => {
     fastify.DefaultParams,
     fastify.DefaultHeaders,
     {
-      claimNodes: {type: string; provider: string; version: string; data: {}}[]
+      type: string
+      data: {}
     }
   >(
     '/api/v1/cred/create',
     {
       schema: {
         body: S.object()
-          .prop(
-            'claimNodes',
-            S.array().items(
-              S.object()
-                .prop('type', S.string())
-                .prop('provider', S.string())
-                .prop('version', S.string())
-                .prop('data', S.object())
-                .required(['type', 'provider', 'version', 'data']),
-            ),
-          )
-          .required(['claimNodes']),
+          .prop('type', S.string())
+          .prop('data', S.object())
+          .required(['type', 'data']),
       },
     },
     async (req, reply) => {
-      const cred = await IssuedCredential.create({claimNodes: req.body.claimNodes, claimVersion: 'v1'})
+      const cred = await IssuedCredential.create({type: req.body.type, data: req.body.data, claimVersion: 'v1'})
 
       return reply.status(200).send({id: cred.id})
     },
@@ -66,7 +54,7 @@ export const applyCredRoutes = (app: fastify.FastifyInstance) => {
   )
 
   app.get<fastify.DefaultQuery, {id: string}>(
-    '/api/v1/cred/:id/get-claimed-data',
+    '/api/v1/cred/:id/get-claimed-vc',
     {
       schema: {
         params: S.object()
@@ -78,14 +66,13 @@ export const applyCredRoutes = (app: fastify.FastifyInstance) => {
       const cred = await IssuedCredential.findOne({where: {id: req.params.id}})
 
       if (!cred) return reply.status(404).send({})
-      if (!cred.credential) return reply.status(404).send({})
-      if (!cred.batchCredential) return reply.status(404).send({})
+      if (!cred.vc) return reply.status(404).send({})
 
-      const {credential, batchCredential} = cred
+      const {vc} = cred
 
       await cred.destroy()
 
-      return reply.status(200).send({credential, batchCredential})
+      return reply.status(200).send({vc})
     },
   )
 
@@ -113,147 +100,24 @@ export const applyCredRoutes = (app: fastify.FastifyInstance) => {
       if (!cred) return reply.status(404).send({})
       if (cred.claimed) return reply.status(400).send({})
 
-      const claimNodes = cred.claimNodes.map(node =>
-        buildClaimNodeV1({
-          dataStr: JSON.stringify(node.data),
-          type: node.type as any,
-          provider: node.provider,
-          version: node.version,
-        }),
-      )
-
-      const vc = await buildSDVCV1({
-        claimNodes,
-        subjectDID: req.body.subject,
+      const vc = buildAtomicVCV1({
+        type: [cred.type],
+        data: cred.data,
+        subject: req.body.subject,
         issuanceDate: dayjs.utc().toISOString(),
         expirationDate: dayjs
           .utc()
           .add(2, 'month')
           .toISOString(),
         privateKey: Buffer.from(''),
+        revocation: {
+          '@context': '',
+        },
       })
 
-      await cred.update({claimed: true})
+      await cred.update({claimed: true, vc})
 
-      const env = getEnv()
-
-      return reply.status(200).send({
-        credential: vc,
-        batchUrl: `${env.appServerUrl || env.host}/api/v1/cred/${req.params.id}/claim-v1/batch?issue-kit-from${
-          req.query['issue-kit-from']
-        }`,
-        contractAddress,
-      })
-    },
-  )
-
-  app.post<
-    {'issue-kit-from': 'qr' | 'button'},
-    {id: string},
-    fastify.DefaultHeaders,
-    {
-      credential: SDVCV1
-      subjectSignature: string
-    }
-  >(
-    '/api/v1/cred/:id/claim-v1/batch',
-    {
-      schema: {
-        querystring: S.object()
-          .prop('issue-kit-from', S.enum(['qr', 'button']))
-          .required(['issue-kit-from']),
-        params: S.object()
-          .prop('id', S.string().format('uuid'))
-          .required(['id']),
-        body: S.object()
-          .prop(
-            'credential',
-            S.object()
-              .prop('@context', S.array().items(S.string()))
-              .prop('id', S.string())
-              .prop('type', S.array().items(S.string()))
-              .prop('issuer', S.string())
-              .prop('issuanceDate', S.string())
-              .prop('expirateDate', S.string())
-              .prop(
-                'credentialSubject',
-                S.object()
-                  .prop('id', S.string())
-                  .prop(
-                    'claimNodes',
-                    S.array().items(
-                      S.object()
-                        .prop(
-                          'claimNode',
-                          S.object()
-                            .prop(
-                              'data',
-                              S.object()
-                                .prop('data', S.string())
-                                .prop('nonce', S.string())
-                                .prop('version', S.string())
-                                .required(['data', 'nonce', 'version']),
-                            )
-                            .prop(
-                              'type',
-                              S.object()
-                                .prop('type', S.string())
-                                .prop('provider', S.string())
-                                .prop('nonce', S.string())
-                                .required(['type', 'nonce']),
-                            )
-                            .prop('aux', S.string())
-                            .required(['data', 'type', 'aux']),
-                        )
-                        .prop('issuer', S.string())
-                        .prop('issuerSignature', S.string())
-                        .required(['claimNode', 'issuer', 'issuerSignature']),
-                    ),
-                  )
-                  .required(['id', 'claimNodes']),
-              )
-              .prop(
-                'proof',
-                S.object()
-                  .prop('issuerSignature', S.string())
-                  .prop('layer2Hash', S.string())
-                  .prop('checksumSignature', S.string())
-                  .prop('paddingNodes', S.array().items(S.string()))
-                  .prop('rootHash', S.string())
-                  .prop('rootHashNonce', S.string())
-                  .required(['issuerSignature', 'layer2Hash', 'checksumSignature', 'paddingNodes', 'rootHash', 'rootHashNonce']),
-              )
-              .required(['@context', 'id', 'type', 'issuer', 'issuanceDate', 'credentialSubject', 'proof']),
-          )
-          .prop('subjectSignature', S.string())
-          .required(['credential', 'subjectSignature']),
-      },
-    },
-    async (req, reply) => {
-      const cred = await IssuedCredential.findOne({where: {id: req.params.id}})
-      if (!cred) return reply.status(404).send({})
-
-      const batchVc = await buildSDBatchVCV1({
-        credential: req.body.credential,
-        privateKey: Buffer.from([]),
-        contractAddress,
-        subjectSignature: req.body.subjectSignature,
-        requestNonce: req.params.id,
-      })
-
-      if (req.query['issue-kit-from'] === 'qr') {
-        sendNotification({
-          recipient: req.params.id,
-          type: 'notif/cred-claimed',
-          payload: JSON.stringify({batchCredential: batchVc, credential: req.body.credential}),
-        })
-
-        await cred.destroy()
-      } else {
-        await cred.update({batchCredential: batchVc, credential: req.body.credential})
-      }
-
-      return reply.status(200).send({})
+      return reply.status(200).send({vc})
     },
   )
 }

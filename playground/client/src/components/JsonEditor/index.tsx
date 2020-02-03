@@ -5,8 +5,8 @@ import {FC} from 'react-forward-props'
 import 'jsoneditor-react/es/editor.min.css'
 
 type JsonEditorProps = {
-  value: {}
-  onChange?: (value: {}) => void
+  value: {} | null
+  onChange?: (value: {} | null) => void
 }
 
 export const JsonEditor: FC<'div', JsonEditorProps> = props => <JsonEditorBase value={props.value} onChange={props.onChange} mode="tree" />

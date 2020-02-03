@@ -4,6 +4,7 @@ import {useParams, Redirect} from 'react-router-dom'
 import {isUuid} from 'uuidv4'
 import {ClaimElement} from '@bloomprotocol/claim-kit-react'
 import clsx from 'clsx'
+import {AtomicVCV1} from '@bloomprotocol/attestations-common'
 
 import {Shell} from '../../components/Shell'
 import {sitemap} from '../../sitemap'
@@ -21,7 +22,7 @@ import {JsonEditor} from '../../components/JsonEditor'
 import './index.scss'
 
 const useGetClaimedTypes = (ready: boolean) => {
-  const [claimedData, setClaimedData] = useState<[] | null | undefined>()
+  const [claimedVC, setClaimedVC] = useState<AtomicVCV1 | null | undefined>()
 
   useEffect(() => {
     let current = true
@@ -31,10 +32,10 @@ const useGetClaimedTypes = (ready: boolean) => {
 
       if (token) {
         try {
-          const {claimNodes} = await api.cred.getClaimedData({id: token})
-          if (current) setClaimedData(claimNodes)
+          const {vc} = await api.cred.getClaimedVC({id: token})
+          if (current) setClaimedVC(vc)
         } catch {
-          if (current) setClaimedData(null)
+          if (current) setClaimedVC(null)
         }
       }
     }
@@ -47,9 +48,7 @@ const useGetClaimedTypes = (ready: boolean) => {
   }, [])
 
   useEffect(() => {
-    const socketCallback = (verifiableCredential: any) => {
-      setClaimedData(verifiableCredential)
-    }
+    const socketCallback = (vc: any) => setClaimedVC(vc)
 
     if (ready) {
       resetSocketConnection()
@@ -61,7 +60,7 @@ const useGetClaimedTypes = (ready: boolean) => {
     }
   }, [ready])
 
-  return claimedData
+  return claimedVC
 }
 
 type ClaimProps = {}
@@ -70,7 +69,7 @@ export const Claim: React.FC<ClaimProps> = props => {
   const isMobile = bowser.parse(window.navigator.userAgent).platform.type === 'mobile'
   const {id: token} = useParams<{id: string}>()
   const {data, error} = useCredGetConfig({id: token})
-  const claimedData = useGetClaimedTypes(data !== null)
+  const claimedVC = useGetClaimedTypes(data !== null)
   const {claimVC} = useLocalClient()
   const [errorMessage, setErrorMessage] = useState<string>()
 
@@ -80,15 +79,15 @@ export const Claim: React.FC<ClaimProps> = props => {
 
   let children: React.ReactNode
 
-  if (claimedData) {
+  if (claimedVC) {
     children = (
       <Message skin={MessageSkin.success}>
         <MessageHeader>
           <p>Successfully Claimed Credential</p>
         </MessageHeader>
         <MessageBody>
-          <div className="claim__claimed-data-container">
-            <JsonEditor value={claimedData} />
+          <div className="claim__claimed-vc-container">
+            <JsonEditor value={claimedVC} />
           </div>
         </MessageBody>
       </Message>
@@ -129,7 +128,7 @@ export const Claim: React.FC<ClaimProps> = props => {
         <Button
           isFullwidth
           onClick={async () => {
-            const response = await claimVC(url, token)
+            const response = await claimVC(url)
 
             if (response.kind === 'error') {
               setErrorMessage(response.message)

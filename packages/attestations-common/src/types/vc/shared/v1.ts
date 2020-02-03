@@ -77,7 +77,7 @@ export type BaseVCV1<
   Subject extends BaseVCSubjectV1 = BaseVCSubjectV1,
   Type extends BaseVCTypeV1 = BaseVCTypeV1,
   Proof extends BaseVCProofV1 = BaseVCProofV1,
-  Revocation extends BaseVCRevocationV1 = BaseVCRevocationSimpleV1
+  Revocation extends BaseVCRevocationV1 = BaseVCRevocationV1
 > = {
   '@context': string[]
   id?: string

@@ -1,4 +1,4 @@
-import {EthUtils, AtomicVCV1, AtomicVCSubjectV1} from '@bloomprotocol/attestations-common'
+import {EthUtils, AtomicVCV1, AtomicVCSubjectV1, BaseVCRevocationV1} from '@bloomprotocol/attestations-common'
 import EthWallet from 'ethereumjs-wallet'
 
 const {EcdsaSecp256k1KeyClass2019, EcdsaSecp256k1Signature2019, defaultDocumentLoader} = require('@transmute/lds-ecdsa-secp256k1-2019')
@@ -6,13 +6,14 @@ const keyto = require('@trust/keyto')
 const jsigs = require('jsonld-signatures')
 const {AssertionProofPurpose} = jsigs.purposes
 
-export const buildAtomicVCV1 = async <D extends {}>({
+export const buildAtomicVCV1 = async <D extends {}, R extends BaseVCRevocationV1>({
   subject: _subject,
   type,
   data,
   privateKey,
   issuanceDate,
   expirationDate,
+  revocation,
 }: {
   subject: string
   type: string[]
@@ -20,6 +21,7 @@ export const buildAtomicVCV1 = async <D extends {}>({
   privateKey: Buffer
   issuanceDate: string
   expirationDate?: string
+  revocation: R
 }): Promise<AtomicVCV1<AtomicVCSubjectV1<D>>> => {
   const {didDocument: subjectDidDoc} = await new EthUtils.EthereumDIDResolver().resolve(_subject)
 
@@ -36,6 +38,7 @@ export const buildAtomicVCV1 = async <D extends {}>({
       id: subjectDidDoc.id,
       ...data,
     },
+    revocation,
   }
 
   const credential: AtomicVCV1<AtomicVCSubjectV1<D>> = await jsigs.sign(unsignedCred, {

@@ -1,11 +1,10 @@
 import React, {useContext} from 'react'
 import createPersistedState from 'use-persisted-state'
 import EthWallet from 'ethereumjs-wallet'
-import {SDBatchVCV1, SDVCV1, EthUtils} from '@bloomprotocol/attestations-common'
+import {AtomicVCV1} from '@bloomprotocol/attestations-common'
 import wretch from 'wretch'
-import * as ethSigUtil from 'eth-sig-util'
 
-import {buildBatchFullVCV1, buildVerifiablePresentation, appendQuery} from './utils'
+import {buildVPV1, appendQuery} from './utils'
 
 const usePrivateKeyState = createPersistedState('attestations-playground.privateKey')
 const useSDVCsState = createPersistedState('attestations-playground.sdvcs')
@@ -22,15 +21,15 @@ type ErrorRequestResponse = {
 type RequestResponse = SuccessRequestResponse | ErrorRequestResponse
 
 type LocalClientContextProps = {
-  sdvcs: any[]
+  atomicVCs: AtomicVCV1[]
   wallet: EthWallet
   regen: () => void
   shareVCs: (types: string[], token: string, to: string) => Promise<RequestResponse>
-  claimVC: (from: string, token: string) => Promise<RequestResponse>
+  claimVC: (from: string) => Promise<RequestResponse>
 }
 
 const LocalClientContext = React.createContext<LocalClientContextProps>({
-  sdvcs: [],
+  atomicVCs: [],
   wallet: EthWallet.generate(),
   regen: () => {},
   shareVCs: async () => ({kind: 'success'}),
@@ -39,7 +38,7 @@ const LocalClientContext = React.createContext<LocalClientContextProps>({
 
 export const LocalClientProvider: React.FC = props => {
   const [privateKey, setPrivateKey] = usePrivateKeyState<string>(() => EthWallet.generate().getPrivateKeyString())
-  const [sdvcs, setSDVCs] = useSDVCsState<SDBatchVCV1[]>(() => [])
+  const [atomicVCs, setAtomicVCs] = useSDVCsState<AtomicVCV1[]>(() => [])
 
   const wallet = EthWallet.fromPrivateKey(Buffer.from(privateKey.replace('0x', ''), 'hex'))
 
@@ -47,13 +46,13 @@ export const LocalClientProvider: React.FC = props => {
     <LocalClientContext.Provider
       value={{
         wallet,
-        sdvcs,
+        atomicVCs,
         regen: () => {
           setPrivateKey(EthWallet.generate().getPrivateKeyString())
-          setSDVCs([])
+          setAtomicVCs([])
         },
         shareVCs: async (types, token, to) => {
-          if (sdvcs.length === 0) {
+          if (atomicVCs.length === 0) {
             return {
               kind: 'error',
               message: 'You do not have any credentials stored locally',
@@ -68,14 +67,14 @@ export const LocalClientProvider: React.FC = props => {
           }
 
           const missing: string[] = []
-          const foundSdvcs: SDBatchVCV1[] = []
+          const foundVCs: AtomicVCV1[] = []
 
           types.forEach(type => {
             // TODO: is this the way we should be checking?
-            const foundVC = foundSdvcs.find(sdvc => sdvc.type.includes(type))
+            const foundVC = foundVCs.find(vc => vc.type.includes(type))
 
             if (foundVC) {
-              foundSdvcs.push(foundVC)
+              foundVCs.push(foundVC)
             } else {
               missing.push(type)
             }
@@ -88,21 +87,7 @@ export const LocalClientProvider: React.FC = props => {
             }
           }
 
-          const fullVcs = await Promise.all(
-            foundSdvcs.map(
-              async sdvc =>
-                await buildBatchFullVCV1({
-                  subject: `did:ethr:${wallet.getAddressString()}`,
-                  stage: 'mainnet',
-                  target: sdvc.credentialSubject.claimNodes[0],
-                  sdvc: sdvc,
-                  authorization: [],
-                  wallet,
-                }),
-            ),
-          )
-
-          const vp = buildVerifiablePresentation({wallet, fullCredentials: fullVcs, token, domain: to})
+          const vp = buildVPV1({wallet, atomicVCs: foundVCs, token, domain: to})
 
           try {
             await wretch()
@@ -118,16 +103,14 @@ export const LocalClientProvider: React.FC = props => {
 
           return {kind: 'success'}
         },
-        claimVC: async (from, token) => {
-          let sdvc: SDVCV1
-          let batchUrl: string
-          let contractAddress: string
+        claimVC: async from => {
+          let vc: AtomicVCV1
 
           try {
-            ;({credential: sdvc, batchUrl, contractAddress} = await wretch()
+            ;({vc} = await wretch()
               .url(appendQuery(from, {'share-kit-from': 'qr'}))
               .post({subject: `did:ethr:${wallet.getAddressString()}`})
-              .json<{credential: SDVCV1; batchUrl: string; contractAddress: string}>())
+              .json<{vc: AtomicVCV1}>())
           } catch {
             return {
               kind: 'error',
@@ -135,25 +118,7 @@ export const LocalClientProvider: React.FC = props => {
             }
           }
 
-          let sdBatchVc: SDBatchVCV1
-
-          const subjectSignature = ethSigUtil.signTypedData(wallet.getPrivateKey(), {
-            data: EthUtils.getAttestationAgreement(contractAddress, 1, sdvc.proof.layer2Hash, token),
-          })
-
-          try {
-            ;({sdBatchVc} = await wretch()
-              .url(batchUrl)
-              .post({credential: sdvc, subjectSignature})
-              .json<{sdBatchVc: SDBatchVCV1}>())
-          } catch {
-            return {
-              kind: 'error',
-              message: 'Something went wrong while batching the VC to claim',
-            }
-          }
-
-          setSDVCs([...sdvcs, sdBatchVc])
+          setAtomicVCs([...atomicVCs, vc])
 
           return {kind: 'success'}
         },
