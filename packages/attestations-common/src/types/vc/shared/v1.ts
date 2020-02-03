@@ -90,7 +90,22 @@ export type BaseVCSubjectV1 = {
   id: string
 }
 
-export type BaseVCV1<Subject extends BaseVCSubjectV1 = BaseVCSubjectV1, Type extends BaseVCTypeV1 = BaseVCTypeV1, Proof extends {} = {}> = {
+export type BaseVCProofUnsignedV1 = {
+  type: string
+  created: string
+  proofPurpose: string
+  verificationMethod: string
+}
+
+export type BaseVCProofSignedV1 = BaseVCProofUnsignedV1 & {
+  jws: string
+}
+
+export type BaseVCV1<
+  Subject extends BaseVCSubjectV1 = BaseVCSubjectV1,
+  Type extends BaseVCTypeV1 = BaseVCTypeV1,
+  Proof extends BaseVCProofUnsignedV1 = BaseVCProofUnsignedV1
+> = {
   '@context': string[]
   id?: string
   type: Type
@@ -100,3 +115,26 @@ export type BaseVCV1<Subject extends BaseVCSubjectV1 = BaseVCSubjectV1, Type ext
   credentialSubject: Subject
   proof: Proof
 }
+
+export type VPTypeV1 = ['VerifiablePresentation', ...string[]]
+
+export type VPProofV1 = {
+  type: string
+  created: string
+  proofPurpose: string // 'authentication', ...
+  verificationMethod: string
+  challenge: string
+  domain: string
+  jws: string
+}
+
+// TODO: This is missing the `signature` and `packedData` fields. How should those translate over?
+export type VPV1<VC extends BaseVCV1 = BaseVCV1> = {
+  '@context': string[]
+  type: VPTypeV1
+  verifiableCredential: VC[]
+  holder: string
+  proof: VPProofV1
+}
+
+export type VP = VPV1

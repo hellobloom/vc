@@ -90,11 +90,7 @@ export type AtomicVCVerifiedDataV1 = AtomicVCVerifiedDataLegacyV1 | AtomicVCVeri
 
 export type AtomicVCTypeV1 = [BaseVCTypeV1[0], 'AtomicCredential', ...string[]]
 
-export type AtomicVCSubjectV1 = BaseVCSubjectV1 & {
-  data: string
-  /** Array of signed authorization objects Only included if subject is different from sharer otherwise empty array */
-  authorization: AtomicVCSignedAuthorizationV1[]
-}
+export type AtomicVCSubjectV1 = BaseVCSubjectV1
 
 export type AtomicVCProofV1 = {
   type: string
@@ -102,7 +98,6 @@ export type AtomicVCProofV1 = {
   proofPurpose: 'assertionMethod'
   verificationMethod: string
   jws: string
-  data: AtomicVCVerifiedDataV1
 }
 
 export type AtomicVCV1<
