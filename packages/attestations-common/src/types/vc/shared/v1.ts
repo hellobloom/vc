@@ -1,3 +1,4 @@
+export type TContext = string | string[] | {} | Array<{}>
 export type VCClaimNodeDataV1 = {
   /**
    * String representation of the attestations data.
@@ -53,7 +54,7 @@ export type VCRevocationLinks = {
 export type BaseVCTypeV1 = ['VerifiableCredential', ...string[]]
 
 export type BaseVCSubjectV1 = {
-  id: string
+  identifier: string
 }
 
 export type BaseVCProofV1 = {
@@ -79,7 +80,7 @@ export type BaseVCV1<
   Proof extends BaseVCProofV1 = BaseVCProofV1,
   Revocation extends BaseVCRevocationV1 = BaseVCRevocationV1
 > = {
-  '@context': string[]
+  '@context': TContext
   id?: string
   type: Type
   issuer: string
@@ -104,7 +105,7 @@ export type VPProofV1 = {
 
 // TODO: This is missing the `signature` and `packedData` fields. How should those translate over?
 export type VPV1<VC extends BaseVCV1 = BaseVCV1> = {
-  '@context': string[]
+  '@context': TContext
   type: VPTypeV1
   verifiableCredential: VC[]
   holder: string
