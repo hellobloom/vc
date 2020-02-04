@@ -1,13 +1,10 @@
-import {AtomicVCV1} from '../../vc/atomic/v1'
-//import {Organization, PostalAddress, Text, Event, Person} from 'schema-dts'
 import {Organization} from 'schema-dts'
 
-// Coerce Organization to object
-export type OrganizationObj = Organization & {'@type': string}
+import {AtomicVCV1, AtomicVCSubjectV1} from '../../vc/atomic/v1'
 
-export type VCEntity = AtomicVCV1<OrganizationObj, ['VerifiableCredential', 'AtomicCredential', 'EntityCredential']>
+export type VCEntity = AtomicVCV1<AtomicVCSubjectV1<Organization>, ['VerifiableCredential', 'AtomicCredential', 'EntityCredential']>
 
-export const VCEntityExampleOrganization: OrganizationObj = {
+export const VCEntityExampleOrganization: AtomicVCSubjectV1<Organization> = {
   '@type': 'Corporation',
   name: 'ACME Inc.',
   legalName: 'Acme Holding Group Inc. LLC',

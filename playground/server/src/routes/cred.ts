@@ -1,6 +1,6 @@
 import fastify from 'fastify'
 import S from 'fluent-schema'
-import {buildAtomicVCV1} from '@bloomprotocol/issue-kit'
+import {buildAtomicVCV1, buildAtomicVCSubjectV1} from '@bloomprotocol/issue-kit'
 import {EthUtils} from '@bloomprotocol/attestations-common'
 import dayjs from 'dayjs'
 
@@ -102,10 +102,14 @@ export const applyCredRoutes = (app: fastify.FastifyInstance) => {
       if (cred.claimed) return reply.status(400).send({})
 
       try {
-        const vc = await buildAtomicVCV1({
-          type: [cred.type],
-          data: cred.data,
+        const credentialSubject = await buildAtomicVCSubjectV1({
+          data: {...cred.data, '@type': ''},
           subject: req.body.subject,
+        })
+
+        const vc = await buildAtomicVCV1({
+          credentialSubject,
+          type: [cred.type],
           issuanceDate: dayjs.utc().toISOString(),
           expirationDate: dayjs
             .utc()
@@ -114,6 +118,7 @@ export const applyCredRoutes = (app: fastify.FastifyInstance) => {
           privateKey: Buffer.from('ca2eeb77a6d85f208cd852307c7ef2e66df2962e9b3ca4943923b6ffc38c8277', 'hex'),
           revocation: {
             '@context': 'placeholder',
+            token: '',
           },
         })
 

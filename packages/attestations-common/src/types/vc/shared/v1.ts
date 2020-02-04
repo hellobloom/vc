@@ -53,15 +53,14 @@ export type VCRevocationLinks = {
 
 export type BaseVCTypeV1 = ['VerifiableCredential', ...string[]]
 
-export type BaseVCSubjectV1 = {
-  '@type': string
-  identifier?: string
+export type BaseVCSubjectV1<Data extends {} = {}> = Data & {
+  identifier: string
 }
 
 export type BaseVCProofV1 = {
   type: string
   created: string
-  proofPurpose: string
+  proofPurpose: 'assertionMethod'
   verificationMethod: string
   jws: string
 }
@@ -87,7 +86,7 @@ export type BaseVCV1<
   issuer: string
   issuanceDate: string
   expirationDate?: string
-  credentialSubject: Subject
+  credentialSubject: Subject | Subject[]
   revocation: Revocation
   proof: Proof
 }
@@ -97,7 +96,7 @@ export type VPTypeV1 = ['VerifiablePresentation', ...string[]]
 export type VPProofV1 = {
   type: string
   created: string
-  proofPurpose: string // 'authentication', ...
+  proofPurpose: 'authentication'
   verificationMethod: string
   challenge: string
   domain: string

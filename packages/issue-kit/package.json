@@ -13,7 +13,7 @@
   ],
   "scripts": {
     "start": "tsdx watch --tsconfig ./tsconfig.build.json",
-    "build": "tsdx build --tsconfig ./tsconfig.build.json",
+    "build": "tsdx build --transpileOnly --tsconfig ./tsconfig.build.json",
     "test": "CI=true tsdx test",
     "test:watch": "tsdx test",
     "lint": "tsdx lint src test",
@@ -34,6 +34,7 @@
     "js-sha3": "^0.8.0",
     "jsonld-signatures": "^4.6.0",
     "randombytes": "^2.1.0",
+    "schema-dts": "^0.5.1",
     "uuidv4": "^6.0.0"
   },
   "devDependencies": {
@@ -47,9 +48,9 @@
     "eslint-config-prettier": "^6.9.0",
     "eslint-plugin-prettier": "^3.1.2",
     "prettier": "^1.19.1",
-    "tsdx": "^0.12.1",
+    "tsdx": "^0.12.3",
     "tslib": "^1.10.0",
-    "typescript": "^3.7.4"
+    "typescript": "^3.7.5"
   },
   "jest": {
     "moduleFileExtensions": [
