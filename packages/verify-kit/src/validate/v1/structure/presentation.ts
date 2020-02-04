@@ -25,7 +25,7 @@ const isValidDIDOwner = (value: any) => {
 }
 
 export const validateCredentialSubject = genValidateFn<AtomicVCSubjectV1>({
-  id: EthUtils.isValidDID,
+  identifier: EthUtils.isValidDID,
 })
 
 const validateCredentialRevocation = genValidateFn<BaseVCRevocationV1>({
