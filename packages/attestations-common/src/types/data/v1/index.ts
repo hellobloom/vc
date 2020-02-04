@@ -91,8 +91,8 @@ export const VCEntityExample: VCEntity = {
     type: 'EcdsaSecp256k1Signature2019',
     created: '2020-02-03T21:03:53.192Z',
     proofPurpose: 'assertionMethod',
-    verificationMethod: 'authentication',
-    jws: '0xacfb8aebf80261cab09fabc9eafcbf9bcab19285178f8b32aebc',
+    verificationMethod: 'did:ethr:0xafb9cab09fba0c9baf09bc0a9fba09ea7618471247',
+    jws: '0xacfb8aebf80261cab09fabc9eafcbf9bcab19285178f8b32aebceba9cb121cbae08cba08bcea98e124125c',
   },
   credentialSubject: VCEntityExampleOrganization,
 }
