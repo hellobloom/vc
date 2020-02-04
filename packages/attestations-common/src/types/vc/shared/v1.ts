@@ -55,6 +55,7 @@ export type BaseVCTypeV1 = ['VerifiableCredential', ...string[]]
 
 export type BaseVCSubjectV1 = {
   '@type': string
+  identifier?: string
 }
 
 export type BaseVCProofV1 = {

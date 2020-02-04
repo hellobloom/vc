@@ -25,6 +25,7 @@ const isValidDIDOwner = (value: any) => {
 }
 
 export const validateCredentialSubject = genValidateFn<AtomicVCSubjectV1>({
+  '@type': Utils.isNotEmptyString,
   identifier: EthUtils.isValidDID,
 })
 

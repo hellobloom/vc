@@ -1,4 +1,4 @@
-import {EthUtils, AtomicVCV1, AtomicVCSubjectV1, BaseVCRevocationSimpleV1} from '@bloomprotocol/attestations-common'
+import {EthUtils, AtomicVCV1, AtomicVCSubjectV1, BaseVCSubjectV1, BaseVCRevocationSimpleV1} from '@bloomprotocol/attestations-common'
 import EthWallet from 'ethereumjs-wallet'
 
 const {EcdsaSecp256k1KeyClass2019, EcdsaSecp256k1Signature2019, defaultDocumentLoader} = require('@transmute/lds-ecdsa-secp256k1-2019')
@@ -6,7 +6,7 @@ const keyto = require('@trust/keyto')
 const jsigs = require('jsonld-signatures')
 const {AssertionProofPurpose} = jsigs.purposes
 
-export const buildAtomicVCV1 = async <D extends {}, R extends BaseVCRevocationSimpleV1>({
+export const buildAtomicVCV1 = async <D extends BaseVCSubjectV1, R extends BaseVCRevocationSimpleV1>({
   subject: _subject,
   type,
   data,
