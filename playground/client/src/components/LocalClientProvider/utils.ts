@@ -1,4 +1,4 @@
-import {EthUtils, VPV1, VPProofV1, AtomicVCV1} from '@bloomprotocol/attestations-common'
+import {EthUtils, VPV1, AtomicVCV1} from '@bloomprotocol/attestations-common'
 import EthWallet from 'ethereumjs-wallet'
 import extend from 'extend'
 

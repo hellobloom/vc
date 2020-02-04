@@ -23,7 +23,12 @@ export const applyCredRoutes = (app: fastify.FastifyInstance) => {
       schema: {
         body: S.object()
           .prop('type', S.string())
-          .prop('data', S.object())
+          .prop(
+            'data',
+            S.object()
+              .prop('@type', S.string())
+              .required(['@type']),
+          )
           .required(['type', 'data']),
       },
     },
@@ -103,7 +108,7 @@ export const applyCredRoutes = (app: fastify.FastifyInstance) => {
 
       try {
         const credentialSubject = await buildAtomicVCSubjectV1({
-          data: {...cred.data, '@type': ''},
+          data: cred.data,
           subject: req.body.subject,
         })
 

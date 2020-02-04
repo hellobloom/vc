@@ -6,7 +6,7 @@ export class IssuedCredential extends Model {
 
   type!: string
 
-  data!: {}
+  data!: {'@type': string}
 
   claimVersion!: 'v1'
 

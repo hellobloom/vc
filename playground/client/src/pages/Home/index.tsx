@@ -34,7 +34,7 @@ export const Home: React.FC<HomeProps> = props => {
                     <Delete className="home__vc__delete-btn" onClick={() => deleteVC(i)} aria-label="Delete VC" />
                   </div>
                   <div className="column is-paddingless">
-                    <JsonEditor value={vc} />
+                    <JsonEditor value={vc} mode="tree" />
                   </div>
                 </div>
               ))}

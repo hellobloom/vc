@@ -3,6 +3,8 @@ import {Link} from 'react-router-dom'
 import {FC} from 'react-forward-props'
 import {useId} from '@reach/auto-id'
 import {codeBlock} from 'common-tags'
+import S from 'fluent-schema'
+import {SimpleThing} from '@bloomprotocol/attestations-common'
 
 import {Shell} from '../../components/Shell'
 import {Message, MessageSkin, MessageHeader, MessageBody} from '../../components/Message'
@@ -19,7 +21,7 @@ type AtomicVCBuilderProps = {
   type: string
   data: {} | null
   onTypeChange: (type: string) => void
-  onDataChange: (data: {} | null) => void
+  onDataChange: (data: SimpleThing | null) => void
 }
 
 const AtomicVCBuilder: FC<'div', AtomicVCBuilderProps> = props => {
@@ -48,7 +50,16 @@ const AtomicVCBuilder: FC<'div', AtomicVCBuilderProps> = props => {
           Data
         </label>
         <div className="control">
-          <JsonEditor id={`${id}-data`} value={props.data} onChange={props.onDataChange} />
+          <JsonEditor
+            mode="code"
+            id={`${id}-data`}
+            value={props.data}
+            onChange={props.onDataChange}
+            schema={S.object()
+              .prop('@type', S.string())
+              .required(['@type'])
+              .valueOf()}
+          />
         </div>
       </div>
     </div>
@@ -60,7 +71,7 @@ type IssueProps = {}
 export const Issue: React.FC<IssueProps> = props => {
   const [newCredId, setNewCredId] = useState<string>()
   const [type, setType] = useState('')
-  const [data, setData] = useState<{} | null>({})
+  const [data, setData] = useState<SimpleThing | null>({'@type': ''})
 
   const isDisabled = type.trim() === '' || data === null
 
@@ -83,12 +94,10 @@ export const Issue: React.FC<IssueProps> = props => {
         <div className="column is-half">
           <Card>
             <CardHeader>
-              <CardHeaderTitle className="issue__claim-nodes__title">Claim Nodes</CardHeaderTitle>
+              <CardHeaderTitle>Configuration</CardHeaderTitle>
             </CardHeader>
             <CardContent>
-              <div className="issue__claim-nodes__content">
-                <AtomicVCBuilder type={type} data={data} onTypeChange={setType} onDataChange={setData} />
-              </div>
+              <AtomicVCBuilder type={type} data={data} onTypeChange={setType} onDataChange={setData} />
             </CardContent>
           </Card>
         </div>
@@ -98,10 +107,9 @@ export const Issue: React.FC<IssueProps> = props => {
               <CardHeaderTitle>Atomic Verifiable Credential</CardHeaderTitle>
             </CardHeader>
             <CardContent>
-              <div className="issue__vc__content">
-                <pre>
-                  <code>
-                    {codeBlock`
+              <pre>
+                <code>
+                  {codeBlock`
                     const credentialSubject = await buildAtomicVCSubectV1({
                       data: ${JSON.stringify(data)},
                       subject: 'did:ethr:0x...',
@@ -116,9 +124,8 @@ export const Issue: React.FC<IssueProps> = props => {
                       privateKey: Buffer.from('...', 'hex'),
                     })
                     `}
-                  </code>
-                </pre>
-              </div>
+                </code>
+              </pre>
             </CardContent>
             <CardFooter>
               <CardFooterItem>
@@ -129,7 +136,7 @@ export const Issue: React.FC<IssueProps> = props => {
                     const {id} = await api.cred.create({type, data: data!})
                     setNewCredId(id)
                     setType('')
-                    setData({})
+                    setData({'@type': ''})
                   }}
                   isDisabled={isDisabled}
                 >

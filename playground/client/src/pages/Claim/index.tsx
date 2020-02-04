@@ -87,7 +87,7 @@ export const Claim: React.FC<ClaimProps> = props => {
         </MessageHeader>
         <MessageBody>
           <div className="claim__claimed-vc-container">
-            <JsonEditor value={claimedVC} />
+            <JsonEditor value={claimedVC} mode="tree" />
           </div>
         </MessageBody>
       </Message>

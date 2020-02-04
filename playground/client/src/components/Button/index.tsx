@@ -70,7 +70,22 @@ export const Button: FC<'button', ButtonProps> = _props => {
 
   return (
     <button
-      {...forwardProps(props, 'skin', 'size', 'isLight', 'isFullwidth', 'isOutlined', 'isInverted', 'isRounded')}
+      {...forwardProps(
+        props,
+        'skin',
+        'size',
+        'isLight',
+        'isFullwidth',
+        'isOutlined',
+        'isInverted',
+        'isRounded',
+        'isHovered',
+        'isFocused',
+        'isActive',
+        'isLoading',
+        'isStatic',
+        'isDisabled',
+      )}
       className={clsx(
         'button',
         props.skin.className,

@@ -1,4 +1,4 @@
-import React, {useCallback, useState, useEffect} from 'react'
+import React, {useState, useEffect} from 'react'
 import {RequestElement, Action} from '@bloomprotocol/share-kit-react'
 import {TAttestationTypeNames} from '@bloomprotocol/attestations-common'
 import {useParams, Redirect} from 'react-router-dom'
@@ -89,7 +89,7 @@ export const Share: React.FC<ShareProps> = props => {
         </MessageHeader>
         <MessageBody>
           <div className="share__shared-data-container">
-            <JsonEditor value={sharedData} />
+            <JsonEditor value={sharedData} mode="tree" />
           </div>
         </MessageBody>
       </Message>
