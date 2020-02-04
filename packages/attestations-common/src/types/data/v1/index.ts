@@ -3,7 +3,7 @@ import {AtomicVCV1} from '../../vc/atomic/v1'
 import {Organization} from 'schema-dts'
 
 // Coerce Organization to object
-export type OrganizationObj = Organization & {identifier: string}
+export type OrganizationObj = Organization & {'@type': string}
 
 export type VCEntity = AtomicVCV1<OrganizationObj, ['VerifiableCredential', 'AtomicCredential', 'EntityCredential']>
 

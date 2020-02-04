@@ -54,7 +54,7 @@ export type VCRevocationLinks = {
 export type BaseVCTypeV1 = ['VerifiableCredential', ...string[]]
 
 export type BaseVCSubjectV1 = {
-  identifier: string
+  '@type': string
 }
 
 export type BaseVCProofV1 = {
