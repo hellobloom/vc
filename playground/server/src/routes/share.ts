@@ -124,24 +124,19 @@ export const applyShareRoutes = (app: fastify.FastifyInstance) => {
           .prop(
             'proof',
             S.object()
-              .prop(
-                'metaData',
-                S.object()
-                  .prop('nonce')
-                  .required(['nonce']),
-              )
-              .required(['metaData']),
+              .prop('challenge', S.string().format('uuid'))
+              .required(['challenge']),
           )
           .required(['proof']),
       },
     },
     async (req, reply) => {
-      const request = await ShareRequest.findOne({where: {id: req.body.proof.metaData.nonce}})
+      const request = await ShareRequest.findOne({where: {id: req.body.proof.challenge}})
       if (!request) return reply.status(404).send({})
 
       const outcome = await validateVerifiablePresentationResponse(req.body, {version: 'v1'})
       if (outcome.kind === 'invalid') {
-        return reply.status(400).send({message: 'Share payload could not be validated'})
+        return reply.status(400).send({message: 'Share payload could not be validated', errors: outcome.errors})
       }
 
       const sharedTypes: string[][] = outcome.data.verifiableCredential.map(vc => vc.type)
@@ -153,7 +148,7 @@ export const applyShareRoutes = (app: fastify.FastifyInstance) => {
 
       if (req.query['share-kit-from'] === 'qr') {
         sendNotification({
-          recipient: req.body.token,
+          recipient: req.body.proof.challenge,
           type: 'notif/share-recieved',
           payload: JSON.stringify(verifiableCredential),
         })

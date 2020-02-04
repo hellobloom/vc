@@ -2,4 +2,14 @@
   &__regen-btn {
     margin-top: 0.7rem;
   }
+
+  &__vc {
+    &:not(:last-child) {
+      margin-bottom: 2rem;
+    }
+
+    &__delete-btn {
+      margin-right: 1rem;
+    }
+  }
 }

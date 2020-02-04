@@ -106,7 +106,7 @@ export const Claim: React.FC<ClaimProps> = props => {
     let localClientButton: React.ReactNode | undefined
 
     if (data) {
-      const url = `${host}/api/v1/cred/${token}/claim-${data.claimVersion}`
+      const endpoint = `/api/v1/cred/${token}/claim-${data.claimVersion}`
 
       cardContent = (
         <ClaimElement
@@ -115,7 +115,7 @@ export const Claim: React.FC<ClaimProps> = props => {
           claimData={{
             version: 1,
             token,
-            url,
+            url: `${host}${endpoint}`,
           }}
           qrOptions={{size: 256}}
           buttonOptions={{
@@ -128,7 +128,7 @@ export const Claim: React.FC<ClaimProps> = props => {
         <Button
           isFullwidth
           onClick={async () => {
-            const response = await claimVC(url)
+            const response = await claimVC(endpoint)
 
             if (response.kind === 'error') {
               setErrorMessage(response.message)
@@ -168,12 +168,22 @@ export const Claim: React.FC<ClaimProps> = props => {
     )
   }
 
+  const isNarrow = !data && !claimedVC
+
   return (
     <Shell titleSuffix="Claim">
       <h1 className="title is-1 has-text-weight-bold has-text-centered">Claim Credential</h1>
       <p className="subtitle has-text-centered">Claim a credential with a {isMobile ? 'click of a button' : 'scan of a QR code'}.</p>
       <div className="columns is-mobile is-centered">
-        <div className={clsx('column is-one-third-desktop is-half-tablet')}>{children}</div>
+        <div
+          className={clsx('column is-one-third-desktop is-half-tablet', {
+            'is-narrow': isNarrow,
+            'is-full': claimedVC,
+          })}
+          style={{width: isNarrow && !claimedVC ? 'auto' : undefined}}
+        >
+          {children}
+        </div>
       </div>
     </Shell>
   )

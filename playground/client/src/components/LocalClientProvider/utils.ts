@@ -42,6 +42,7 @@ export const buildVPV1 = async ({
       challenge: token,
       domain: domain,
     }),
+    expansionMap: false, // TODO: remove this
   })
 
   return vp
