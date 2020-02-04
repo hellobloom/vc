@@ -39,6 +39,8 @@ export const VCEntityExampleOrganization: OrganizationObj = {
       '@type': 'EducationalOccupationalCredential',
       credentialCategory: 'Bankruptcy',
       additionalType: 'Bankruptcy',
+      dateCreated: '2020-01-23',
+      datePublished: '2020-01-23',
       recognizedBy: {
         '@type': 'GovernmentOrganization',
         name: '鄂尔多斯市工商行政管理局', // ACRA in Singapore
