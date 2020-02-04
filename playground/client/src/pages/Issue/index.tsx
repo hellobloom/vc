@@ -102,10 +102,15 @@ export const Issue: React.FC<IssueProps> = props => {
                 <pre>
                   <code>
                     {codeBlock`
-                    const atomicVC = buildAtomicVCV1({
-                      type: ['${type}']
+                    const credentialSubject = await buildAtomicVCSubectV1({
                       data: ${JSON.stringify(data)},
                       subject: 'did:ethr:0x...',
+                    })
+
+                    const atomicVC = await buildAtomicVCV1({
+                      type: ['${type}']
+                      data: ${JSON.stringify(data)},
+                      credentialSubject,
                       issuanceDate: '...',
                       expirationDate: '...',
                       privateKey: Buffer.from('...', 'hex'),
