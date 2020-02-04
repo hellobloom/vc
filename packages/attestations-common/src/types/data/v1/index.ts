@@ -11,7 +11,7 @@ export const VCEntityExampleOrganization: OrganizationObj = {
   '@type': 'Corporation',
   name: 'ACME Inc.',
   legalName: 'Acme Holding Group Inc. LLC',
-  identifier: '911500007014628574',
+  identifier: 'did:ethr:0xefabcea1928125af09bc0a9fba09ea7618471247',
   additionalType: ['PublicCompany'],
   address: [
     {
