@@ -21,24 +21,26 @@ type ErrorRequestResponse = {
 type RequestResponse = SuccessRequestResponse | ErrorRequestResponse
 
 type LocalClientContextProps = {
-  atomicVCs: AtomicVCV1[]
+  vcs: AtomicVCV1[]
   wallet: EthWallet
   regen: () => void
+  deleteVC: (index: number) => void
   shareVCs: (types: string[], token: string, to: string) => Promise<RequestResponse>
   claimVC: (from: string) => Promise<RequestResponse>
 }
 
 const LocalClientContext = React.createContext<LocalClientContextProps>({
-  atomicVCs: [],
+  vcs: [],
   wallet: EthWallet.generate(),
   regen: () => {},
+  deleteVC: () => {},
   shareVCs: async () => ({kind: 'success'}),
   claimVC: async () => ({kind: 'success'}),
 })
 
 export const LocalClientProvider: React.FC = props => {
   const [privateKey, setPrivateKey] = usePrivateKeyState<string>(() => EthWallet.generate().getPrivateKeyString())
-  const [atomicVCs, setAtomicVCs] = useSDVCsState<AtomicVCV1[]>(() => [])
+  const [vcs, setVCs] = useSDVCsState<AtomicVCV1[]>(() => [])
 
   const wallet = EthWallet.fromPrivateKey(Buffer.from(privateKey.replace('0x', ''), 'hex'))
 
@@ -46,13 +48,18 @@ export const LocalClientProvider: React.FC = props => {
     <LocalClientContext.Provider
       value={{
         wallet,
-        atomicVCs,
+        vcs,
         regen: () => {
           setPrivateKey(EthWallet.generate().getPrivateKeyString())
-          setAtomicVCs([])
+          setVCs([])
+        },
+        deleteVC: index => {
+          const newVCs = [...vcs]
+          newVCs.splice(index, 1)
+          setVCs(newVCs)
         },
         shareVCs: async (types, token, to) => {
-          if (atomicVCs.length === 0) {
+          if (vcs.length === 0) {
             return {
               kind: 'error',
               message: 'You do not have any credentials stored locally',
@@ -71,7 +78,7 @@ export const LocalClientProvider: React.FC = props => {
 
           types.forEach(type => {
             // TODO: is this the way we should be checking?
-            const foundVC = foundVCs.find(vc => vc.type.includes(type))
+            const foundVC = vcs.find(vc => vc.type.includes(type))
 
             if (foundVC) {
               foundVCs.push(foundVC)
@@ -87,7 +94,7 @@ export const LocalClientProvider: React.FC = props => {
             }
           }
 
-          const vp = buildVPV1({wallet, atomicVCs: foundVCs, token, domain: to})
+          const vp = await buildVPV1({wallet, atomicVCs: foundVCs, token, domain: to})
 
           try {
             await wretch()
@@ -108,7 +115,8 @@ export const LocalClientProvider: React.FC = props => {
 
           try {
             ;({vc} = await wretch()
-              .url(appendQuery(from, {'share-kit-from': 'qr'}))
+              .headers({credentials: 'same-origin', 'Content-Type': 'application/json'})
+              .url(appendQuery(from, {'claim-kit-from': 'qr'}))
               .post({subject: `did:ethr:${wallet.getAddressString()}`})
               .json<{vc: AtomicVCV1}>())
           } catch {
@@ -118,7 +126,7 @@ export const LocalClientProvider: React.FC = props => {
             }
           }
 
-          setAtomicVCs([...atomicVCs, vc])
+          setVCs([...vcs, vc])
 
           return {kind: 'success'}
         },

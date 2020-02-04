@@ -13,7 +13,14 @@ export const isValid = <T>(valideFn: ValidateFn<T>) => (data: Unvalidated<T>): d
 }
 
 export const isAsyncValid = <T>(valideFn: AsyncValidateFn<T>) => async (data: Unvalidated<T>): Promise<boolean> => {
-  return (await valideFn(data)).kind === 'validated'
+  const outcome = await valideFn(data)
+
+  if (outcome.kind === 'validated') {
+    return true
+  } else {
+    console.log(outcome.message, data)
+    return false
+  }
 }
 
 export const isUndefinedOr = (validator: Validator) => (value: any, data: any) => {

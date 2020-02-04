@@ -30,12 +30,17 @@ export type ValidateFn<T> = (data: Unvalidated<T>) => ValidationResponse<T>
 
 export type AsyncValidateFn<T> = (data: Unvalidated<T>) => Promise<ValidationResponse<T>>
 
-export const genAsyncValidateFn = <T>(validations: AsyncValidations<T>): AsyncValidateFn<T> => async data => {
+export const genAsyncValidateFn = <T>(
+  validations: AsyncValidations<T>,
+  {required: _required}: {required?: (keyof T)[]} = {},
+): AsyncValidateFn<T> => async data => {
+  const required = _required || []
+
   try {
     for (let i = 0; i < Object.keys(validations).length; i++) {
       const fieldName = Object.keys(validations)[i] as keyof T
 
-      if (data[fieldName] === undefined) {
+      if (required.includes(fieldName) && typeof data[fieldName] === 'undefined') {
         throw new Error(`Missing ${fieldName}`)
       }
 
@@ -70,12 +75,17 @@ export const genAsyncValidateFn = <T>(validations: AsyncValidations<T>): AsyncVa
   }
 }
 
-export const genValidateFn = <T>(validations: Validations<T>): ValidateFn<T> => data => {
+export const genValidateFn = <T>(
+  validations: Validations<T>,
+  {required: _required}: {required?: (keyof T)[]} = {},
+): ValidateFn<T> => data => {
+  const required = _required || []
+
   try {
     Object.keys(validations).forEach(_fieldName => {
       const fieldName = _fieldName as keyof T
 
-      if (data[fieldName] === undefined) {
+      if (required.includes(fieldName) && typeof data[fieldName] === 'undefined') {
         throw new Error(`Missing ${fieldName}`)
       }
 

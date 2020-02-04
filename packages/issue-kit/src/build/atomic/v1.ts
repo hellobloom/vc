@@ -51,6 +51,7 @@ export const buildAtomicVCV1 = async <D extends {}, R extends BaseVCRevocationV1
     }),
     documentLoader: defaultDocumentLoader,
     purpose: new AssertionProofPurpose(),
+    expansionMap: false, // TODO: remove this
   })
 
   return credential

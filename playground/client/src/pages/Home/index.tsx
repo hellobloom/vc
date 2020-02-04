@@ -6,11 +6,12 @@ import {Button} from '../../components/Button'
 import {JsonEditor} from '../../components/JsonEditor'
 
 import './index.scss'
+import {Delete} from '../../components/Delete'
 
 type HomeProps = {}
 
 export const Home: React.FC<HomeProps> = props => {
-  const {wallet, sdvcs, regen} = useLocalClient()
+  const {wallet, vcs, regen, deleteVC} = useLocalClient()
 
   return (
     <Shell>
@@ -25,10 +26,17 @@ export const Home: React.FC<HomeProps> = props => {
           </Button>
           <div className="is-divider" />
           <h3 className="title is-3">Local Attestations:</h3>
-          {sdvcs.length > 0 ? (
+          {vcs.length > 0 ? (
             <React.Fragment>
-              {sdvcs.map((sdvc, i) => (
-                <JsonEditor key={i} value={sdvc} />
+              {vcs.map((vc, i) => (
+                <div className="columns home__vc" key={i}>
+                  <div className="column is-narrow is-paddingless">
+                    <Delete className="home__vc__delete-btn" onClick={() => deleteVC(i)} aria-label="Delete VC" />
+                  </div>
+                  <div className="column is-paddingless">
+                    <JsonEditor value={vc} />
+                  </div>
+                </div>
               ))}
             </React.Fragment>
           ) : (

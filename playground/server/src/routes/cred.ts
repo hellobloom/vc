@@ -6,6 +6,7 @@ import dayjs from 'dayjs'
 
 import {IssuedCredential} from '@server/models'
 import {claimCookieKey} from '@server/cookies'
+import {sendNotification} from '@server/socket/sender'
 
 export const applyCredRoutes = (app: fastify.FastifyInstance) => {
   app.post<
@@ -76,13 +77,13 @@ export const applyCredRoutes = (app: fastify.FastifyInstance) => {
     },
   )
 
-  app.post<{'issue-kit-from': 'qr' | 'button'}, {id: string}, fastify.DefaultHeaders, {subject: string}>(
+  app.post<{'claim-kit-from': 'qr' | 'button'}, {id: string}, fastify.DefaultHeaders, {subject: string}>(
     '/api/v1/cred/:id/claim-v1',
     {
       schema: {
         querystring: S.object()
-          .prop('issue-kit-from', S.enum(['qr', 'button']))
-          .required(['issue-kit-from']),
+          .prop('claim-kit-from', S.enum(['qr', 'button']))
+          .required(['claim-kit-from']),
         params: S.object()
           .prop('id', S.string().format('uuid'))
           .required(['id']),
@@ -100,24 +101,38 @@ export const applyCredRoutes = (app: fastify.FastifyInstance) => {
       if (!cred) return reply.status(404).send({})
       if (cred.claimed) return reply.status(400).send({})
 
-      const vc = buildAtomicVCV1({
-        type: [cred.type],
-        data: cred.data,
-        subject: req.body.subject,
-        issuanceDate: dayjs.utc().toISOString(),
-        expirationDate: dayjs
-          .utc()
-          .add(2, 'month')
-          .toISOString(),
-        privateKey: Buffer.from(''),
-        revocation: {
-          '@context': '',
-        },
-      })
+      try {
+        const vc = await buildAtomicVCV1({
+          type: [cred.type],
+          data: cred.data,
+          subject: req.body.subject,
+          issuanceDate: dayjs.utc().toISOString(),
+          expirationDate: dayjs
+            .utc()
+            .add(2, 'month')
+            .toISOString(),
+          privateKey: Buffer.from('ca2eeb77a6d85f208cd852307c7ef2e66df2962e9b3ca4943923b6ffc38c8277', 'hex'),
+          revocation: {
+            '@context': 'placeholder',
+          },
+        })
 
-      await cred.update({claimed: true, vc})
+        if (req.query['claim-kit-from'] === 'qr') {
+          sendNotification({
+            recipient: req.params.id,
+            type: 'notif/cred-claimed',
+            payload: JSON.stringify(vc),
+          })
 
-      return reply.status(200).send({vc})
+          await cred.destroy()
+        } else {
+          await cred.update({claimed: true, vc})
+        }
+
+        return reply.status(200).send({vc})
+      } catch {
+        return reply.status(400).send({})
+      }
     },
   )
 }

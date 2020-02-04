@@ -47,11 +47,11 @@ const useGetSharedTypes = (ready: boolean) => {
     }
   }, [])
 
-  const socketCallback = useCallback(async verifiableCredential => {
-    setSharedData(verifiableCredential)
-  }, [])
-
   useEffect(() => {
+    const socketCallback = async (verifiableCredential: any) => {
+      setSharedData(verifiableCredential)
+    }
+
     if (ready) {
       resetSocketConnection()
       socketOn('notif/share-recieved', socketCallback)
@@ -60,7 +60,7 @@ const useGetSharedTypes = (ready: boolean) => {
     return () => {
       socketOff('notif/share-recieved', socketCallback)
     }
-  }, [ready, socketCallback])
+  }, [ready])
 
   return sharedData
 }
@@ -108,7 +108,7 @@ export const Share: React.FC<ShareProps> = props => {
     let localClientButton: React.ReactNode | undefined
 
     if (data) {
-      const url = `${host}/api/v1/share/recieve-${data.responseVersion}`
+      const endpoint = `/api/v1/share/recieve-${data.responseVersion}`
 
       cardContent = (
         <RequestElement
@@ -117,7 +117,7 @@ export const Share: React.FC<ShareProps> = props => {
           requestData={{
             action: Action.attestation,
             token,
-            url,
+            url: `${host}${endpoint}`,
             org_name: 'Attestation Playground',
             org_logo_url: 'https://bloom.co/images/notif/bloom-logo.png',
             org_usage_policy_url: 'https://bloom.co/legal/terms',
@@ -137,7 +137,7 @@ export const Share: React.FC<ShareProps> = props => {
           <Button
             isFullwidth
             onClick={async () => {
-              const response = await shareVCs(data.types, token, url)
+              const response = await shareVCs(data.types, token, endpoint)
 
               if (response.kind === 'error') {
                 setErrorMessage(response.message)
