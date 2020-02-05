@@ -126,7 +126,7 @@ const useTypeMatch = (search: string) => {
     const allTypesSet = new Set(vcs.map(vc => vc.type).flat())
     allTypesSet.delete('VerifiableCredential')
 
-    if (search === '') return Array.from(allTypesSet)
+    if (debouncedSearch === '') return Array.from(allTypesSet)
 
     const result = new Fuse(
       Array.from(allTypesSet).map(type => ({type})),
@@ -299,9 +299,7 @@ export const Request: React.FC<RequestProps> = props => {
             </Card>
           </div>
         </div>
-        <div className="title is-4">
-          Response Version: <span className="is-italic has-text-info">(Coming Soon)</span>
-        </div>
+        <div className="title is-4">Response Version:</div>
         <div className="field">
           <div className="control">
             <label className="radio">
