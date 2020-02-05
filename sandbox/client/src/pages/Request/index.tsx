@@ -1,8 +1,10 @@
-import React, {useState} from 'react'
+import React, {useState, useMemo} from 'react'
 import {AttestationTypeNames, AttestationTypes} from '@bloomprotocol/attestations-common'
 import {stripIndent} from 'common-tags'
 import {Link} from 'react-router-dom'
 import {FC} from 'react-forward-props'
+import Fuse from 'fuse.js'
+import {useDebounce} from 'react-use'
 
 import {Shell} from '../../components/Shell'
 import {api} from '../../api'
@@ -11,6 +13,8 @@ import {Message, MessageHeader, MessageBody, MessageSkin} from '../../components
 import {Card, CardContent, CardHeader, CardHeaderTitle} from '../../components/Card'
 import {Button, ButtonSkin} from '../../components/Button'
 import {Delete} from '../../components/Delete'
+import {Combobox, ComboboxInput, ComboboxPopover, ComboboxList, ComboboxOption} from '../../components/Combobox'
+import {useLocalClient} from '../../components/LocalClientProvider'
 
 import './index.scss'
 
@@ -113,12 +117,45 @@ const TypeConfig: FC<'details', TypeConfigProps> = props => {
   )
 }
 
+const useTypeMatch = (search: string) => {
+  const {vcs} = useLocalClient()
+  const [debouncedSearch, setDebouncedSearch] = useState(search)
+  useDebounce(() => setDebouncedSearch(search), 500, [search])
+
+  return useMemo(() => {
+    const allTypesSet = new Set(vcs.map(vc => vc.type).flat())
+    allTypesSet.delete('VerifiableCredential')
+
+    if (search === '') return Array.from(allTypesSet)
+
+    const result = new Fuse(
+      Array.from(allTypesSet).map(type => ({type})),
+      {
+        shouldSort: false,
+        tokenize: true,
+        matchAllTokens: true,
+        threshold: 0.2,
+        location: 0,
+        distance: 100,
+        maxPatternLength: 32,
+        minMatchCharLength: 1,
+        keys: ['type'],
+      },
+    )
+      .search(debouncedSearch)
+      .map(({type}) => type)
+
+    return result
+  }, [vcs, debouncedSearch])
+}
+
 type RequestProps = {}
 
 export const Request: React.FC<RequestProps> = props => {
   const [selectedTypes, setSelectedTypes] = useState<Set<string>>(new Set())
   const [customTypes, setCustomTypes] = useState<Set<string>>(new Set())
   const [newCustomType, setNewCustomType] = useState('')
+  const matchingTypes = useTypeMatch(newCustomType)
   const [responseVersion, setResponseVersion] = useState('v0')
 
   const [newShareId, setNewShareId] = useState<string>()
@@ -178,13 +215,22 @@ export const Request: React.FC<RequestProps> = props => {
                     >
                       <div className="field has-addons">
                         <div className="control is-expanded">
-                          <input
-                            value={newCustomType}
-                            onChange={e => setNewCustomType(e.target.value.trim())}
-                            className="input"
-                            type="text"
-                            placeholder="Custom Type"
-                          />
+                          <Combobox onSelect={value => setNewCustomType(value)}>
+                            <ComboboxInput
+                              placeholder="Custom Type"
+                              value={newCustomType}
+                              onChange={e => setNewCustomType(e.target.value.trim())}
+                            />
+                            {matchingTypes && matchingTypes.length > 0 && (
+                              <ComboboxPopover>
+                                <ComboboxList aria-label="Credential Types">
+                                  {matchingTypes.slice(0, 10).map((type, index) => (
+                                    <ComboboxOption key={index} value={type} />
+                                  ))}
+                                </ComboboxList>
+                              </ComboboxPopover>
+                            )}
+                          </Combobox>
                         </div>
                         <div className="control">
                           <Button>Add</Button>
