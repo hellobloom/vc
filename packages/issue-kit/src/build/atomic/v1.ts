@@ -32,7 +32,7 @@ export const buildAtomicVCV1 = async <S extends AtomicVCSubjectV1<{'@type': stri
   revocation,
   context: _context,
 }: {
-  credentialSubject: S
+  credentialSubject: S | S[]
   type: string[]
   privateKey: Buffer
   issuanceDate: string

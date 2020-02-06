@@ -9,6 +9,7 @@ import {
   AtomicVCSubjectV1,
   AtomicVCProofV1,
   BaseVCRevocationV1,
+  ValidateFn,
 } from '@bloomprotocol/attestations-common'
 
 const {EcdsaSecp256k1KeyClass2019, EcdsaSecp256k1Signature2019, defaultDocumentLoader} = require('@transmute/lds-ecdsa-secp256k1-2019')
@@ -28,6 +29,14 @@ export const validateCredentialSubject = genValidateFn<AtomicVCSubjectV1>({
   '@type': Utils.isNotEmptyString,
   identifier: EthUtils.isValidDID,
 })
+
+const isValidOrArrayOf = <T>(validateFn: ValidateFn<T>) => (data: any): data is T => {
+  if (Array.isArray(data)) {
+    return data.every(Utils.isValid(validateFn))
+  } else {
+    return Utils.isValid(validateFn)(data)
+  }
+}
 
 const validateCredentialRevocation = genValidateFn<BaseVCRevocationV1>({
   '@context': Utils.isNotEmptyString,
@@ -76,7 +85,7 @@ export const validateVerifiableCredential = genAsyncValidateFn<AtomicVCV1>({
   issuanceDate: Utils.isValidRFC3339DateTime,
   expirationDate: Utils.isUndefinedOr(Utils.isValidRFC3339DateTime),
   credentialSubject: [
-    Utils.isValid(validateCredentialSubject),
+    isValidOrArrayOf(validateCredentialSubject),
     // TODO: validate rest of credentialSubject based on the `type` array
   ],
   revocation: Utils.isValid(validateCredentialRevocation),

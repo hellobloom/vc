@@ -15,7 +15,7 @@ module.exports = {
       },
       data: {
         allowNull: false,
-        type: DataTypes.JSONB,
+        type: DataTypes.ARRAY(DataTypes.JSONB),
       },
       claimVersion: {
         allowNull: false,

@@ -1,12 +1,17 @@
 import {Sequelize, Model, DataTypes, UUIDV4} from 'sequelize'
 import {AtomicVCV1} from '@bloomprotocol/attestations-common'
 
+export type DataMapping = {
+  datum: {'@type': string}
+  subject: string
+}
+
 export class IssuedCredential extends Model {
   id!: string
 
   type!: string
 
-  data!: {'@type': string}
+  data!: DataMapping[]
 
   claimVersion!: 'v1'
 
@@ -34,7 +39,7 @@ export const initIssuedCredential = (sequelize: Sequelize) => {
       },
       data: {
         allowNull: false,
-        type: DataTypes.JSONB,
+        type: DataTypes.ARRAY(DataTypes.JSONB),
       },
       claimVersion: {
         allowNull: false,

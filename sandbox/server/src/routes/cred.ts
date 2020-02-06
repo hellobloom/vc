@@ -8,6 +8,11 @@ import {IssuedCredential} from '@server/models'
 import {claimCookieKey} from '@server/cookies'
 import {sendNotification} from '@server/socket/sender'
 
+type DataMapping = {
+  datum: {'@type': string}
+  subject: string
+}
+
 export const applyCredRoutes = (app: fastify.FastifyInstance) => {
   app.post<
     fastify.DefaultQuery,
@@ -15,7 +20,7 @@ export const applyCredRoutes = (app: fastify.FastifyInstance) => {
     fastify.DefaultHeaders,
     {
       type: string
-      data: {}
+      data: DataMapping[]
     }
   >(
     '/api/v1/cred/create',
@@ -25,14 +30,24 @@ export const applyCredRoutes = (app: fastify.FastifyInstance) => {
           .prop('type', S.string())
           .prop(
             'data',
-            S.object()
-              .prop('@type', S.string())
-              .required(['@type']),
+            S.array().items(
+              S.object()
+                .prop(
+                  'datum',
+                  S.object()
+                    .prop('@type', S.string())
+                    .required(['@type']),
+                )
+                .prop('subject', S.string())
+                .required(['datum', 'subject']),
+            ),
           )
           .required(['type', 'data']),
       },
     },
     async (req, reply) => {
+      if (!req.body.data.every(({subject}) => subject === '' || EthUtils.isValidDID(subject))) return reply.status(400).send({})
+
       const cred = await IssuedCredential.create({type: req.body.type, data: req.body.data, claimVersion: 'v1'})
 
       return reply.status(200).send({id: cred.id})
@@ -107,10 +122,18 @@ export const applyCredRoutes = (app: fastify.FastifyInstance) => {
       if (cred.claimed) return reply.status(400).send({})
 
       try {
-        const credentialSubject = await buildAtomicVCSubjectV1({
-          data: cred.data,
-          subject: req.body.subject,
-        })
+        const credentialSubject = await Promise.all(
+          cred.data.map(async ({datum, subject}) => {
+            console.log({subject})
+
+            return await buildAtomicVCSubjectV1({
+              data: JSON.parse(JSON.stringify(datum).replace('{{claimer}}', subject)),
+              subject: subject || req.body.subject,
+            })
+          }),
+        )
+
+        console.log({credentialSubject})
 
         const vc = await buildAtomicVCV1({
           credentialSubject,

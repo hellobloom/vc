@@ -8,6 +8,7 @@ import {SimpleThing} from '@bloomprotocol/attestations-common'
 import {PrismAsyncLight as SyntaxHighlighter} from 'react-syntax-highlighter'
 import ts from 'react-syntax-highlighter/dist/esm/languages/prism/typescript'
 import coy from 'react-syntax-highlighter/dist/esm/styles/prism/coy'
+import {uuid} from 'uuidv4'
 
 import {Shell} from '../../components/Shell'
 import {Message, MessageSkin, MessageHeader, MessageBody} from '../../components/Message'
@@ -22,11 +23,17 @@ import './index.scss'
 
 SyntaxHighlighter.registerLanguage('typescript', ts)
 
+type DataMapping = {
+  id: string
+  datum: SimpleThing | null
+  subject: string
+}
+
 type AtomicVCBuilderProps = {
   type: string
-  data: {} | null
+  data: DataMapping[]
   onTypeChange: (type: string) => void
-  onDataChange: (data: SimpleThing | null) => void
+  onDataChange: (data: DataMapping[]) => void
 }
 
 const AtomicVCBuilder: FC<'div', AtomicVCBuilderProps> = props => {
@@ -50,41 +57,113 @@ const AtomicVCBuilder: FC<'div', AtomicVCBuilderProps> = props => {
           />
         </div>
       </div>
-      <div className="field">
-        <label htmlFor={`${id}-data`} className="label">
-          Credential Data
-        </label>
-        <div className="control">
-          <JsonEditor
-            mode="code"
-            id={`${id}-data`}
-            value={props.data}
-            onChange={props.onDataChange}
-            schema={S.object()
-              .prop('@type', S.string())
-              .required(['@type'])
-              .valueOf()}
-          />
-          <p className="help">
-            Must extend from{' '}
-            <a href="https://schema.org/Thing" target="_blank" rel="noreferer noopener">
-              schema.org/Thing
-            </a>
-          </p>
-        </div>
-      </div>
+      <div className="is-divider" />
+      {props.data.map(({id: dataId, datum, subject}, index) => (
+        <React.Fragment key={dataId}>
+          <div className="field">
+            <label htmlFor={`${id}-subject`} className="label">
+              Credential Subject{props.data.length > 1 ? ` ${index}` : ''}
+            </label>
+            <div className="control">
+              <input
+                required
+                value={subject}
+                onChange={e => {
+                  const newData = [...props.data]
+                  const foundDatum = newData.find(d => d.id === dataId)
+                  if (!foundDatum) return
+                  foundDatum.subject = e.target.value.trim()
+                  props.onDataChange(newData)
+                }}
+                id={`${id}-subject`}
+                className="input"
+                type="text"
+                placeholder="Credential Subject (did:ethr:0x...)"
+              />
+            </div>
+            <p className="help">Leave blank if subject is claiming the credential</p>
+          </div>
+          <div className="field">
+            <label htmlFor={`${id}-data-${index}`} className="label">
+              Credential Data{props.data.length > 1 ? ` ${index}` : ''}
+            </label>
+            <div className="control">
+              <JsonEditor
+                mode="code"
+                id={`${id}-data-${index}`}
+                value={datum}
+                onChange={newDatum => {
+                  const newData = [...props.data]
+                  const foundDatum = newData.find(d => d.id === dataId)
+                  if (!foundDatum) return
+                  foundDatum.datum = newDatum
+                  props.onDataChange(newData)
+                }}
+                schema={S.object()
+                  .prop('@type', S.string())
+                  .required(['@type'])
+                  .valueOf()}
+              />
+              <p className="help">
+                Must extend from{' '}
+                <a href="https://schema.org/Thing" target="_blank" rel="noopener noreferrer">
+                  schema.org/Thing
+                </a>
+              </p>
+              <p className="help">Use {'{{claimer}}'} as a placeholder for the claimer's DID</p>
+            </div>
+          </div>
+          {index !== props.data.length - 1 && <div className="is-divider" />}
+        </React.Fragment>
+      ))}
     </div>
   )
+}
+
+const buildOutputString = (data: DataMapping[], type: string) => {
+  if (data.length === 1) {
+    return codeBlock`
+      const credentialSubject = await buildAtomicVCSubectV1({
+        data: ${JSON.stringify(data[0].datum)},
+        subject: '${data[0].subject || '{{claimer}}'}',
+      })
+
+      const atomicVC = await buildAtomicVCV1({
+        type: ['${type}']
+        credentialSubject,
+        issuanceDate: '...',
+        expirationDate: '...',
+        privateKey: Buffer.from('...', 'hex'),
+      })`
+  } else {
+    const subjectStrings = data.map(({datum, subject}, index) => {
+      return `const credentialSubject${index} = await buildAtomicVCSubectV1({
+        data: ${JSON.stringify(datum)},
+        subject: '${subject || '{{claimer}}'}',
+      })\n`
+    })
+
+    return codeBlock`
+      ${subjectStrings}
+      const atomicVC = await buildAtomicVCV1({
+        type: ['${type}']
+        credentialSubject: [${data.map((_, i) => `credentialSubject${i}`)}],
+        issuanceDate: '...',
+        expirationDate: '...',
+        privateKey: Buffer.from('...', 'hex'),
+      })`
+  }
 }
 
 type IssueProps = {}
 
 export const Issue: React.FC<IssueProps> = props => {
   const [newCredId, setNewCredId] = useState<string>()
+  const [errorMessage, setErrorMessage] = useState<string>()
   const [type, setType] = useState('')
-  const [data, setData] = useState<SimpleThing | null>({'@type': ''})
+  const [data, setData] = useState<DataMapping[]>([{id: uuid(), datum: {'@type': ''}, subject: ''}])
 
-  const isDisabled = type.trim() === '' || data === null
+  const isDisabled = type.trim() === '' || data.some(({datum}) => datum === null)
 
   return (
     <Shell titleSuffix="Issue">
@@ -93,12 +172,21 @@ export const Issue: React.FC<IssueProps> = props => {
       {newCredId && (
         <Message skin={MessageSkin.success}>
           <MessageHeader>
-            <p>Request Successfully Created</p>
+            <p>Credential Successfully Created</p>
             <Delete onClick={() => setNewCredId(undefined)} aria-label="clear message" />
           </MessageHeader>
           <MessageBody>
             To claim this credential navigate to <Link to={sitemap.claim(newCredId)}>{sitemap.claim(newCredId)}</Link>.
           </MessageBody>
+        </Message>
+      )}
+      {errorMessage && (
+        <Message skin={MessageSkin.danger}>
+          <MessageHeader>
+            <p>Request Failed</p>
+            <Delete onClick={() => setErrorMessage(undefined)} aria-label="clear message" />
+          </MessageHeader>
+          <MessageBody>{errorMessage}</MessageBody>
         </Message>
       )}
       <div className="columns">
@@ -110,6 +198,18 @@ export const Issue: React.FC<IssueProps> = props => {
             <CardContent>
               <AtomicVCBuilder type={type} data={data} onTypeChange={setType} onDataChange={setData} />
             </CardContent>
+            <CardFooter>
+              <CardFooterItem>
+                <Button
+                  isFullwidth
+                  onClick={() => {
+                    setData([...data, {id: uuid(), datum: {'@type': ''}, subject: ''}])
+                  }}
+                >
+                  Add Another Data Object
+                </Button>
+              </CardFooterItem>
+            </CardFooter>
           </Card>
         </div>
         <div className="column is-half">
@@ -119,20 +219,7 @@ export const Issue: React.FC<IssueProps> = props => {
             </CardHeader>
             <CardContent>
               <SyntaxHighlighter className="issue__output__code" language="typescript" style={coy}>
-                {codeBlock`
-                const credentialSubject = await buildAtomicVCSubectV1({
-                  data: ${JSON.stringify(data)},
-                  subject: 'did:ethr:0x...',
-                })
-
-                const atomicVC = await buildAtomicVCV1({
-                  type: ['${type}']
-                  data: ${JSON.stringify(data)},
-                  credentialSubject,
-                  issuanceDate: '...',
-                  expirationDate: '...',
-                  privateKey: Buffer.from('...', 'hex'),
-                })`}
+                {buildOutputString(data, type)}
               </SyntaxHighlighter>
             </CardContent>
             <CardFooter>
@@ -141,10 +228,14 @@ export const Issue: React.FC<IssueProps> = props => {
                   isFullwidth
                   skin={ButtonSkin.info}
                   onClick={async () => {
-                    const {id} = await api.cred.create({type, data: data!})
-                    setNewCredId(id)
-                    setType('')
-                    setData({'@type': ''})
+                    try {
+                      const {id} = await api.cred.create({type, data})
+                      setNewCredId(id)
+                      setType('')
+                      setData([{id: uuid(), datum: {'@type': ''}, subject: ''}])
+                    } catch {
+                      setErrorMessage('Something went wrong while creating the credential')
+                    }
                   }}
                   isDisabled={isDisabled}
                 >
