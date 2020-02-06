@@ -1,8 +1,8 @@
 import {EthUtils, AtomicVCV1, AtomicVCSubjectV1, BaseVCRevocationSimpleV1} from '@bloomprotocol/attestations-common'
 import EthWallet from 'ethereumjs-wallet'
+import {keyUtils} from '@transmute/es256k-jws-ts'
+import {EcdsaSecp256k1KeyClass2019, EcdsaSecp256k1Signature2019, defaultDocumentLoader} from '@transmute/lds-ecdsa-secp256k1-2019'
 
-const {EcdsaSecp256k1KeyClass2019, EcdsaSecp256k1Signature2019, defaultDocumentLoader} = require('@transmute/lds-ecdsa-secp256k1-2019')
-const keyto = require('@trust/keyto')
 const jsigs = require('jsonld-signatures')
 const {AssertionProofPurpose} = jsigs.purposes
 
@@ -66,11 +66,12 @@ export const buildAtomicVCV1 = async <S extends AtomicVCSubjectV1<{'@type': stri
       key: new EcdsaSecp256k1KeyClass2019({
         id: issuerDidDoc.publicKey[0].id,
         controller: issuerDidDoc.publicKey[0].controller,
-        privateKeyJwk: keyto.from(issuer.getPrivateKeyString().replace('0x', ''), 'blk').toJwk('private'),
+        privateKeyJwk: await keyUtils.privateJWKFromPrivateKeyHex(issuer.getPrivateKeyString().replace('0x', '')),
       }),
     }),
     documentLoader: defaultDocumentLoader,
     purpose: new AssertionProofPurpose(),
+    compactProof: false,
     expansionMap: false, // TODO: remove this
   })
 

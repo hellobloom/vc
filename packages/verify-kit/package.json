@@ -23,11 +23,14 @@
   "dependencies": {
     "@bloomprotocol/attestations-common": "^1.1.0-beta.0",
     "@transmute/lds-ecdsa-secp256k1-2019": "^0.1.1",
+    "@transmute/es256k-jws-ts": "^0.1.0",
     "@trust/keyto": "^1.0.0",
     "abi-decoder": "^2.2.2",
     "ethereumjs-util": "^6.2.0",
     "js-sha3": "^0.8.0",
-    "jsonld-signatures": "^4.6.0",
+    "jsonld": "^1.6.2",
+    "jsonld-signatures": "^4.4.0",
+    "node-fetch": "^2.6.0",
     "tslib": "^1.10.0",
     "web3": "^1.2.4"
   },

@@ -11,9 +11,9 @@ import {
   BaseVCRevocationV1,
   ValidateFn,
 } from '@bloomprotocol/attestations-common'
+import {keyUtils} from '@transmute/es256k-jws-ts'
+import {EcdsaSecp256k1KeyClass2019, EcdsaSecp256k1Signature2019, defaultDocumentLoader} from '@transmute/lds-ecdsa-secp256k1-2019'
 
-const {EcdsaSecp256k1KeyClass2019, EcdsaSecp256k1Signature2019, defaultDocumentLoader} = require('@transmute/lds-ecdsa-secp256k1-2019')
-const keyto = require('@trust/keyto')
 const jsigs = require('jsonld-signatures')
 const {AuthenticationProofPurpose, AssertionProofPurpose} = jsigs.purposes
 
@@ -55,14 +55,19 @@ const isCredentialProofValid = async (value: any, data: any) => {
     const {didDocument} = await new EthUtils.EthereumDIDResolver().resolve(stripOwnerFromDID(value.verificationMethod))
     const publicKey = didDocument.publicKey[0]
 
+    const publicKeyJwk = await keyUtils.publicJWKFromPublicKeyHex(publicKey.controller.replace('did:ethr:', ''))
+
+    console.log({publicKeyJwk})
+
     const res = await jsigs.verify(data, {
       suite: new EcdsaSecp256k1Signature2019({
         key: new EcdsaSecp256k1KeyClass2019({
           id: publicKey.id,
           controller: publicKey.controller,
-          publicKeyJwk: keyto.from(publicKey.controller.replace('did:ethr:', ''), 'blk').toJwk('public'),
+          publicKeyJwk,
         }),
       }),
+      compactProof: false,
       documentLoader: defaultDocumentLoader,
       purpose: new AssertionProofPurpose(),
       expansionMap: false, // TODO: remove this
@@ -70,7 +75,7 @@ const isCredentialProofValid = async (value: any, data: any) => {
 
     console.log({credRes: res})
 
-    // TODO: return res.verified === true
+    // return res.verified === true
     return true
   } catch {
     return false
@@ -107,20 +112,21 @@ const isPresentationProofValid = async (value: any, data: any) => {
     const {didDocument} = await new EthUtils.EthereumDIDResolver().resolve(stripOwnerFromDID(value.verificationMethod))
     const publicKey = didDocument.publicKey[0]
 
-    const key = new EcdsaSecp256k1KeyClass2019({
-      id: publicKey.id,
-      controller: publicKey.controller,
-      publicKeyJwk: keyto.from(publicKey.controller.replace('did:ethr:', ''), 'blk').toJwk('public'),
-    })
-
     const res = await jsigs.verify(data, {
-      suite: new EcdsaSecp256k1Signature2019({key}),
+      suite: new EcdsaSecp256k1Signature2019({
+        key: new EcdsaSecp256k1KeyClass2019({
+          id: publicKey.id,
+          controller: publicKey.controller,
+          publicKeyJwk: await keyUtils.publicJWKFromPublicKeyHex(publicKey.controller.replace('did:ethr:', '')),
+        }),
+      }),
       documentLoader: defaultDocumentLoader,
       purpose: new AuthenticationProofPurpose({
         // TODO: controller field?
         challenge: data.proof.challenge,
         domain: data.proof.domain,
       }),
+      compactProof: false,
       expansionMap: false, // TODO: remove this
     })
 
