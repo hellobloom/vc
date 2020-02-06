@@ -1,10 +1,13 @@
 import React, {useState, useMemo} from 'react'
 import {AttestationTypeNames, AttestationTypes} from '@bloomprotocol/attestations-common'
-import {stripIndent} from 'common-tags'
+import {codeBlock} from 'common-tags'
 import {Link} from 'react-router-dom'
 import {FC} from 'react-forward-props'
 import Fuse from 'fuse.js'
 import {useDebounce} from 'react-use'
+import {PrismAsyncLight as SyntaxHighlighter} from 'react-syntax-highlighter'
+import ts from 'react-syntax-highlighter/dist/esm/languages/prism/typescript'
+import coy from 'react-syntax-highlighter/dist/esm/styles/prism/coy'
 
 import {Shell} from '../../components/Shell'
 import {api} from '../../api'
@@ -17,6 +20,8 @@ import {Combobox, ComboboxInput, ComboboxPopover, ComboboxList, ComboboxOption} 
 import {useLocalClient} from '../../components/LocalClientProvider'
 
 import './index.scss'
+
+SyntaxHighlighter.registerLanguage('typescript', ts)
 
 const getDisplayValueForType = (type: string) => {
   const manifest = AttestationTypes[type as any]
@@ -217,7 +222,7 @@ export const Request: React.FC<RequestProps> = props => {
                         <div className="control is-expanded">
                           <Combobox onSelect={value => setNewCustomType(value)}>
                             <ComboboxInput
-                              placeholder="Custom Type"
+                              placeholder="Custom Credential"
                               value={newCustomType}
                               onChange={e => setNewCustomType(e.target.value.trim())}
                             />
@@ -338,23 +343,26 @@ export const Request: React.FC<RequestProps> = props => {
         </Button>
       </div>
       <div className="request__output">
-        <div className="title is-4">Output:</div>
-        <pre>
-          <code>
-            {stripIndent`
-              const requestData: RequestData = {
-                action: Action.attestation,
-                token: '...',
-                url: '...',
-                org_name: 'VC Sandbox',
-                org_logo_url: 'https://bloom.co/images/notif/bloom-logo.png',
-                org_usage_policy_url: 'https://bloom.co/legal/terms',
-                org_privacy_policy_url: 'https://bloom.co/legal/privacy',
-                types: [${allRequestedTypes.map(type => `"${type}"`).join(', ')}]
-              }
-            `}
-          </code>
-        </pre>
+        <Card>
+          <CardHeader>
+            <CardHeaderTitle>Output</CardHeaderTitle>
+          </CardHeader>
+          <CardContent>
+            <SyntaxHighlighter className="request__output__code" language="typescript" style={coy}>
+              {codeBlock`
+            const requestData: RequestData = {
+              action: Action.attestation,
+              token: '...',
+              url: '...',
+              org_name: 'VC Sandbox',
+              org_logo_url: 'https://bloom.co/images/notif/bloom-logo.png',
+              org_usage_policy_url: 'https://bloom.co/legal/terms',
+              org_privacy_policy_url: 'https://bloom.co/legal/privacy',
+              types: [${allRequestedTypes.map(type => `"${type}"`).join(', ')}]
+            }`}
+            </SyntaxHighlighter>
+          </CardContent>
+        </Card>
       </div>
     </Shell>
   )

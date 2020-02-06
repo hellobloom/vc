@@ -5,6 +5,9 @@ import {useId} from '@reach/auto-id'
 import {codeBlock} from 'common-tags'
 import S from 'fluent-schema'
 import {SimpleThing} from '@bloomprotocol/attestations-common'
+import {PrismAsyncLight as SyntaxHighlighter} from 'react-syntax-highlighter'
+import ts from 'react-syntax-highlighter/dist/esm/languages/prism/typescript'
+import coy from 'react-syntax-highlighter/dist/esm/styles/prism/coy'
 
 import {Shell} from '../../components/Shell'
 import {Message, MessageSkin, MessageHeader, MessageBody} from '../../components/Message'
@@ -16,6 +19,8 @@ import {api} from '../../api'
 import {JsonEditor} from '../../components/JsonEditor'
 
 import './index.scss'
+
+SyntaxHighlighter.registerLanguage('typescript', ts)
 
 type AtomicVCBuilderProps = {
   type: string
@@ -31,7 +36,7 @@ const AtomicVCBuilder: FC<'div', AtomicVCBuilderProps> = props => {
     <div>
       <div className="field">
         <label htmlFor={`${id}-type`} className="label">
-          Type
+          Credential Type
         </label>
         <div className="control">
           <input
@@ -41,13 +46,13 @@ const AtomicVCBuilder: FC<'div', AtomicVCBuilderProps> = props => {
             id={`${id}-type`}
             className="input"
             type="text"
-            placeholder="Type"
+            placeholder="Credential Type (AlumniCredential)"
           />
         </div>
       </div>
       <div className="field">
         <label htmlFor={`${id}-data`} className="label">
-          Data
+          Credential Data
         </label>
         <div className="control">
           <JsonEditor
@@ -60,6 +65,12 @@ const AtomicVCBuilder: FC<'div', AtomicVCBuilderProps> = props => {
               .required(['@type'])
               .valueOf()}
           />
+          <p className="help">
+            Must extend from{' '}
+            <a href="https://schema.org/Thing" target="_blank" rel="noreferer noopener">
+              schema.org/Thing
+            </a>
+          </p>
         </div>
       </div>
     </div>
@@ -104,28 +115,25 @@ export const Issue: React.FC<IssueProps> = props => {
         <div className="column is-half">
           <Card>
             <CardHeader>
-              <CardHeaderTitle>Atomic Verifiable Credential</CardHeaderTitle>
+              <CardHeaderTitle>Output</CardHeaderTitle>
             </CardHeader>
             <CardContent>
-              <pre>
-                <code>
-                  {codeBlock`
-                    const credentialSubject = await buildAtomicVCSubectV1({
-                      data: ${JSON.stringify(data)},
-                      subject: 'did:ethr:0x...',
-                    })
+              <SyntaxHighlighter className="issue__output__code" language="typescript" style={coy}>
+                {codeBlock`
+                const credentialSubject = await buildAtomicVCSubectV1({
+                  data: ${JSON.stringify(data)},
+                  subject: 'did:ethr:0x...',
+                })
 
-                    const atomicVC = await buildAtomicVCV1({
-                      type: ['${type}']
-                      data: ${JSON.stringify(data)},
-                      credentialSubject,
-                      issuanceDate: '...',
-                      expirationDate: '...',
-                      privateKey: Buffer.from('...', 'hex'),
-                    })
-                    `}
-                </code>
-              </pre>
+                const atomicVC = await buildAtomicVCV1({
+                  type: ['${type}']
+                  data: ${JSON.stringify(data)},
+                  credentialSubject,
+                  issuanceDate: '...',
+                  expirationDate: '...',
+                  privateKey: Buffer.from('...', 'hex'),
+                })`}
+              </SyntaxHighlighter>
             </CardContent>
             <CardFooter>
               <CardFooterItem>
