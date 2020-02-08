@@ -714,13 +714,17 @@ const _documentLoader = (() => {
   return browser ? jsonld.documentLoaders.xhr() : jsonld.documentLoaders.node()
 })()
 
-export const documentLoader = async (url: string) => {
+export const documentLoader = async (url: string): Promise<any> => {
   if (url.startsWith('did:')) {
-    const {didDocument} = await new EthereumDIDResolver().resolve(url)
+    const did = url.indexOf('#') >= 0 ? url.substr(0, url.indexOf('#')) : url
+
+    const {
+      didDocument: {rawDocument},
+    } = await new EthereumDIDResolver().resolve(did)
 
     return {
       contextUrl: null,
-      document: didDocument.rawDocument,
+      document: rawDocument,
       documentUrl: url,
     }
   }
