@@ -1,6 +1,4 @@
 declare module 'ethereumjs-wallet' {
-  import {Buffer} from 'buffer'
-
   export default class Wallet {
     getAddress(): Buffer
     getAddressString(): string

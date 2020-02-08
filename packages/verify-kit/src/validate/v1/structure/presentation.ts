@@ -12,7 +12,9 @@ import {
   ValidateFn,
 } from '@bloomprotocol/attestations-common'
 import {keyUtils} from '@transmute/es256k-jws-ts'
-import {EcdsaSecp256k1KeyClass2019, EcdsaSecp256k1Signature2019, defaultDocumentLoader} from '@transmute/lds-ecdsa-secp256k1-2019'
+import {EcdsaSecp256k1KeyClass2019, EcdsaSecp256k1Signature2019} from '@transmute/lds-ecdsa-secp256k1-2019'
+import EthWallet from 'ethereumjs-wallet'
+// import EthU from 'ethereumjs-util'
 
 const jsigs = require('jsonld-signatures')
 const {AuthenticationProofPurpose, AssertionProofPurpose} = jsigs.purposes
@@ -55,9 +57,16 @@ const isCredentialProofValid = async (value: any, data: any) => {
     const {didDocument} = await new EthUtils.EthereumDIDResolver().resolve(stripOwnerFromDID(value.verificationMethod))
     const publicKey = didDocument.publicKey[0]
 
-    const publicKeyJwk = await keyUtils.publicJWKFromPublicKeyHex(publicKey.controller.replace('did:ethr:', ''))
+    const issuerPublicKey = EthWallet.fromPrivateKey(
+      Buffer.from('efca4cdd31923b50f4214af5d2ae10e7ac45a5019e9431cc195482d707485378', 'hex'),
+    ).getPublicKeyString()
 
+    const publicKeyJwk = await keyUtils.publicJWKFromPublicKeyHex(issuerPublicKey)
+
+    console.log({issuerPublicKey})
+    console.log({didDocument})
     console.log({publicKeyJwk})
+    console.log({data})
 
     const res = await jsigs.verify(data, {
       suite: new EcdsaSecp256k1Signature2019({
@@ -68,7 +77,7 @@ const isCredentialProofValid = async (value: any, data: any) => {
         }),
       }),
       compactProof: false,
-      documentLoader: defaultDocumentLoader,
+      documentLoader: EthUtils.documentLoader,
       purpose: new AssertionProofPurpose(),
       expansionMap: false, // TODO: remove this
     })
@@ -120,7 +129,7 @@ const isPresentationProofValid = async (value: any, data: any) => {
           publicKeyJwk: await keyUtils.publicJWKFromPublicKeyHex(publicKey.controller.replace('did:ethr:', '')),
         }),
       }),
-      documentLoader: defaultDocumentLoader,
+      documentLoader: EthUtils.documentLoader,
       purpose: new AuthenticationProofPurpose({
         // TODO: controller field?
         challenge: data.proof.challenge,

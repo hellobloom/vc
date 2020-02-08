@@ -10,6 +10,7 @@ import {
   IDidDocument,
   IDidDocumentPublicKey,
 } from '@decentralized-identity/did-common-typescript'
+const jsonld = require('jsonld')
 
 import {MerkleTree} from './merkletreejs'
 import {
@@ -662,6 +663,7 @@ interface IEthDidDocumentPublicKey extends IDidDocumentPublicKey {
 }
 interface IEthDidDocument extends IDidDocument {
   publicKey?: IEthDidDocumentPublicKey[]
+  assertionMethod?: IDidDocument['authentication']
 }
 
 const ethrDidDocumentTmpl = (ethAddress: string): IEthDidDocument => ({
@@ -703,4 +705,25 @@ export const isValidDID = (value: any): value is string => {
   if (typeof value !== 'string') return false
 
   return value.startsWith('did:ethr:') && ethUtil.isValidAddress(value.replace('did:ethr:', ''))
+}
+
+const _documentLoader = (() => {
+  const nodejs = typeof process !== 'undefined' && process.versions && process.versions.node
+  const browser = !nodejs && (typeof window !== 'undefined' || typeof self !== 'undefined')
+
+  return browser ? jsonld.documentLoaders.xhr() : jsonld.documentLoaders.node()
+})()
+
+export const documentLoader = async (url: string) => {
+  if (url.startsWith('did:')) {
+    const {didDocument} = await new EthereumDIDResolver().resolve(url)
+
+    return {
+      contextUrl: null,
+      document: didDocument.rawDocument,
+      documentUrl: url,
+    }
+  }
+
+  return _documentLoader(url)
 }

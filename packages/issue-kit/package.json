@@ -33,7 +33,7 @@
     "ethereumjs-util": "^6.2.0",
     "ethereumjs-wallet": "^0.6.3",
     "js-sha3": "^0.8.0",
-    "jsonld": "^1.6.2",
+    "jsonld": "^2.0.2",
     "jsonld-signatures": "^4.4.0",
     "node-fetch": "^2.6.0",
     "randombytes": "^2.1.0",

@@ -27,8 +27,9 @@
     "@trust/keyto": "^1.0.0",
     "abi-decoder": "^2.2.2",
     "ethereumjs-util": "^6.2.0",
+    "ethereumjs-wallet": "^0.6.3",
     "js-sha3": "^0.8.0",
-    "jsonld": "^1.6.2",
+    "jsonld": "^2.0.2",
     "jsonld-signatures": "^4.4.0",
     "node-fetch": "^2.6.0",
     "tslib": "^1.10.0",
@@ -47,7 +48,6 @@
     "eslint-config-prettier": "^6.9.0",
     "eslint-plugin-prettier": "^3.1.2",
     "eth-sig-util": "^2.5.2",
-    "ethereumjs-wallet": "^0.6.3",
     "prettier": "^1.19.1",
     "tsdx": "^0.12.1",
     "typescript": "^3.7.5"
