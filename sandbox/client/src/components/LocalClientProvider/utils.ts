@@ -27,7 +27,7 @@ export const buildVPV1 = async ({
     holder: `did:ethr:${wallet.getAddressString()}`,
   }
 
-  const {didDocument} = await new EthUtils.EthereumDIDResolver().resolve(`did:ethr:${wallet.getAddressString()}`)
+  const {didDocument} = await EthUtils.resolveDID(`did:ethr:${wallet.getAddressString()}`)
 
   const vp: VPV1<AtomicVCV1> = jsigs.sign(unsignedVP, {
     suite: new EcdsaSecp256k1Signature2019({
