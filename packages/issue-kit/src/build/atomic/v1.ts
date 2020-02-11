@@ -13,7 +13,7 @@ export const buildAtomicVCSubjectV1 = async <Data extends {'@type': string}>({
   data: Data
   subject: string
 }): Promise<AtomicVCSubjectV1<Data>> => {
-  const {didDocument: subjectDidDoc} = await new EthUtils.EthereumDIDResolver().resolve(subject)
+  const {didDocument: subjectDidDoc} = await EthUtils.resolveDID(subject)
 
   const credentialSubject: AtomicVCSubjectV1<Data> = {
     ...data,
@@ -41,7 +41,7 @@ export const buildAtomicVCV1 = async <S extends AtomicVCSubjectV1<{'@type': stri
   context?: string | string[]
 }): Promise<AtomicVCV1> => {
   const issuer = EthWallet.fromPrivateKey(privateKey)
-  const {didDocument: issuerDidDoc} = await new EthUtils.EthereumDIDResolver().resolve(`did:ethr:${issuer.getAddressString()}`)
+  const {didDocument: issuerDidDoc} = await EthUtils.resolveDID(`did:ethr:${issuer.getAddressString()}`)
   const publicKey = issuerDidDoc.publicKey[0]
 
   const context = ['https://www.w3.org/2018/credentials/v1']

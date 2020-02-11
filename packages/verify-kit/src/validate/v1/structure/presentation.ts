@@ -14,7 +14,6 @@ import {
 import {keyUtils} from '@transmute/es256k-jws-ts'
 import {EcdsaSecp256k1KeyClass2019, EcdsaSecp256k1Signature2019} from '@transmute/lds-ecdsa-secp256k1-2019'
 import EthWallet from 'ethereumjs-wallet'
-// import EthU from 'ethereumjs-util'
 
 const jsigs = require('jsonld-signatures')
 const {AuthenticationProofPurpose, AssertionProofPurpose} = jsigs.purposes
@@ -54,26 +53,21 @@ const validateCredentialProof = genValidateFn<AtomicVCProofV1>({
 
 const isCredentialProofValid = async (value: any, data: any) => {
   try {
-    const {didDocument} = await new EthUtils.EthereumDIDResolver().resolve(stripOwnerFromDID(value.verificationMethod))
+    const {didDocument} = await EthUtils.resolveDID(stripOwnerFromDID(value.verificationMethod))
     const publicKey = didDocument.publicKey[0]
-
+    // TODO: Recover public key from JWS
     const issuerPublicKey = EthWallet.fromPrivateKey(
       Buffer.from('efca4cdd31923b50f4214af5d2ae10e7ac45a5019e9431cc195482d707485378', 'hex'),
     ).getPublicKeyString()
 
     const publicKeyJwk = await keyUtils.publicJWKFromPublicKeyHex(issuerPublicKey)
 
-    console.log({issuerPublicKey})
-    console.log({didDocument})
-    console.log({publicKeyJwk})
-    console.log({data})
-
     const res = await jsigs.verify(data, {
       suite: new EcdsaSecp256k1Signature2019({
         key: new EcdsaSecp256k1KeyClass2019({
           id: publicKey.id,
           controller: publicKey.controller,
-          publicKeyJwk,
+          publicKeyJwk: publicKeyJwk,
         }),
       }),
       compactProof: false,
@@ -82,10 +76,7 @@ const isCredentialProofValid = async (value: any, data: any) => {
       expansionMap: false, // TODO: remove this
     })
 
-    console.log({credRes: res})
-
-    // return res.verified === true
-    return true
+    return res.verified === true
   } catch {
     return false
   }
@@ -118,20 +109,26 @@ const validateProof = genValidateFn<VPProofV1>({
 
 const isPresentationProofValid = async (value: any, data: any) => {
   try {
-    const {didDocument} = await new EthUtils.EthereumDIDResolver().resolve(stripOwnerFromDID(value.verificationMethod))
+    const {didDocument} = await EthUtils.resolveDID(stripOwnerFromDID(value.verificationMethod))
     const publicKey = didDocument.publicKey[0]
+
+    // TODO: Recover public key from JWS
+    const holderPublicKey = EthWallet.fromPrivateKey(
+      Buffer.from('c87509a1c067bbde78beb793e6fa76530b6382a4c0241e5e4a9ec0a0f44dc0d3', 'hex'),
+    ).getPublicKeyString()
+
+    const publicKeyJwk = await keyUtils.publicJWKFromPublicKeyHex(holderPublicKey)
 
     const res = await jsigs.verify(data, {
       suite: new EcdsaSecp256k1Signature2019({
         key: new EcdsaSecp256k1KeyClass2019({
           id: publicKey.id,
           controller: publicKey.controller,
-          publicKeyJwk: await keyUtils.publicJWKFromPublicKeyHex(publicKey.controller.replace('did:ethr:', '')),
+          publicKeyJwk: publicKeyJwk,
         }),
       }),
       documentLoader: EthUtils.documentLoader,
       purpose: new AuthenticationProofPurpose({
-        // TODO: controller field?
         challenge: data.proof.challenge,
         domain: data.proof.domain,
       }),
@@ -139,10 +136,7 @@ const isPresentationProofValid = async (value: any, data: any) => {
       expansionMap: false, // TODO: remove this
     })
 
-    console.log({presRes: res})
-
-    // TODO: return res.verified === true
-    return true
+    return res.verified === true
   } catch {
     return false
   }

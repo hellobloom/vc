@@ -3,13 +3,7 @@ import * as ethUtil from 'ethereumjs-util'
 import randomBytes from 'randombytes'
 import * as ethSigUtil from 'eth-sig-util'
 import EthWallet from 'ethereumjs-wallet'
-import {
-  IDidResolver,
-  IDidResolveResult,
-  DidDocument,
-  IDidDocument,
-  IDidDocumentPublicKey,
-} from '@decentralized-identity/did-common-typescript'
+import {IDidDocument, IDidDocumentPublicKey} from '@decentralized-identity/did-common-typescript'
 const jsonld = require('jsonld')
 
 import {MerkleTree} from './merkletreejs'
@@ -661,13 +655,14 @@ export const validateBloomBatchMerkleTreeComponents = genValidateFn({
 interface IEthDidDocumentPublicKey extends IDidDocumentPublicKey {
   ethereumAddress: string
 }
-interface IEthDidDocument extends IDidDocument {
+interface IEthDidDocument extends Omit<IDidDocument, '@context'> {
+  '@context': string | string[]
   publicKey?: IEthDidDocumentPublicKey[]
   assertionMethod?: IDidDocument['authentication']
 }
 
 const ethrDidDocumentTmpl = (ethAddress: string): IEthDidDocument => ({
-  '@context': 'https://w3id.org/did/v1',
+  '@context': ['https://w3id.org/did/v1', 'https://w3id.org/security/v2'],
   id: `did:ethr:${ethAddress}`,
   publicKey: [
     {
@@ -677,34 +672,127 @@ const ethrDidDocumentTmpl = (ethAddress: string): IEthDidDocument => ({
       ethereumAddress: ethAddress,
     },
   ],
-  authentication: [
-    {
-      type: 'Secp256k1SignatureAuthentication2018',
-      publicKey: `did:ethr:${ethAddress}#owner`,
-    },
-  ],
+  authentication: [`did:ethr:${ethAddress}#owner`],
+  assertionMethod: [`did:ethr:${ethAddress}#owner`],
 })
 
 /**
- * Simplified "resolver", that just uses a template to avoid unnecessary performance issues.
+ * Class for performing various DID document operations.
  */
-export class EthereumDIDResolver implements IDidResolver {
-  public async resolve(did: string): Promise<IDidResolveResult> {
-    if (!isValidDID(did)) {
-      throw Error(`unable to resolve did document: ${did}`)
+class EthDidDocument {
+  /**
+   * Returns the DID within the key ID given.
+   * @param keyId A fully-qualified key ID. e.g. 'did:example:abc#key1'
+   * @example 'did:example:abc#key1' returns 'did:example:abc'
+   */
+  public static getDidFromKeyId(keyId: string): string {
+    const didLength = keyId.indexOf('#')
+    const did = keyId.substr(0, didLength)
+    return did
+  }
+
+  /** Url of the @context for this document */
+  public context: string | string[]
+
+  /** The DID to which this DID Document pertains. */
+  public id: string
+
+  /** Array of public keys associated with the DID */
+  public publicKey: IDidDocumentPublicKey[]
+
+  /** The raw document returned by the resolver. */
+  public rawDocument: IEthDidDocument
+
+  constructor(json: IEthDidDocument) {
+    for (let field of ['@context', 'id']) {
+      if (!(field in json)) {
+        throw new Error(`${field} is required`)
+      }
     }
 
-    const didDocument = ethrDidDocumentTmpl(did.replace('did:ethr:', ''))
-    return {
-      didDocument: new DidDocument(didDocument),
-    }
+    this.rawDocument = json
+    this.context = json['@context']
+    this.id = json.id
+    this.publicKey = this.parsePublicKeyDetails(json.publicKey || [])
+  }
+
+  /**
+   * Gets the matching public key for a given key id
+   *
+   * @param id fully qualified key id
+   */
+  public getPublicKey(id: string): IDidDocumentPublicKey | undefined {
+    return this.publicKey.find(item => item.id === id)
+  }
+
+  /**
+   * Returns all of the service endpoints contained in this DID Document.
+   */
+  public getServices() {
+    return this.rawDocument.service || []
+  }
+
+  /**
+   * Returns all of the service endpoints matching the given type.
+   *
+   * @param type The type of service(s) to query.
+   */
+  public getServicesByType(type: string) {
+    return this.getServices().filter(service => service.type === type)
+  }
+
+  /**
+   * Parses the `publicKey` array in the DID document and ensures that the key IDs are
+   * fully-qualified.
+   *
+   * @param publicKeyDefinitions The `publicKey` array from the DID document.
+   */
+  private parsePublicKeyDetails(publicKeyDefinitions: IDidDocumentPublicKey[]) {
+    return publicKeyDefinitions.map(key => {
+      let id = key.id
+
+      if (!id.includes('#')) {
+        id = `${this.id}#${id}`
+      } else if (id.indexOf('#') === 0) {
+        id = this.id + id
+      }
+
+      return Object.assign({}, key, {id})
+    })
   }
 }
+
+interface IEthDidResolveResult {
+  didDocument: EthDidDocument
+}
+
+export const resolveDID = async (did: string): Promise<IEthDidResolveResult> => {
+  if (!isValidDID(did)) {
+    throw Error(`unable to resolve did document: ${did}`)
+  }
+
+  did = stripHash(did)
+
+  const didDocument = ethrDidDocumentTmpl(did.replace('did:ethr:', ''))
+  return {
+    didDocument: new EthDidDocument(didDocument),
+  }
+}
+
+const stripHash = (url: string) => (url.indexOf('#') >= 0 ? url.substr(0, url.indexOf('#')) : url)
 
 export const isValidDID = (value: any): value is string => {
   if (typeof value !== 'string') return false
 
-  return value.startsWith('did:ethr:') && ethUtil.isValidAddress(value.replace('did:ethr:', ''))
+  let isValidAddress: boolean
+
+  if (value.indexOf('#') >= 0) {
+    isValidAddress = ethUtil.isValidAddress(stripHash(value).replace('did:ethr:', ''))
+  } else {
+    isValidAddress = ethUtil.isValidAddress(value.replace('did:ethr:', ''))
+  }
+
+  return value.startsWith('did:ethr:') && isValidAddress
 }
 
 const _documentLoader = (() => {
@@ -716,16 +804,14 @@ const _documentLoader = (() => {
 
 export const documentLoader = async (url: string): Promise<any> => {
   if (url.startsWith('did:')) {
-    const did = url.indexOf('#') >= 0 ? url.substr(0, url.indexOf('#')) : url
-
     const {
       didDocument: {rawDocument},
-    } = await new EthereumDIDResolver().resolve(did)
+    } = await resolveDID(url)
 
     return {
       contextUrl: null,
       document: rawDocument,
-      documentUrl: url,
+      documentUrl: stripHash(url),
     }
   }
 

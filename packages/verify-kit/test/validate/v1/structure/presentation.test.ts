@@ -17,26 +17,6 @@ const bobWallet = EthWallet.fromPrivateKey(Buffer.from('c87509a1c067bbde78beb793
 
 const aliceWallet = EthWallet.fromPrivateKey(Buffer.from('ae6ae8e5ccbfb04590405997ee2d52d2b330726137b875053c36d94e974d162f', 'hex'))
 
-// test('test jwk stuff', async () => {
-//   const publicKeyString = issuerWallet.getPublicKeyString()
-
-//   console.log({publicKeyLength: publicKeyString.length})
-//   console.log({publicKey: publicKeyString})
-//   const wrappedIssuerPrivateKeyJkw = await keyUtils.privateJWKFromPrivateKeyHex(issuerWallet.getPrivateKeyString().replace('0x', ''))
-//   const wrappedIssuerPublicKeyJkw = await keyUtils.publicJWKFromPublicKeyHex(publicKeyString)
-
-//   const issuerPrivateKeyJkw = keyto.from(issuerWallet.getPrivateKeyString().replace('0x', ''), 'blk').toJwk('private')
-//   const issuerPublicKeyJkwFromPrivate = keyto.from(issuerWallet.getPrivateKeyString().replace('0x', ''), 'blk').toJwk('public')
-//   const issuerPublicKeyJkw = keyto.from(publicKeyString, 'blk').toJwk('public')
-
-//   console.log({wrappedIssuerPrivateKeyJkw})
-//   console.log({wrappedIssuerPublicKeyJkw})
-
-//   console.log({issuerPrivateKeyJkw})
-//   console.log({issuerPublicKeyJkwFromPrivate})
-//   console.log({issuerPublicKeyJkw})
-// })
-
 const buildVerifiablePresentation = async ({
   wallet,
   atomicCredentials,
@@ -48,7 +28,7 @@ const buildVerifiablePresentation = async ({
   domain: string
   wallet: EthWallet
 }): Promise<VPV1> => {
-  const {didDocument} = await new EthUtils.EthereumDIDResolver().resolve(`did:ethr:${wallet.getAddressString()}`)
+  const {didDocument} = await EthUtils.resolveDID(`did:ethr:${wallet.getAddressString()}`)
   const publicKey = didDocument.publicKey[0]
 
   const unsignedVP: Omit<VPV1<AtomicVCV1>, 'proof'> = {
@@ -71,14 +51,16 @@ const buildVerifiablePresentation = async ({
     documentLoader: EthUtils.documentLoader,
     purpose: new AuthenticationProofPurpose({
       challenge: token,
-      domain: domain,
+      domain,
     }),
+    compactProof: false,
+    expansionMap: false, // TODO: remove this
   })
 
   return vp
 }
 
-xtest('Validation.validateCredentialSubject', async () => {
+test('Validation.validateCredentialSubject', async () => {
   expect.assertions(1)
 
   const credentialSubject = await buildAtomicVCSubjectV1({
@@ -92,7 +74,7 @@ xtest('Validation.validateCredentialSubject', async () => {
 test('Validation.validateVerifiableCredential', async () => {
   jest.setTimeout(15000)
 
-  expect.assertions(1)
+  expect.assertions(2)
 
   const credentialSubject = await buildAtomicVCSubjectV1({
     subject: `did:ethr:${bobWallet.getAddressString()}`,
@@ -111,22 +93,22 @@ test('Validation.validateVerifiableCredential', async () => {
     },
   })
 
-  // const atomicVCWOExp = await buildAtomicVCV1({
-  //   credentialSubject,
-  //   type: ['CustomCredential'],
-  //   privateKey: issuerPrivKey,
-  //   issuanceDate: '2016-02-01T00:00:00.000Z',
-  //   revocation: {
-  //     '@context': 'https://example.com',
-  //     token: '1234',
-  //   },
-  // })
+  const atomicVCWOExp = await buildAtomicVCV1({
+    credentialSubject,
+    type: ['CustomCredential'],
+    privateKey: issuerPrivKey,
+    issuanceDate: '2016-02-01T00:00:00.000Z',
+    revocation: {
+      '@context': 'https://example.com',
+      token: '1234',
+    },
+  })
 
   await expect(Utils.isAsyncValid(Validation.validateVerifiableCredential)(atomicVC)).resolves.toBeTruthy()
-  // await expect(Utils.isAsyncValid(Validation.validateVerifiableCredential)(atomicVCWOExp)).resolves.toBeTruthy()
+  await expect(Utils.isAsyncValid(Validation.validateVerifiableCredential)(atomicVCWOExp)).resolves.toBeTruthy()
 })
 
-xtest('Validation.validateVerifiablePresentationV1', async () => {
+test('Validation.validateVerifiablePresentationV1', async () => {
   expect.assertions(2)
 
   const credentialSubject = await buildAtomicVCSubjectV1({
@@ -160,6 +142,6 @@ xtest('Validation.validateVerifiablePresentationV1', async () => {
     domain: 'https://bloom.co/receiveData',
   })
 
-  await expect(await Validation.validateVerifiablePresentationV1(vp)).resolves.toBeTruthy()
-  await expect(await Validation.validateVerifiablePresentationV1(invalidVP)).resolves.toBeTruthy()
+  await expect(Utils.isAsyncValid(Validation.validateVerifiablePresentationV1)(vp)).resolves.toBeTruthy()
+  await expect(Utils.isAsyncValid(Validation.validateVerifiablePresentationV1)(invalidVP)).resolves.toBeFalsy()
 })
