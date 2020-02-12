@@ -72,8 +72,6 @@ export class RecoverableEcdsaSecp256k1Signature2019 extends LinkedDataSignature 
       data: verifyData,
     })
 
-    console.log({jws, recoveryId})
-
     proof[proofSignatureKey] = jws
     proof[proofRecoveryKey] = recoveryId
     return proof
@@ -99,18 +97,14 @@ export class RecoverableEcdsaSecp256k1Signature2019 extends LinkedDataSignature 
       const key = await this.LDKeyClass.from(verificationMethod)
       verifier = key.verifier(key, this.alg, this.type)
     }
-    console.log('verifySignature', {verifyData})
+
     const result = await verifier.verify({
       data: Buffer.from(verifyData),
       signature: proof[proofSignatureKey],
       recoveryId: proof[proofRecoveryKey],
     })
 
-    console.log('verifySignature', {result})
-
-    const verified = typeof result === 'string'
-
-    return verified
+    return typeof result === 'string'
   }
 
   /** ensure there is a way to verify */

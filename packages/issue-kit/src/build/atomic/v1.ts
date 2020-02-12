@@ -19,9 +19,11 @@ export const buildAtomicVCSubjectV1 = async <Data extends {'@type': string}>({
 }): Promise<AtomicVCSubjectV1<Data>> => {
   const {didDocument: subjectDidDoc} = await EthUtils.resolveDID(subject)
 
+  if (data.hasOwnProperty('id')) throw Error("Data must not contain an 'id' property, that is assigned to the subject's DID")
+
   const credentialSubject: AtomicVCSubjectV1<Data> = {
     ...data,
-    identifier: subjectDidDoc.id,
+    id: subjectDidDoc.id,
   }
 
   return credentialSubject
@@ -66,26 +68,22 @@ export const buildAtomicVCV1 = async <S extends AtomicVCSubjectV1<{'@type': stri
     revocation,
   }
 
-  console.log({publicKey: issuer.getAddressString()})
-  const privateKeyJwk = await keyUtils.privateJWKFromPrivateKeyHex(issuer.getPrivateKeyString().replace('0x', ''))
-
-  console.log({privateKeyJwk})
-
   const credential: AtomicVCV1 = await jsigs.sign(unsignedCred, {
     suite: new RecoverableEcdsaSecp256k1Signature2019({
       key: new RecoverableEcdsaSecp256k1KeyClass2019({
         id: publicKey.id,
         controller: publicKey.controller,
-        privateKeyJwk,
+        privateKeyJwk: await keyUtils.privateJWKFromPrivateKeyHex(issuer.getPrivateKeyString().replace('0x', '')),
       }),
     }),
     documentLoader: EthUtils.documentLoader,
-    purpose: new RecoverableAssertionProofPurpose(),
+    purpose: new RecoverableAssertionProofPurpose({
+      addressKey: 'ethereumAddress',
+      keyToAddress: key => EthWallet.fromPublicKey(Buffer.from(key.substr(2), 'hex')).getAddressString(),
+    }),
     compactProof: false,
     expansionMap: false, // TODO: remove this
   })
-
-  console.log({credential})
 
   return credential
 }

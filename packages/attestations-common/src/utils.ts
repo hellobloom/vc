@@ -1,27 +1,10 @@
 import {validateDateTime} from './RFC3339DateTime'
 import {Validator, ValidateFn, AsyncValidateFn, AsyncValidator, Unvalidated} from './validation'
 
-export const isValid = <T>(valideFn: ValidateFn<T>) => (data: Unvalidated<T>): data is T => {
-  const outcome = valideFn(data)
+export const isValid = <T>(valideFn: ValidateFn<T>) => (data: Unvalidated<T>): data is T => valideFn(data).kind === 'validated'
 
-  if (outcome.kind === 'validated') {
-    return true
-  } else {
-    console.log(outcome.message, data)
-    return false
-  }
-}
-
-export const isAsyncValid = <T>(valideFn: AsyncValidateFn<T>) => async (data: Unvalidated<T>): Promise<boolean> => {
-  const outcome = await valideFn(data)
-
-  if (outcome.kind === 'validated') {
-    return true
-  } else {
-    console.log(outcome.message, data)
-    return false
-  }
-}
+export const isAsyncValid = <T>(valideFn: AsyncValidateFn<T>) => async (data: Unvalidated<T>): Promise<boolean> =>
+  (await valideFn(data)).kind === 'validated'
 
 export const isUndefinedOr = (validator: Validator) => (value: any, data: any) => {
   if (typeof value === 'undefined') return true

@@ -16,6 +16,7 @@ import {
   RecoverableEcdsaSecp256k1KeyClass2019,
   Purposes,
 } from '@bloomprotocol/jsonld-recoverable-es256k'
+import EthWallet from 'ethereumjs-wallet'
 
 const jsigs = require('jsonld-signatures')
 const {RecoverableAssertionProofPurpose, RecoverableAuthenticationProofPurpose} = Purposes
@@ -30,7 +31,7 @@ const isValidDIDOwner = (value: any) => {
 
 export const validateCredentialSubject = genValidateFn<AtomicVCSubjectV1>({
   '@type': Utils.isNotEmptyString,
-  identifier: EthUtils.isValidDID,
+  id: EthUtils.isValidDID,
 })
 
 const isValidOrArrayOf = <T>(validateFn: ValidateFn<T>) => (data: any): data is T => {
@@ -69,7 +70,10 @@ const isCredentialProofValid = async (value: any, data: any) => {
       }),
       compactProof: false,
       documentLoader: EthUtils.documentLoader,
-      purpose: new RecoverableAssertionProofPurpose(),
+      purpose: new RecoverableAssertionProofPurpose({
+        addressKey: 'ethereumAddress',
+        keyToAddress: key => EthWallet.fromPublicKey(Buffer.from(key.substr(2), 'hex')).getAddressString(),
+      }),
       expansionMap: false, // TODO: remove this
     })
 
@@ -93,6 +97,12 @@ export const validateVerifiableCredential = genAsyncValidateFn<AtomicVCV1>({
   revocation: Utils.isValid(validateCredentialRevocation),
   proof: [Utils.isValid(validateCredentialProof), isCredentialProofValid],
 })
+
+const isValidVerifiableCredential = async (value: any, data: any) => {
+  if (value.credentialSubject.id !== data.holder) return false
+
+  return await Utils.isAsyncValid(validateVerifiableCredential)(value)
+}
 
 const validateProof = genValidateFn<VPProofV1>({
   type: Utils.isNotEmptyString,
@@ -120,6 +130,8 @@ const isPresentationProofValid = async (value: any, data: any) => {
       }),
       documentLoader: EthUtils.documentLoader,
       purpose: new RecoverableAuthenticationProofPurpose({
+        addressKey: 'ethereumAddress',
+        keyToAddress: key => EthWallet.fromPublicKey(Buffer.from(key.substr(2), 'hex')).getAddressString(),
         challenge: data.proof.challenge,
         domain: data.proof.domain,
       }),
@@ -136,7 +148,7 @@ const isPresentationProofValid = async (value: any, data: any) => {
 export const validateVerifiablePresentationV1 = genAsyncValidateFn<VPV1<AtomicVCV1>>({
   '@context': Utils.isArrayOfNonEmptyStrings,
   type: [Utils.isArrayOfNonEmptyStrings, (value: any) => value[0] === 'VerifiablePresentation'],
-  verifiableCredential: Utils.isAsyncArrayOf(Utils.isAsyncValid(validateVerifiableCredential)),
+  verifiableCredential: Utils.isAsyncArrayOf(isValidVerifiableCredential),
   holder: [EthUtils.isValidDID],
   proof: [Utils.isValid(validateProof), isPresentationProofValid],
 })
