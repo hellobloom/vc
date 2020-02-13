@@ -51,10 +51,14 @@ export type VCRevocationLinks = {
   typeHash: string
 }
 
+// Do not import {Thing} from 'schema-dts' because it chokes TS
+export type SimpleThing = {'@type': string}
+
 export type BaseVCTypeV1 = ['VerifiableCredential', ...string[]]
 
-export type BaseVCSubjectV1<Data extends {} = {}> = Data & {
-  identifier: string
+export type BaseVCSubjectV1<Data extends SimpleThing> = Exclude<Data, string> & {
+  '@id': string
+  '@type': string
 }
 
 export type BaseVCProofV1 = {
@@ -75,7 +79,7 @@ export type BaseVCRevocationSimpleV1 = {
 }
 
 export type BaseVCV1<
-  Subject extends BaseVCSubjectV1 = BaseVCSubjectV1,
+  Subject extends BaseVCSubjectV1<SimpleThing> = BaseVCSubjectV1<SimpleThing>,
   Type extends BaseVCTypeV1 = BaseVCTypeV1,
   Proof extends BaseVCProofV1 = BaseVCProofV1,
   Revocation extends BaseVCRevocationV1 = BaseVCRevocationV1

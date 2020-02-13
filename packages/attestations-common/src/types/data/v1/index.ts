@@ -2,13 +2,16 @@ import {Organization} from 'schema-dts'
 
 import {AtomicVCV1, AtomicVCSubjectV1} from '../../vc/atomic/v1'
 
-export type VCEntity = AtomicVCV1<AtomicVCSubjectV1<Organization>, ['VerifiableCredential', 'AtomicCredential', 'EntityCredential']>
+export type VCEntity = AtomicVCV1<
+  AtomicVCSubjectV1<Exclude<Organization, string>>,
+  ['VerifiableCredential', 'AtomicCredential', 'EntityCredential']
+>
 
-export const VCEntityExampleOrganization: AtomicVCSubjectV1<Organization> = {
+export const VCEntityExampleOrganization: AtomicVCSubjectV1<Exclude<Organization, string>> = {
+  '@id': 'did:ethr:0xefabcea1928125af09bc0a9fba09ea7618471247',
   '@type': 'Corporation',
   name: 'ACME Inc.',
   legalName: 'Acme Holding Group Inc. LLC',
-  identifier: 'did:ethr:0xefabcea1928125af09bc0a9fba09ea7618471247',
   additionalType: ['PublicCompany'],
   address: [
     {

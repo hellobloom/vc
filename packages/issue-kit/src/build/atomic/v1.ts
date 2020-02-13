@@ -17,7 +17,7 @@ export const buildAtomicVCSubjectV1 = async <Data extends {'@type': string}>({
 
   const credentialSubject: AtomicVCSubjectV1<Data> = {
     ...data,
-    identifier: subjectDidDoc.id,
+    '@id': subjectDidDoc.id,
   }
 
   return credentialSubject
