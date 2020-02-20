@@ -104,6 +104,8 @@ export class RecoverableEcdsaSecp256k1Signature2019 extends LinkedDataSignature 
       recoveryId: proof[proofRecoveryKey],
     })
 
+    console.log({result})
+
     return typeof result === 'string'
   }
 
