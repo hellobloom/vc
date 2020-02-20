@@ -1,5 +1,6 @@
 import {renderRequestQRCode} from '../../src/elements/renderRequestQRCode'
-import {Action, RequestData, QROptions, ButtonOptions} from '../../src/types'
+import {Action, RequestData, ButtonOptions} from '../../src/types'
+import {QROptions} from '../../src'
 
 describe('renderRequestQRCode', () => {
   let requestQRCode: {

@@ -15,7 +15,7 @@ import {
   TAddress,
   IBaseAttAddress,
   IBaseAttIncome,
-} from '../src/AttestationData'
+} from '../src/types/data/v0'
 
 test('phone extractor', () => {
   const value = '+15154932491'

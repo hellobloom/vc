@@ -11,7 +11,7 @@ export const isUndefinedOr = (validator: Validator) => (value: any, data: any) =
   return validator(value, data)
 }
 
-export const isArrayOf = (validator: Validator, rejectEmpty = true): Validator => (value: any, data: any) => {
+export const isArrayOf = (validator: Validator, rejectEmpty = true) => (value: any, data?: any) => {
   if (!Array.isArray(value)) return false
   if (value.length === 0 && rejectEmpty) return false
   return value.every(value => validator(value, data))
@@ -31,9 +31,9 @@ export const isAsyncArrayOf = (validator: AsyncValidator, rejectEmpty = true): A
   return outcome
 }
 
-export const isNotEmptyString: Validator = (value: any) => typeof value === 'string' && value.trim() !== ''
+export const isNotEmptyString = (value: any) => typeof value === 'string' && value.trim() !== ''
 
-export const isArrayOfNonEmptyStrings: Validator = isArrayOf(isNotEmptyString)
+export const isArrayOfNonEmptyStrings = isArrayOf(isNotEmptyString)
 
 /**
  * Returns the value of `JSON.stringify` of a new object argument `obj`,
