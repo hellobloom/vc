@@ -42,11 +42,11 @@ const isValidOrArrayOf = <T>(validateFn: ValidateFn<T>) => (data: any): data is 
   }
 }
 
-const validateCredentialRevocation = genValidateFn<BaseVCRevocationV1>({
+export const validateCredentialRevocation = genValidateFn<BaseVCRevocationV1>({
   '@context': Utils.isNotEmptyString,
 })
 
-const validateCredentialProof = genValidateFn<AtomicVCProofV1>({
+export const validateCredentialProof = genValidateFn<AtomicVCProofV1>({
   type: Utils.isNotEmptyString,
   created: Utils.isValidRFC3339DateTime,
   proofPurpose: (value: any) => value === 'assertionMethod',
@@ -55,8 +55,6 @@ const validateCredentialProof = genValidateFn<AtomicVCProofV1>({
 })
 
 const isCredentialProofValid = async (value: any, data: any) => {
-  // return true
-
   try {
     const {didDocument} = await EthUtils.resolveDID(stripOwnerFromDID(value.verificationMethod))
     const publicKey = didDocument.publicKey[0]
@@ -86,7 +84,7 @@ const isCredentialProofValid = async (value: any, data: any) => {
 export const validateVerifiableCredential = genAsyncValidateFn<AtomicVCV1>({
   '@context': Utils.isArrayOfNonEmptyStrings,
   id: Utils.isUndefinedOr(Utils.isNotEmptyString),
-  type: [Utils.isArrayOfNonEmptyStrings, (value: any) => value[0] === 'VerifiableCredential'],
+  type: [Utils.isArrayOfNonEmptyStrings, (value: string[]) => value.includes('VerifiableCredential')],
   issuer: EthUtils.isValidDID,
   issuanceDate: Utils.isValidRFC3339DateTime,
   expirationDate: Utils.isUndefinedOr(Utils.isValidRFC3339DateTime),
@@ -147,7 +145,7 @@ const isPresentationProofValid = async (value: any, data: any) => {
 
 export const validateVerifiablePresentationV1 = genAsyncValidateFn<VPV1<AtomicVCV1>>({
   '@context': Utils.isArrayOfNonEmptyStrings,
-  type: [Utils.isArrayOfNonEmptyStrings, (value: any) => value[0] === 'VerifiablePresentation'],
+  type: [Utils.isArrayOfNonEmptyStrings, (value: string[]) => value.includes('VerifiablePresentation')],
   verifiableCredential: Utils.isAsyncArrayOf(isValidVerifiableCredential),
   holder: [EthUtils.isValidDID],
   proof: [Utils.isValid(validateProof), isPresentationProofValid],
