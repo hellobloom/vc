@@ -1,7 +1,6 @@
-import {Options as QROptions} from '@bloomprotocol/qr'
-
 import {renderClaimQRCode} from '../../src/elements/renderClaimQRCode'
 import {ClaimData, ButtonOptions} from '../../src/types'
+import {QROptions} from '../../src'
 
 describe('renderClaimQRCode', () => {
   let claimQRCode: {
