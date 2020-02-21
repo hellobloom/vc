@@ -29,13 +29,13 @@ const isValidDIDOwner = (value: any) => {
   return EthUtils.isValidDID(stripOwnerFromDID(value))
 }
 
-export const validateCredentialSubject = genValidateFn<AtomicVCSubjectV1<any>>({
-  id: EthUtils.isValidDID,
-  data: Utils.isObject,
+const validateCredentialSubjectData = genValidateFn<AtomicVCSubjectV1<any>['data']>({
+  '@type': Utils.isNotEmptyString,
 })
 
-export const validateCredentialSubjectData = genValidateFn<AtomicVCSubjectV1<any>['data']>({
-  '@type': Utils.isNotEmptyString,
+export const validateCredentialSubject = genValidateFn<AtomicVCSubjectV1<any>>({
+  id: EthUtils.isValidDID,
+  data: Utils.isValid(validateCredentialSubjectData),
 })
 
 const isValidOrArrayOf = <T>(validateFn: ValidateFn<T>) => (data: any): data is T => {
