@@ -2,78 +2,84 @@ import {Organization} from 'schema-dts'
 
 import {AtomicVCV1, AtomicVCSubjectV1} from '../../vc/atomic/v1'
 
-export type VCEntity = AtomicVCV1<AtomicVCSubjectV1<Organization>, ['VerifiableCredential', 'AtomicCredential', 'EntityCredential']>
+export type VCEntity = AtomicVCV1<
+  AtomicVCSubjectV1<Exclude<Organization, string>>,
+  ['VerifiableCredential', 'AtomicCredential', 'EntityCredential']
+>
 
-export const VCEntityExampleOrganization: AtomicVCSubjectV1<Organization> = {
+export const VCEntityExampleOrganization: AtomicVCSubjectV1<Exclude<Organization, string>> = {
   id: 'did:ethr:0xefabcea1928125af09bc0a9fba09ea7618471247',
-  '@type': 'Corporation',
-  name: 'ACME Inc.',
-  legalName: 'Acme Holding Group Inc. LLC',
-  additionalType: ['PublicCompany'],
-  address: [
-    {
-      '@type': 'PostalAddress',
-      streetAddress: '123 Road',
-      addressCountry: 'Singapore',
-      addressLocality: 'Kallang',
-      addressRegion: 'Singapore',
-      postOfficeBoxNumber: '92151ABCbF2',
-      postalCode: '125912-212',
-    },
-  ],
-  dissolutionDate: '2020-02-03T21:03:53.192Z',
-  hasCredential: [
-    {
-      '@type': 'EducationalOccupationalCredential',
-      credentialCategory: 'Corporation',
-      additionalType: 'Incorporation',
-      recognizedBy: {
-        '@type': 'GovernmentOrganization',
-        name: '鄂尔多斯市工商行政管理局', // ACRA in Singapore
+  data: {
+    '@type': 'Corporation',
+    name: 'ACME Inc.',
+    legalName: 'Acme Holding Group Inc. LLC',
+
+    additionalType: ['PublicCompany'],
+    address: [
+      {
+        '@type': 'PostalAddress',
+        streetAddress: '123 Road',
+        addressCountry: 'Singapore',
+        addressLocality: 'Kallang',
+        addressRegion: 'Singapore',
+        postOfficeBoxNumber: '92151ABCbF2',
+        postalCode: '125912-212',
       },
-    },
-    {
-      '@type': 'EducationalOccupationalCredential',
-      credentialCategory: 'Bankruptcy',
-      additionalType: 'Bankruptcy',
-      dateCreated: '2020-01-23',
-      datePublished: '2020-01-23',
-      recognizedBy: {
-        '@type': 'GovernmentOrganization',
-        name: '鄂尔多斯市工商行政管理局', // ACRA in Singapore
-      },
-    },
-  ],
-  telephone: '+86-010-57376964',
-  faxNumber: '+86-010-56632450',
-  email: 'elion600277_zqb@elion.com.cn',
-  subjectOf: [
-    {
-      '@type': 'WebSite',
-      url: 'http://www.elion.cn/',
-    },
-  ],
-  employee: [
-    {
-      '@type': 'Person',
-      name: 'Dora El-Explorer',
-      identifier: 'c22814e7-bad2-41b9-8ee0-7bd9fd59b734',
-      jobTitle: ['Authorized Representative', 'Officer', 'Owner', 'Nominee Director', 'Company Secretary'],
-      hasCredential: [
-        {
-          '@type': 'EducationalOccupationalCredential',
-          credentialCategory: 'Citizenship',
-          identifier: 'S0123456@',
-          recognizedBy: [
-            {
-              '@type': 'GovernmentOrganization',
-              name: 'Singapore Office of Citizenship',
-            },
-          ],
+    ],
+    dissolutionDate: '2020-02-03T21:03:53.192Z',
+    hasCredential: [
+      {
+        '@type': 'EducationalOccupationalCredential',
+        credentialCategory: 'Corporation',
+        additionalType: 'Incorporation',
+        recognizedBy: {
+          '@type': 'GovernmentOrganization',
+          name: '鄂尔多斯市工商行政管理局', // ACRA in Singapore
         },
-      ],
-    },
-  ],
+      },
+      {
+        '@type': 'EducationalOccupationalCredential',
+        credentialCategory: 'Bankruptcy',
+        additionalType: 'Bankruptcy',
+        dateCreated: '2020-01-23',
+        datePublished: '2020-01-23',
+        recognizedBy: {
+          '@type': 'GovernmentOrganization',
+          name: '鄂尔多斯市工商行政管理局', // ACRA in Singapore
+        },
+      },
+    ],
+    telephone: '+86-010-57376964',
+    faxNumber: '+86-010-56632450',
+    email: 'elion600277_zqb@elion.com.cn',
+    subjectOf: [
+      {
+        '@type': 'WebSite',
+        url: 'http://www.elion.cn/',
+      },
+    ],
+    employee: [
+      {
+        '@type': 'Person',
+        name: 'Dora El-Explorer',
+        identifier: 'c22814e7-bad2-41b9-8ee0-7bd9fd59b734',
+        jobTitle: ['Authorized Representative', 'Officer', 'Owner', 'Nominee Director', 'Company Secretary'],
+        hasCredential: [
+          {
+            '@type': 'EducationalOccupationalCredential',
+            credentialCategory: 'Citizenship',
+            identifier: 'S0123456@',
+            recognizedBy: [
+              {
+                '@type': 'GovernmentOrganization',
+                name: 'Singapore Office of Citizenship',
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
 }
 
 export const VCEntityExample: VCEntity = {

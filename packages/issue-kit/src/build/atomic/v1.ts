@@ -1,4 +1,4 @@
-import {EthUtils, AtomicVCV1, AtomicVCSubjectV1, BaseVCRevocationSimpleV1} from '@bloomprotocol/attestations-common'
+import {EthUtils, AtomicVCV1, AtomicVCSubjectV1, BaseVCRevocationSimpleV1, SimpleThing} from '@bloomprotocol/attestations-common'
 import {
   RecoverableEcdsaSecp256k1Signature2019,
   RecoverableEcdsaSecp256k1KeyClass2019,
@@ -10,7 +10,7 @@ import {keyUtils} from '@transmute/es256k-jws-ts'
 const jsigs = require('jsonld-signatures')
 const {RecoverableAssertionProofPurpose} = Purposes
 
-export const buildAtomicVCSubjectV1 = async <Data extends {'@type': string}>({
+export const buildAtomicVCSubjectV1 = async <Data extends SimpleThing>({
   data,
   subject,
 }: {
@@ -22,8 +22,8 @@ export const buildAtomicVCSubjectV1 = async <Data extends {'@type': string}>({
   if (data.hasOwnProperty('id')) throw Error("Data must not contain an 'id' property, that is assigned to the subject's DID")
 
   const credentialSubject: AtomicVCSubjectV1<Data> = {
-    ...data,
     id: subjectDidDoc.id,
+    data,
   }
 
   return credentialSubject

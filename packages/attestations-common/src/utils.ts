@@ -31,6 +31,8 @@ export const isAsyncArrayOf = (validator: AsyncValidator, rejectEmpty = true): A
   return outcome
 }
 
+export const isObject = (value: any) => typeof value === 'object'
+
 export const isNotEmptyString = (value: any) => typeof value === 'string' && value.trim() !== ''
 
 export const isArrayOfNonEmptyStrings = isArrayOf(isNotEmptyString)
