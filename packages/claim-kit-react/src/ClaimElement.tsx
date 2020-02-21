@@ -1,12 +1,5 @@
 import * as React from 'react'
-import {
-  renderClaimElement,
-  ClaimData,
-  QROptions,
-  ButtonOptions,
-  ShouldRenderButton,
-  ClaimElementResult,
-} from '@bloomprotocol/claim-kit'
+import {renderClaimElement, ClaimData, QROptions, ButtonOptions, ShouldRenderButton, ClaimElementResult} from '@bloomprotocol/claim-kit'
 import {Component, forwardProps} from 'react-forward-props'
 
 export type ClaimElementProps = {

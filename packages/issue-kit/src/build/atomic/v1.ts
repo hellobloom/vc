@@ -1,12 +1,16 @@
-import {EthUtils, AtomicVCV1, AtomicVCSubjectV1, BaseVCRevocationSimpleV1} from '@bloomprotocol/attestations-common'
+import {EthUtils, AtomicVCV1, AtomicVCSubjectV1, BaseVCRevocationSimpleV1, SimpleThing} from '@bloomprotocol/attestations-common'
+import {
+  RecoverableEcdsaSecp256k1Signature2019,
+  RecoverableEcdsaSecp256k1KeyClass2019,
+  Purposes,
+} from '@bloomprotocol/jsonld-recoverable-es256k'
 import EthWallet from 'ethereumjs-wallet'
 import {keyUtils} from '@transmute/es256k-jws-ts'
-import {EcdsaSecp256k1KeyClass2019, EcdsaSecp256k1Signature2019} from '@transmute/lds-ecdsa-secp256k1-2019'
 
 const jsigs = require('jsonld-signatures')
-const {AssertionProofPurpose} = jsigs.purposes
+const {RecoverableAssertionProofPurpose} = Purposes
 
-export const buildAtomicVCSubjectV1 = async <Data extends {'@type': string}>({
+export const buildAtomicVCSubjectV1 = async <Data extends SimpleThing>({
   data,
   subject,
 }: {
@@ -15,9 +19,11 @@ export const buildAtomicVCSubjectV1 = async <Data extends {'@type': string}>({
 }): Promise<AtomicVCSubjectV1<Data>> => {
   const {didDocument: subjectDidDoc} = await EthUtils.resolveDID(subject)
 
+  if (data.hasOwnProperty('id')) throw Error("Data must not contain an 'id' property, that is assigned to the subject's DID")
+
   const credentialSubject: AtomicVCSubjectV1<Data> = {
-    ...data,
-    '@id': subjectDidDoc.id,
+    id: subjectDidDoc.id,
+    data,
   }
 
   return credentialSubject
@@ -62,26 +68,22 @@ export const buildAtomicVCV1 = async <S extends AtomicVCSubjectV1<{'@type': stri
     revocation,
   }
 
-  console.log({publicKey: issuer.getAddressString()})
-  const privateKeyJwk = await keyUtils.privateJWKFromPrivateKeyHex(issuer.getPrivateKeyString().replace('0x', ''))
-
-  console.log({privateKeyJwk})
-
   const credential: AtomicVCV1 = await jsigs.sign(unsignedCred, {
-    suite: new EcdsaSecp256k1Signature2019({
-      key: new EcdsaSecp256k1KeyClass2019({
+    suite: new RecoverableEcdsaSecp256k1Signature2019({
+      key: new RecoverableEcdsaSecp256k1KeyClass2019({
         id: publicKey.id,
         controller: publicKey.controller,
-        privateKeyJwk,
+        privateKeyJwk: await keyUtils.privateJWKFromPrivateKeyHex(issuer.getPrivateKeyString().replace('0x', '')),
       }),
     }),
     documentLoader: EthUtils.documentLoader,
-    purpose: new AssertionProofPurpose(),
+    purpose: new RecoverableAssertionProofPurpose({
+      addressKey: 'ethereumAddress',
+      keyToAddress: key => EthWallet.fromPublicKey(Buffer.from(key.substr(2), 'hex')).getAddressString(),
+    }),
     compactProof: false,
     expansionMap: false, // TODO: remove this
   })
-
-  console.log({credential})
 
   return credential
 }

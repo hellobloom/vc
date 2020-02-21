@@ -56,9 +56,9 @@ export type SimpleThing = {'@type': string}
 
 export type BaseVCTypeV1 = ['VerifiableCredential', ...string[]]
 
-export type BaseVCSubjectV1<Data extends SimpleThing> = Exclude<Data, string> & {
-  '@id': string
-  '@type': string
+export type BaseVCSubjectV1<Data extends SimpleThing> = {
+  id: string
+  data: Data
 }
 
 export type BaseVCProofV1 = {

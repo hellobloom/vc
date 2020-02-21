@@ -55,6 +55,9 @@
     "webpack": "^4.41.5"
   },
   "jest": {
+    "setupFiles": [
+      "jest-canvas-mock"
+    ],
     "moduleFileExtensions": [
       "ts",
       "tsx",

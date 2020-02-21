@@ -1,12 +1,15 @@
 import {EthUtils, Utils, AtomicVCV1, VPV1} from '@bloomprotocol/attestations-common'
 import {buildAtomicVCSubjectV1, buildAtomicVCV1} from '@bloomprotocol/issue-kit'
+import {
+  RecoverableEcdsaSecp256k1KeyClass2019,
+  RecoverableEcdsaSecp256k1Signature2019,
+  Purposes,
+} from '@bloomprotocol/jsonld-recoverable-es256k'
 import EthWallet from 'ethereumjs-wallet'
 import {keyUtils} from '@transmute/es256k-jws-ts'
-import {EcdsaSecp256k1KeyClass2019, EcdsaSecp256k1Signature2019} from '@transmute/lds-ecdsa-secp256k1-2019'
 
-// const keyto = require('@trust/keyto')
 const jsigs = require('jsonld-signatures')
-const {AuthenticationProofPurpose} = jsigs.purposes
+const {RecoverableAuthenticationProofPurpose} = Purposes
 
 import * as Validation from '../../../../src/validate/v1/structure'
 
@@ -41,15 +44,17 @@ const buildVerifiablePresentation = async ({
   const privateKeyJwk = await keyUtils.privateJWKFromPrivateKeyHex(wallet.getPrivateKeyString().replace('0x', ''))
 
   const vp: VPV1 = await jsigs.sign(unsignedVP, {
-    suite: new EcdsaSecp256k1Signature2019({
-      key: new EcdsaSecp256k1KeyClass2019({
+    suite: new RecoverableEcdsaSecp256k1Signature2019({
+      key: new RecoverableEcdsaSecp256k1KeyClass2019({
         id: publicKey.id,
         controller: publicKey.controller,
         privateKeyJwk,
       }),
     }),
     documentLoader: EthUtils.documentLoader,
-    purpose: new AuthenticationProofPurpose({
+    purpose: new RecoverableAuthenticationProofPurpose({
+      addressKey: 'ethereumAddress',
+      keyToAddress: key => EthWallet.fromPublicKey(Buffer.from(key.substr(2), 'hex')).getAddressString(),
       challenge: token,
       domain,
     }),
@@ -60,88 +65,742 @@ const buildVerifiablePresentation = async ({
   return vp
 }
 
-test('Validation.validateCredentialSubject', async () => {
-  expect.assertions(1)
+describe('Validation.validateCredentialSubject', () => {
+  it('passes', async () => {
+    expect.assertions(1)
 
-  const credentialSubject = await buildAtomicVCSubjectV1({
-    subject: `did:ethr:${bobWallet.getAddressString()}`,
-    data: {'@type': 'Thing'},
+    const credentialSubject = await buildAtomicVCSubjectV1({
+      subject: `did:ethr:${bobWallet.getAddressString()}`,
+      data: {'@type': 'Thing'},
+    })
+
+    await expect(Utils.isValid(Validation.validateCredentialSubject)(credentialSubject)).toBeTruthy()
   })
 
-  expect(Utils.isValid(Validation.validateCredentialSubject)(credentialSubject)).toBeTruthy()
+  it('fails with empty subject', async () => {
+    expect.assertions(1)
+
+    const credentialSubject = await buildAtomicVCSubjectV1({
+      subject: `did:ethr:${bobWallet.getAddressString()}`,
+      data: {'@type': 'Thing'},
+    })
+
+    expect(
+      Utils.isValid(Validation.validateCredentialSubject)({
+        ...credentialSubject,
+        id: '',
+      }),
+    ).toBeFalsy()
+  })
+
+  it('fails with empty type', async () => {
+    expect.assertions(1)
+
+    const credentialSubject = await buildAtomicVCSubjectV1({
+      subject: `did:ethr:${bobWallet.getAddressString()}`,
+      data: {'@type': ''},
+    })
+
+    expect(Utils.isValid(Validation.validateCredentialSubject)(credentialSubject)).toBeFalsy()
+  })
 })
 
-test('Validation.validateVerifiableCredential', async () => {
-  jest.setTimeout(15000)
-
-  expect.assertions(2)
-
-  const credentialSubject = await buildAtomicVCSubjectV1({
-    subject: `did:ethr:${bobWallet.getAddressString()}`,
-    data: {'@type': 'Thing'},
+describe('Validation.validateCredentialRevocation', () => {
+  it('passes', () => {
+    expect(Utils.isValid(Validation.validateCredentialRevocation)({'@context': 'https://example.com'})).toBeTruthy()
   })
 
-  const atomicVC = await buildAtomicVCV1({
-    credentialSubject,
-    type: ['CustomCredential'],
-    privateKey: issuerPrivKey,
-    issuanceDate: '2016-02-01T00:00:00.000Z',
-    expirationDate: '2018-02-01T00:00:00.000Z',
-    revocation: {
-      '@context': 'https://example.com',
-      token: '1234',
-    },
+  it('fails with empty context', () => {
+    expect(Utils.isValid(Validation.validateCredentialRevocation)({'@context': ''})).toBeFalsy()
   })
-
-  const atomicVCWOExp = await buildAtomicVCV1({
-    credentialSubject,
-    type: ['CustomCredential'],
-    privateKey: issuerPrivKey,
-    issuanceDate: '2016-02-01T00:00:00.000Z',
-    revocation: {
-      '@context': 'https://example.com',
-      token: '1234',
-    },
-  })
-
-  await expect(Utils.isAsyncValid(Validation.validateVerifiableCredential)(atomicVC)).resolves.toBeTruthy()
-  await expect(Utils.isAsyncValid(Validation.validateVerifiableCredential)(atomicVCWOExp)).resolves.toBeTruthy()
 })
 
-test('Validation.validateVerifiablePresentationV1', async () => {
-  expect.assertions(2)
+describe('Validation.validateCredentialProof', () => {
+  it('passes', async () => {
+    expect.assertions(1)
 
-  const credentialSubject = await buildAtomicVCSubjectV1({
-    subject: `did:ethr:${bobWallet.getAddressString()}`,
-    data: {'@type': 'Thing'},
+    const credentialSubject = await buildAtomicVCSubjectV1({
+      subject: `did:ethr:${bobWallet.getAddressString()}`,
+      data: {'@type': 'Thing'},
+    })
+
+    const atomicVC = await buildAtomicVCV1({
+      credentialSubject,
+      type: ['CustomCredential'],
+      privateKey: issuerPrivKey,
+      issuanceDate: '2016-02-01T00:00:00.000Z',
+      expirationDate: '2018-02-01T00:00:00.000Z',
+      revocation: {
+        '@context': 'https://example.com',
+        token: '1234',
+      },
+    })
+
+    expect(Utils.isValid(Validation.validateCredentialProof)(atomicVC.proof)).toBeTruthy()
   })
 
-  const atomicVC = await buildAtomicVCV1({
-    credentialSubject,
-    type: ['CustomCredential'],
-    privateKey: issuerPrivKey,
-    issuanceDate: '2016-02-01T00:00:00.000Z',
-    expirationDate: '2018-02-01T00:00:00.000Z',
-    revocation: {
-      '@context': 'https://example.com',
-      token: '1234',
-    },
+  it('fails with invalid type', async () => {
+    expect.assertions(1)
+
+    const credentialSubject = await buildAtomicVCSubjectV1({
+      subject: `did:ethr:${bobWallet.getAddressString()}`,
+      data: {'@type': 'Thing'},
+    })
+
+    const atomicVC = await buildAtomicVCV1({
+      credentialSubject,
+      type: ['CustomCredential'],
+      privateKey: issuerPrivKey,
+      issuanceDate: '2016-02-01T00:00:00.000Z',
+      expirationDate: '2018-02-01T00:00:00.000Z',
+      revocation: {
+        '@context': 'https://example.com',
+        token: '1234',
+      },
+    })
+
+    expect(
+      Utils.isValid(Validation.validateCredentialProof)({
+        ...atomicVC.proof,
+        type: '',
+      }),
+    ).toBeFalsy()
   })
 
-  const vp = await buildVerifiablePresentation({
-    wallet: bobWallet,
-    atomicCredentials: [atomicVC],
-    token: EthUtils.generateNonce(),
-    domain: 'https://bloom.co/receiveData',
+  it('fails with invalid created', async () => {
+    expect.assertions(1)
+
+    const credentialSubject = await buildAtomicVCSubjectV1({
+      subject: `did:ethr:${bobWallet.getAddressString()}`,
+      data: {'@type': 'Thing'},
+    })
+
+    const atomicVC = await buildAtomicVCV1({
+      credentialSubject,
+      type: ['CustomCredential'],
+      privateKey: issuerPrivKey,
+      issuanceDate: '2016-02-01T00:00:00.000Z',
+      expirationDate: '2018-02-01T00:00:00.000Z',
+      revocation: {
+        '@context': 'https://example.com',
+        token: '1234',
+      },
+    })
+
+    expect(
+      Utils.isValid(Validation.validateCredentialProof)({
+        ...atomicVC.proof,
+        created: '2016-02-01',
+      }),
+    ).toBeFalsy()
   })
 
-  const invalidVP = await buildVerifiablePresentation({
-    wallet: aliceWallet,
-    atomicCredentials: [atomicVC],
-    token: EthUtils.generateNonce(),
-    domain: 'https://bloom.co/receiveData',
+  it('fails with invalid proofPurpose', async () => {
+    expect.assertions(1)
+
+    const credentialSubject = await buildAtomicVCSubjectV1({
+      subject: `did:ethr:${bobWallet.getAddressString()}`,
+      data: {'@type': 'Thing'},
+    })
+
+    const atomicVC = await buildAtomicVCV1({
+      credentialSubject,
+      type: ['CustomCredential'],
+      privateKey: issuerPrivKey,
+      issuanceDate: '2016-02-01T00:00:00.000Z',
+      expirationDate: '2018-02-01T00:00:00.000Z',
+      revocation: {
+        '@context': 'https://example.com',
+        token: '1234',
+      },
+    })
+
+    expect(
+      Utils.isValid(Validation.validateCredentialProof)({
+        ...atomicVC.proof,
+        proofPurpose: '',
+      }),
+    ).toBeFalsy()
   })
 
-  await expect(Utils.isAsyncValid(Validation.validateVerifiablePresentationV1)(vp)).resolves.toBeTruthy()
-  await expect(Utils.isAsyncValid(Validation.validateVerifiablePresentationV1)(invalidVP)).resolves.toBeFalsy()
+  it('fails with invalid verificationMethod', async () => {
+    expect.assertions(1)
+
+    const credentialSubject = await buildAtomicVCSubjectV1({
+      subject: `did:ethr:${bobWallet.getAddressString()}`,
+      data: {'@type': 'Thing'},
+    })
+
+    const atomicVC = await buildAtomicVCV1({
+      credentialSubject,
+      type: ['CustomCredential'],
+      privateKey: issuerPrivKey,
+      issuanceDate: '2016-02-01T00:00:00.000Z',
+      expirationDate: '2018-02-01T00:00:00.000Z',
+      revocation: {
+        '@context': 'https://example.com',
+        token: '1234',
+      },
+    })
+
+    expect(
+      Utils.isValid(Validation.validateCredentialProof)({
+        ...atomicVC.proof,
+        verificationMethod: '',
+      }),
+    ).toBeFalsy()
+  })
+
+  it('fails with invalid jws', async () => {
+    expect.assertions(1)
+
+    const credentialSubject = await buildAtomicVCSubjectV1({
+      subject: `did:ethr:${bobWallet.getAddressString()}`,
+      data: {'@type': 'Thing'},
+    })
+
+    const atomicVC = await buildAtomicVCV1({
+      credentialSubject,
+      type: ['CustomCredential'],
+      privateKey: issuerPrivKey,
+      issuanceDate: '2016-02-01T00:00:00.000Z',
+      expirationDate: '2018-02-01T00:00:00.000Z',
+      revocation: {
+        '@context': 'https://example.com',
+        token: '1234',
+      },
+    })
+
+    expect(
+      Utils.isValid(Validation.validateCredentialProof)({
+        ...atomicVC.proof,
+        jws: '',
+      }),
+    ).toBeFalsy()
+  })
+})
+
+describe('Validation.validateVerifiableCredential', () => {
+  it('passes', async () => {
+    expect.assertions(1)
+
+    const credentialSubject = await buildAtomicVCSubjectV1({
+      subject: `did:ethr:${bobWallet.getAddressString()}`,
+      data: {'@type': 'Thing'},
+    })
+
+    const atomicVC = await buildAtomicVCV1({
+      credentialSubject,
+      type: ['CustomCredential'],
+      privateKey: issuerPrivKey,
+      issuanceDate: '2016-02-01T00:00:00.000Z',
+      expirationDate: '2018-02-01T00:00:00.000Z',
+      revocation: {
+        '@context': 'https://example.com',
+        token: '1234',
+      },
+    })
+
+    await expect(Utils.isAsyncValid(Validation.validateVerifiableCredential)(atomicVC)).resolves.toBeTruthy()
+  })
+
+  it('passes wihtout an expiration date', async () => {
+    expect.assertions(1)
+
+    const credentialSubject = await buildAtomicVCSubjectV1({
+      subject: `did:ethr:${bobWallet.getAddressString()}`,
+      data: {'@type': 'Thing'},
+    })
+
+    const atomicVC = await buildAtomicVCV1({
+      credentialSubject,
+      type: ['CustomCredential'],
+      privateKey: issuerPrivKey,
+      issuanceDate: '2016-02-01T00:00:00.000Z',
+      revocation: {
+        '@context': 'https://example.com',
+        token: '1234',
+      },
+    })
+
+    await expect(Utils.isAsyncValid(Validation.validateVerifiableCredential)(atomicVC)).resolves.toBeTruthy()
+  })
+
+  it('fails with invalid @context', async () => {
+    expect.assertions(1)
+
+    const credentialSubject = await buildAtomicVCSubjectV1({
+      subject: `did:ethr:${bobWallet.getAddressString()}`,
+      data: {'@type': 'Thing'},
+    })
+
+    const atomicVC = await buildAtomicVCV1({
+      credentialSubject,
+      type: ['CustomCredential'],
+      privateKey: issuerPrivKey,
+      issuanceDate: '2016-02-01T00:00:00.000Z',
+      revocation: {
+        '@context': 'https://example.com',
+        token: '1234',
+      },
+    })
+
+    await expect(
+      Utils.isAsyncValid(Validation.validateVerifiableCredential)({
+        ...atomicVC,
+        '@context': [],
+      }),
+    ).resolves.toBeFalsy()
+  })
+
+  it('fails with invalid id', async () => {
+    expect.assertions(1)
+
+    const credentialSubject = await buildAtomicVCSubjectV1({
+      subject: `did:ethr:${bobWallet.getAddressString()}`,
+      data: {'@type': 'Thing'},
+    })
+
+    const atomicVC = await buildAtomicVCV1({
+      credentialSubject,
+      type: ['CustomCredential'],
+      privateKey: issuerPrivKey,
+      issuanceDate: '2016-02-01T00:00:00.000Z',
+      revocation: {
+        '@context': 'https://example.com',
+        token: '1234',
+      },
+    })
+
+    await expect(
+      Utils.isAsyncValid(Validation.validateVerifiableCredential)({
+        ...atomicVC,
+        id: 1,
+      }),
+    ).resolves.toBeFalsy()
+  })
+
+  it('fails with invalid type', async () => {
+    expect.assertions(1)
+
+    const credentialSubject = await buildAtomicVCSubjectV1({
+      subject: `did:ethr:${bobWallet.getAddressString()}`,
+      data: {'@type': 'Thing'},
+    })
+
+    const atomicVC = await buildAtomicVCV1({
+      credentialSubject,
+      type: ['CustomCredential'],
+      privateKey: issuerPrivKey,
+      issuanceDate: '2016-02-01T00:00:00.000Z',
+      revocation: {
+        '@context': 'https://example.com',
+        token: '1234',
+      },
+    })
+
+    await expect(
+      Utils.isAsyncValid(Validation.validateVerifiableCredential)({
+        ...atomicVC,
+        type: ['CustomCredential'],
+      }),
+    ).resolves.toBeFalsy()
+  })
+
+  it('fails with invalid issuer', async () => {
+    expect.assertions(1)
+
+    const credentialSubject = await buildAtomicVCSubjectV1({
+      subject: `did:ethr:${bobWallet.getAddressString()}`,
+      data: {'@type': 'Thing'},
+    })
+
+    const atomicVC = await buildAtomicVCV1({
+      credentialSubject,
+      type: ['CustomCredential'],
+      privateKey: issuerPrivKey,
+      issuanceDate: '2016-02-01T00:00:00.000Z',
+      revocation: {
+        '@context': 'https://example.com',
+        token: '1234',
+      },
+    })
+
+    await expect(
+      Utils.isAsyncValid(Validation.validateVerifiableCredential)({
+        ...atomicVC,
+        issuer: issuerWallet.getAddressString(),
+      }),
+    ).resolves.toBeFalsy()
+  })
+
+  it('fails with invalid issuanceDate', async () => {
+    expect.assertions(1)
+
+    const credentialSubject = await buildAtomicVCSubjectV1({
+      subject: `did:ethr:${bobWallet.getAddressString()}`,
+      data: {'@type': 'Thing'},
+    })
+
+    const atomicVC = await buildAtomicVCV1({
+      credentialSubject,
+      type: ['CustomCredential'],
+      privateKey: issuerPrivKey,
+      issuanceDate: '2016-02-01',
+      revocation: {
+        '@context': 'https://example.com',
+        token: '1234',
+      },
+    })
+
+    await expect(Utils.isAsyncValid(Validation.validateVerifiableCredential)(atomicVC)).resolves.toBeFalsy()
+  })
+
+  it('fails with invalid expirationDate', async () => {
+    expect.assertions(1)
+
+    const credentialSubject = await buildAtomicVCSubjectV1({
+      subject: `did:ethr:${bobWallet.getAddressString()}`,
+      data: {'@type': 'Thing'},
+    })
+
+    const atomicVC = await buildAtomicVCV1({
+      credentialSubject,
+      type: ['CustomCredential'],
+      privateKey: issuerPrivKey,
+      issuanceDate: '2016-02-01T00:00:00.000Z',
+      expirationDate: '2016-02-01',
+      revocation: {
+        '@context': 'https://example.com',
+        token: '1234',
+      },
+    })
+
+    await expect(Utils.isAsyncValid(Validation.validateVerifiableCredential)(atomicVC)).resolves.toBeFalsy()
+  })
+
+  it('fails with invalid credentialSubject', async () => {
+    expect.assertions(1)
+
+    const credentialSubject = await buildAtomicVCSubjectV1({
+      subject: `did:ethr:${bobWallet.getAddressString()}`,
+      data: {'@type': ''},
+    })
+
+    const atomicVC = await buildAtomicVCV1({
+      credentialSubject,
+      type: ['CustomCredential'],
+      privateKey: issuerPrivKey,
+      issuanceDate: '2016-02-01T00:00:00.000Z',
+      expirationDate: '2016-02-01',
+      revocation: {
+        '@context': 'https://example.com',
+        token: '1234',
+      },
+    })
+
+    await expect(Utils.isAsyncValid(Validation.validateVerifiableCredential)(atomicVC)).resolves.toBeFalsy()
+  })
+
+  it('fails with invalid revocation', async () => {
+    expect.assertions(1)
+
+    const credentialSubject = await buildAtomicVCSubjectV1({
+      subject: `did:ethr:${bobWallet.getAddressString()}`,
+      data: {'@type': ''},
+    })
+
+    const atomicVC = await buildAtomicVCV1({
+      credentialSubject,
+      type: ['CustomCredential'],
+      privateKey: issuerPrivKey,
+      issuanceDate: '2016-02-01T00:00:00.000Z',
+      expirationDate: '2016-02-01',
+      revocation: {
+        '@context': 'https://example.com',
+        token: '1234',
+      },
+    })
+
+    await expect(
+      Utils.isAsyncValid(Validation.validateVerifiableCredential)({
+        ...atomicVC,
+        revocation: {
+          '@context': '',
+        },
+      }),
+    ).resolves.toBeFalsy()
+  })
+
+  it('fails with structurally invalid proof', async () => {
+    expect.assertions(1)
+
+    const credentialSubject = await buildAtomicVCSubjectV1({
+      subject: `did:ethr:${bobWallet.getAddressString()}`,
+      data: {'@type': ''},
+    })
+
+    const atomicVC = await buildAtomicVCV1({
+      credentialSubject,
+      type: ['CustomCredential'],
+      privateKey: issuerPrivKey,
+      issuanceDate: '2016-02-01T00:00:00.000Z',
+      expirationDate: '2016-02-01',
+      revocation: {
+        '@context': 'https://example.com',
+        token: '1234',
+      },
+    })
+
+    await expect(
+      Utils.isAsyncValid(Validation.validateVerifiableCredential)({
+        ...atomicVC,
+        proof: {
+          ...atomicVC.proof,
+          type: '',
+        },
+      }),
+    ).resolves.toBeFalsy()
+  })
+
+  it('fails with invalid proof', async () => {
+    expect.assertions(1)
+
+    const credentialSubject = await buildAtomicVCSubjectV1({
+      subject: `did:ethr:${bobWallet.getAddressString()}`,
+      data: {'@type': ''},
+    })
+
+    const atomicVC = await buildAtomicVCV1({
+      credentialSubject,
+      type: ['CustomCredential'],
+      privateKey: issuerPrivKey,
+      issuanceDate: '2016-02-01T00:00:00.000Z',
+      expirationDate: '2016-02-01',
+      revocation: {
+        '@context': 'https://example.com',
+        token: '1234',
+      },
+    })
+
+    await expect(
+      Utils.isAsyncValid(Validation.validateVerifiableCredential)({
+        ...atomicVC,
+        proof: {
+          ...atomicVC.proof,
+          jws: '',
+        },
+      }),
+    ).resolves.toBeFalsy()
+  })
+})
+
+describe('Validation.validateVerifiablePresentationV1', () => {
+  it('passes', async () => {
+    expect.assertions(1)
+
+    const credentialSubject = await buildAtomicVCSubjectV1({
+      subject: `did:ethr:${bobWallet.getAddressString()}`,
+      data: {'@type': 'Thing'},
+    })
+
+    const atomicVC = await buildAtomicVCV1({
+      credentialSubject,
+      type: ['CustomCredential'],
+      privateKey: issuerPrivKey,
+      issuanceDate: '2016-02-01T00:00:00.000Z',
+      expirationDate: '2018-02-01T00:00:00.000Z',
+      revocation: {
+        '@context': 'https://example.com',
+        token: '1234',
+      },
+    })
+
+    const vp = await buildVerifiablePresentation({
+      wallet: bobWallet,
+      atomicCredentials: [atomicVC],
+      token: EthUtils.generateNonce(),
+      domain: 'https://bloom.co/receiveData',
+    })
+
+    await expect(Utils.isAsyncValid(Validation.validateVerifiablePresentationV1)(vp)).resolves.toBeTruthy()
+  })
+
+  it('fails when subject and sharer differ', async () => {
+    expect.assertions(1)
+
+    const credentialSubject = await buildAtomicVCSubjectV1({
+      subject: `did:ethr:${bobWallet.getAddressString()}`,
+      data: {'@type': 'Thing'},
+    })
+
+    const atomicVC = await buildAtomicVCV1({
+      credentialSubject,
+      type: ['CustomCredential'],
+      privateKey: issuerPrivKey,
+      issuanceDate: '2016-02-01T00:00:00.000Z',
+      expirationDate: '2018-02-01T00:00:00.000Z',
+      revocation: {
+        '@context': 'https://example.com',
+        token: '1234',
+      },
+    })
+
+    const vp = await buildVerifiablePresentation({
+      wallet: aliceWallet,
+      atomicCredentials: [atomicVC],
+      token: EthUtils.generateNonce(),
+      domain: 'https://bloom.co/receiveData',
+    })
+
+    await expect(Utils.isAsyncValid(Validation.validateVerifiablePresentationV1)(vp)).resolves.toBeFalsy()
+  })
+
+  it('fails with invalid type', async () => {
+    expect.assertions(1)
+
+    const credentialSubject = await buildAtomicVCSubjectV1({
+      subject: `did:ethr:${bobWallet.getAddressString()}`,
+      data: {'@type': 'Thing'},
+    })
+
+    const atomicVC = await buildAtomicVCV1({
+      credentialSubject,
+      type: ['CustomCredential'],
+      privateKey: issuerPrivKey,
+      issuanceDate: '2016-02-01T00:00:00.000Z',
+      expirationDate: '2018-02-01T00:00:00.000Z',
+      revocation: {
+        '@context': 'https://example.com',
+        token: '1234',
+      },
+    })
+
+    const vp = await buildVerifiablePresentation({
+      wallet: bobWallet,
+      atomicCredentials: [atomicVC],
+      token: EthUtils.generateNonce(),
+      domain: 'https://bloom.co/receiveData',
+    })
+
+    await expect(
+      Utils.isAsyncValid(Validation.validateVerifiablePresentationV1)({
+        ...vp,
+        type: [''],
+      }),
+    ).resolves.toBeFalsy()
+  })
+
+  it('fails with invalid verifiableCredential', async () => {
+    expect.assertions(1)
+
+    const credentialSubject = await buildAtomicVCSubjectV1({
+      subject: `did:ethr:${bobWallet.getAddressString()}`,
+      data: {'@type': 'Thing'},
+    })
+
+    const atomicVC = await buildAtomicVCV1({
+      credentialSubject,
+      type: ['CustomCredential'],
+      privateKey: issuerPrivKey,
+      issuanceDate: '2016-02-01T00:00:00.000Z',
+      expirationDate: '2018-02-01T00:00:00.000Z',
+      revocation: {
+        '@context': 'https://example.com',
+        token: '1234',
+      },
+    })
+
+    const vp = await buildVerifiablePresentation({
+      wallet: bobWallet,
+      atomicCredentials: [atomicVC],
+      token: EthUtils.generateNonce(),
+      domain: 'https://bloom.co/receiveData',
+    })
+
+    await expect(
+      Utils.isAsyncValid(Validation.validateVerifiablePresentationV1)({
+        ...vp,
+        verifiableCredential: [
+          {
+            ...vp.verifiableCredential[0],
+            type: [''],
+          },
+        ],
+      }),
+    ).resolves.toBeFalsy()
+  })
+
+  it('fails with invalid holder', async () => {
+    expect.assertions(1)
+
+    const credentialSubject = await buildAtomicVCSubjectV1({
+      subject: `did:ethr:${bobWallet.getAddressString()}`,
+      data: {'@type': 'Thing'},
+    })
+
+    const atomicVC = await buildAtomicVCV1({
+      credentialSubject,
+      type: ['CustomCredential'],
+      privateKey: issuerPrivKey,
+      issuanceDate: '2016-02-01T00:00:00.000Z',
+      expirationDate: '2018-02-01T00:00:00.000Z',
+      revocation: {
+        '@context': 'https://example.com',
+        token: '1234',
+      },
+    })
+
+    const vp = await buildVerifiablePresentation({
+      wallet: bobWallet,
+      atomicCredentials: [atomicVC],
+      token: EthUtils.generateNonce(),
+      domain: 'https://bloom.co/receiveData',
+    })
+
+    await expect(
+      Utils.isAsyncValid(Validation.validateVerifiablePresentationV1)({
+        ...vp,
+        holder: bobWallet.getAddressString(),
+      }),
+    ).resolves.toBeFalsy()
+  })
+
+  it('fails with invalid proof', async () => {
+    expect.assertions(1)
+
+    const credentialSubject = await buildAtomicVCSubjectV1({
+      subject: `did:ethr:${bobWallet.getAddressString()}`,
+      data: {'@type': 'Thing'},
+    })
+
+    const atomicVC = await buildAtomicVCV1({
+      credentialSubject,
+      type: ['CustomCredential'],
+      privateKey: issuerPrivKey,
+      issuanceDate: '2016-02-01T00:00:00.000Z',
+      expirationDate: '2018-02-01T00:00:00.000Z',
+      revocation: {
+        '@context': 'https://example.com',
+        token: '1234',
+      },
+    })
+
+    const vp = await buildVerifiablePresentation({
+      wallet: bobWallet,
+      atomicCredentials: [atomicVC],
+      token: EthUtils.generateNonce(),
+      domain: 'https://bloom.co/receiveData',
+    })
+
+    await expect(
+      Utils.isAsyncValid(Validation.validateVerifiablePresentationV1)({
+        ...vp,
+        proof: {
+          ...vp.proof,
+          jws: '',
+        },
+      }),
+    ).resolves.toBeFalsy()
+  })
 })

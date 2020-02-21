@@ -1,4 +1,4 @@
-import {AttestationTypeID, getAttestationTypeStr, getBloomIDStrength, getFormattedName} from '../src/AttestationTypes'
+import {AttestationTypeID, getAttestationTypeStr, getBloomIDStrength, getFormattedName} from '../src/types/attestation'
 
 test('AttestationTypes.getAttestationTypeAttrib does not throw', () => {
   Object.keys(AttestationTypeID)

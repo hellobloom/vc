@@ -1,0 +1,51 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ClaimElement renders correctly 1`] = `
+Object {
+  "token": "token",
+  "url": "https://claim-kit.bloom.co/api/claim?share-kit-from=button",
+  "version": 1,
+}
+`;
+
+exports[`ClaimElement renders correctly 2`] = `"https://mysite.com/bloom-callback"`;
+
+exports[`ClaimElement updates when buttonCallbackUrl changes 1`] = `
+Object {
+  "token": "token",
+  "url": "https://claim-kit.bloom.co/api/claim?share-kit-from=button",
+  "version": 1,
+}
+`;
+
+exports[`ClaimElement updates when buttonCallbackUrl changes 2`] = `"https://mysite.com/bloom-callback"`;
+
+exports[`ClaimElement updates when buttonCallbackUrl changes 3`] = `
+Object {
+  "token": "token",
+  "url": "https://claim-kit.bloom.co/api/claim?share-kit-from=button",
+  "version": 1,
+}
+`;
+
+exports[`ClaimElement updates when buttonCallbackUrl changes 4`] = `"https://mysite.com/bloom-callback-2"`;
+
+exports[`ClaimElement updates when claimData changes 1`] = `
+Object {
+  "token": "token",
+  "url": "https://claim-kit.bloom.co/api/claim?share-kit-from=button",
+  "version": 1,
+}
+`;
+
+exports[`ClaimElement updates when claimData changes 2`] = `"https://mysite.com/bloom-callback"`;
+
+exports[`ClaimElement updates when claimData changes 3`] = `
+Object {
+  "token": "token 2",
+  "url": "https://claim-kit.bloom.co/api/claim?share-kit-from=button",
+  "version": 1,
+}
+`;
+
+exports[`ClaimElement updates when claimData changes 4`] = `"https://mysite.com/bloom-callback"`;
