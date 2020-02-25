@@ -131,7 +131,7 @@ export interface VCSAccountPerson extends Subject<Person> {
   name?: string;
   nationality?: Country;
   hasIDDocument: {
-    '@type': 'DocumentationRole';
+    '@type': 'IDDocumentRole';
     authenticationResult?: string;
     selfieImage?: string;
     faceMatch: {
