@@ -1,4 +1,13 @@
-import { Person, Organization } from 'schema-dts';
+import {
+  Person,
+  Organization,
+  Date as TDate,
+  GenderType,
+  Country,
+  State,
+  City,
+  AdministrativeArea,
+} from 'schema-dts';
 
 import {
   AtomicVCV1,
@@ -87,6 +96,72 @@ export interface VCSAccountOrganization extends Subject<Organization> {
   memberOf: {
     '@type': 'Role';
     memberOf: Organization;
+  };
+}
+
+//////////////////////////////////////////////////////////////
+// ID document
+//////////////////////////////////////////////////////////////
+
+export type TDocumentClass =
+  | 'unknown'
+  | 'passport'
+  | 'visa'
+  | 'drivers_license'
+  | 'identification_card'
+  | 'permit'
+  | 'currency'
+  | 'residence_document'
+  | 'travel_document'
+  | 'birth_certificate'
+  | 'vehicle_registration'
+  | 'other'
+  | 'weapon_license'
+  | 'tribal_identification'
+  | 'voter_identification'
+  | 'military';
+
+export interface VCSAccountPerson extends Subject<Person> {
+  '@type': 'Person';
+  age?: number;
+  birthDate?: TDate;
+  familyName?: string;
+  givenName?: string;
+  gender?: GenderType | string;
+  name?: string;
+  nationality?: Country;
+  hasIDDocument: {
+    '@type': 'DocumentationRole';
+    authenticationResult?: string;
+    selfieImage?: string;
+    faceMatch: {
+      '@type': 'IDDocumentFaceMatch';
+      isMatch?: boolean;
+      score?: number;
+      identifier?: number;
+    };
+    hasIDDocument: {
+      '@type': 'IDDocument';
+      issuer:
+        | Country
+        | State
+        | City
+        | (AdministrativeArea & {
+            identifier?: 'string'; // Issuer code
+          });
+      documentType?: string;
+      issueDate?: TDate;
+      issueType?: string;
+      expirationDate?: TDate;
+      classificationMethod?: 'automatic' | 'manual';
+      idClass: TDocumentClass;
+      idClassName?: string;
+      countryCode?: string;
+      frontImage?: string;
+      backImage?: string;
+      generic?: boolean;
+      keesingCode?: string;
+    };
   };
 }
 
