@@ -19,8 +19,10 @@ describe('buildAtomicVCSubjectV1', () => {
     expect(subject).toEqual(
       expect.objectContaining({
         id: did,
-        '@type': 'Thing',
-        key: 'value',
+        data: {
+          '@type': 'Thing',
+          key: 'value',
+        },
       }),
     )
   })
@@ -71,8 +73,10 @@ describe('buildAtomicVCV1', () => {
       expirationDate: '2018-02-01T00:00:00.000Z',
       credentialSubject: {
         id: did,
-        '@type': 'Thing',
-        key: 'value',
+        data: {
+          '@type': 'Thing',
+          key: 'value',
+        },
       },
       revocation: {
         '@context': 'https://example.com',
@@ -120,8 +124,10 @@ describe('buildAtomicVCV1', () => {
       expirationDate: '2018-02-01T00:00:00.000Z',
       credentialSubject: {
         id: did,
-        '@type': 'Thing',
-        key: 'value',
+        data: {
+          '@type': 'Thing',
+          key: 'value',
+        },
       },
       revocation: {
         '@context': 'https://example.com',
@@ -174,13 +180,17 @@ describe('buildAtomicVCV1', () => {
       credentialSubject: [
         {
           id: did,
-          '@type': 'Thing',
-          key: 'value 1',
+          data: {
+            '@type': 'Thing',
+            key: 'value 1',
+          },
         },
         {
           id: did,
-          '@type': 'Thing',
-          key: 'value 2',
+          data: {
+            '@type': 'Thing',
+            key: 'value 2',
+          },
         },
       ],
       revocation: {
