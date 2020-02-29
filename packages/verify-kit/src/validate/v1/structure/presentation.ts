@@ -2,7 +2,7 @@ import {
   genValidateFn,
   genAsyncValidateFn,
   Utils,
-  EthUtils,
+  DIDUtils,
   VPV1,
   VPProofV1,
   AtomicVCV1,
@@ -23,10 +23,10 @@ const {RecoverableAssertionProofPurpose, RecoverableAuthenticationProofPurpose} 
 
 const stripOwnerFromDID = (value: string) => value.substr(0, value.length - 6)
 
-const isValidDIDOwner = (value: any) => {
+const isValidDIDOwnerStructure = (value: any) => {
   if (typeof value !== 'string') return false
 
-  return EthUtils.isValidDID(stripOwnerFromDID(value))
+  return DIDUtils.isValidDIDStructure(stripOwnerFromDID(value))
 }
 
 const validateCredentialSubjectData = genValidateFn<AtomicVCSubjectV1<any>['data']>({
@@ -34,7 +34,7 @@ const validateCredentialSubjectData = genValidateFn<AtomicVCSubjectV1<any>['data
 })
 
 export const validateCredentialSubject = genValidateFn<AtomicVCSubjectV1<any>>({
-  id: EthUtils.isValidDID,
+  id: DIDUtils.isValidDIDStructure,
   data: Utils.isValid(validateCredentialSubjectData),
 })
 
@@ -54,24 +54,24 @@ export const validateCredentialProof = genValidateFn<AtomicVCProofV1>({
   type: Utils.isNotEmptyString,
   created: Utils.isValidRFC3339DateTime,
   proofPurpose: (value: any) => value === 'assertionMethod',
-  verificationMethod: isValidDIDOwner,
+  verificationMethod: isValidDIDOwnerStructure,
   jws: Utils.isNotEmptyString,
 })
 
 const isCredentialProofValid = async (value: any, data: any) => {
   try {
-    const {didDocument} = await EthUtils.resolveDID(stripOwnerFromDID(value.verificationMethod))
+    const didDocument = await DIDUtils.resolveDID(stripOwnerFromDID(value.verificationMethod))
     const publicKey = didDocument.publicKey[0]
 
     const res = await jsigs.verify(data, {
       suite: new RecoverableEcdsaSecp256k1Signature2019({
         key: new RecoverableEcdsaSecp256k1KeyClass2019({
           id: publicKey.id,
-          controller: publicKey.controller,
+          controller: publicKey.owner,
         }),
       }),
       compactProof: false,
-      documentLoader: EthUtils.documentLoader,
+      documentLoader: DIDUtils.documentLoader,
       purpose: new RecoverableAssertionProofPurpose({
         addressKey: 'ethereumAddress',
         keyToAddress: key => EthWallet.fromPublicKey(Buffer.from(key.substr(2), 'hex')).getAddressString(),
@@ -89,7 +89,7 @@ export const validateVerifiableCredential = genAsyncValidateFn<AtomicVCV1>({
   '@context': Utils.isArrayOfNonEmptyStrings,
   id: Utils.isUndefinedOr(Utils.isNotEmptyString),
   type: [Utils.isArrayOfNonEmptyStrings, (value: string[]) => value.includes('VerifiableCredential')],
-  issuer: EthUtils.isValidDID,
+  issuer: DIDUtils.isValidDIDStructure,
   issuanceDate: Utils.isValidRFC3339DateTime,
   expirationDate: Utils.isUndefinedOr(Utils.isValidRFC3339DateTime),
   credentialSubject: [
@@ -110,7 +110,7 @@ const validateProof = genValidateFn<VPProofV1>({
   type: Utils.isNotEmptyString,
   created: Utils.isValidRFC3339DateTime,
   proofPurpose: (value: any) => value === 'authentication',
-  verificationMethod: isValidDIDOwner,
+  verificationMethod: isValidDIDOwnerStructure,
   challenge: Utils.isNotEmptyString,
   domain: Utils.isNotEmptyString,
   jws: Utils.isNotEmptyString,
@@ -120,17 +120,17 @@ const isPresentationProofValid = async (value: any, data: any) => {
   // return true
 
   try {
-    const {didDocument} = await EthUtils.resolveDID(stripOwnerFromDID(value.verificationMethod))
+    const didDocument = await DIDUtils.resolveDID(stripOwnerFromDID(value.verificationMethod))
     const publicKey = didDocument.publicKey[0]
 
     const res = await jsigs.verify(data, {
       suite: new RecoverableEcdsaSecp256k1Signature2019({
         key: new RecoverableEcdsaSecp256k1KeyClass2019({
           id: publicKey.id,
-          controller: publicKey.controller,
+          controller: publicKey.owner,
         }),
       }),
-      documentLoader: EthUtils.documentLoader,
+      documentLoader: DIDUtils.documentLoader,
       purpose: new RecoverableAuthenticationProofPurpose({
         addressKey: 'ethereumAddress',
         keyToAddress: key => EthWallet.fromPublicKey(Buffer.from(key.substr(2), 'hex')).getAddressString(),
@@ -151,6 +151,6 @@ export const validateVerifiablePresentationV1 = genAsyncValidateFn<VPV1<AtomicVC
   '@context': Utils.isArrayOfNonEmptyStrings,
   type: [Utils.isArrayOfNonEmptyStrings, (value: string[]) => value.includes('VerifiablePresentation')],
   verifiableCredential: Utils.isAsyncArrayOf(isValidVerifiableCredential),
-  holder: [EthUtils.isValidDID],
+  holder: [DIDUtils.isValidDIDStructure],
   proof: [Utils.isValid(validateProof), isPresentationProofValid],
 })

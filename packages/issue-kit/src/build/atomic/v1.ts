@@ -1,4 +1,4 @@
-import {EthUtils, AtomicVCV1, AtomicVCSubjectV1, BaseVCRevocationSimpleV1, SimpleThing} from '@bloomprotocol/attestations-common'
+import {DIDUtils, AtomicVCV1, AtomicVCSubjectV1, BaseVCRevocationSimpleV1, SimpleThing} from '@bloomprotocol/attestations-common'
 import {
   RecoverableEcdsaSecp256k1Signature2019,
   RecoverableEcdsaSecp256k1KeyClass2019,
@@ -17,7 +17,7 @@ export const buildAtomicVCSubjectV1 = async <Data extends SimpleThing>({
   data: Data
   subject: string
 }): Promise<AtomicVCSubjectV1<Data>> => {
-  const {didDocument: subjectDidDoc} = await EthUtils.resolveDID(subject)
+  const subjectDidDoc = await DIDUtils.resolveDID(subject)
 
   if (data.hasOwnProperty('id')) throw Error("Data must not contain an 'id' property, that is assigned to the subject's DID")
 
@@ -32,6 +32,8 @@ export const buildAtomicVCSubjectV1 = async <Data extends SimpleThing>({
 export const buildAtomicVCV1 = async <S extends AtomicVCSubjectV1<{'@type': string}>, R extends BaseVCRevocationSimpleV1>({
   credentialSubject,
   type,
+  issuer,
+  keyId,
   privateKey,
   issuanceDate,
   expirationDate,
@@ -40,15 +42,18 @@ export const buildAtomicVCV1 = async <S extends AtomicVCSubjectV1<{'@type': stri
 }: {
   credentialSubject: S | S[]
   type: string[]
+  issuer: string
+  keyId: string
   privateKey: Buffer
   issuanceDate: string
   expirationDate?: string
   revocation: R
   context?: string | string[]
 }): Promise<AtomicVCV1> => {
-  const issuer = EthWallet.fromPrivateKey(privateKey)
-  const {didDocument: issuerDidDoc} = await EthUtils.resolveDID(`did:ethr:${issuer.getAddressString()}`)
-  const publicKey = issuerDidDoc.publicKey[0]
+  const issuerDidDoc = await DIDUtils.resolveDID(issuer)
+  const publicKey = issuerDidDoc.publicKey.find(({id}) => id === keyId)
+
+  if (!publicKey) throw new Error('Provided key id cannot be found')
 
   const context = ['https://www.w3.org/2018/credentials/v1']
 
@@ -61,7 +66,7 @@ export const buildAtomicVCV1 = async <S extends AtomicVCSubjectV1<{'@type': stri
   const unsignedCred: Omit<AtomicVCV1, 'proof'> = {
     '@context': context,
     type: ['VerifiableCredential', ...type],
-    issuer: `did:ethr:${issuer.getAddressString()}`,
+    issuer,
     issuanceDate,
     expirationDate,
     credentialSubject,
@@ -72,11 +77,11 @@ export const buildAtomicVCV1 = async <S extends AtomicVCSubjectV1<{'@type': stri
     suite: new RecoverableEcdsaSecp256k1Signature2019({
       key: new RecoverableEcdsaSecp256k1KeyClass2019({
         id: publicKey.id,
-        controller: publicKey.controller,
-        privateKeyJwk: await keyUtils.privateJWKFromPrivateKeyHex(issuer.getPrivateKeyString().replace('0x', '')),
+        controller: publicKey.owner,
+        privateKeyJwk: await keyUtils.privateJWKFromPrivateKeyHex(keyUtils.binToHex(privateKey)),
       }),
     }),
-    documentLoader: EthUtils.documentLoader,
+    documentLoader: DIDUtils.documentLoader,
     purpose: new RecoverableAssertionProofPurpose({
       addressKey: 'ethereumAddress',
       keyToAddress: key => EthWallet.fromPublicKey(Buffer.from(key.substr(2), 'hex')).getAddressString(),

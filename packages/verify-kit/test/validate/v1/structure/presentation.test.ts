@@ -1,4 +1,4 @@
-import {EthUtils, Utils, AtomicVCV1, VPV1} from '@bloomprotocol/attestations-common'
+import {EthUtils, DIDUtils, Utils, AtomicVCV1, VPV1} from '@bloomprotocol/attestations-common'
 import {buildAtomicVCSubjectV1, buildAtomicVCV1} from '@bloomprotocol/issue-kit'
 import {
   RecoverableEcdsaSecp256k1KeyClass2019,
@@ -31,7 +31,7 @@ const buildVerifiablePresentation = async ({
   domain: string
   wallet: EthWallet
 }): Promise<VPV1> => {
-  const {didDocument} = await EthUtils.resolveDID(`did:ethr:${wallet.getAddressString()}`)
+  const didDocument = await DIDUtils.resolveDID(`did:ethr:${wallet.getAddressString()}`)
   const publicKey = didDocument.publicKey[0]
 
   const unsignedVP: Omit<VPV1<AtomicVCV1>, 'proof'> = {
@@ -47,11 +47,11 @@ const buildVerifiablePresentation = async ({
     suite: new RecoverableEcdsaSecp256k1Signature2019({
       key: new RecoverableEcdsaSecp256k1KeyClass2019({
         id: publicKey.id,
-        controller: publicKey.controller,
+        controller: publicKey.owner,
         privateKeyJwk,
       }),
     }),
-    documentLoader: EthUtils.documentLoader,
+    documentLoader: DIDUtils.documentLoader,
     purpose: new RecoverableAuthenticationProofPurpose({
       addressKey: 'ethereumAddress',
       keyToAddress: key => EthWallet.fromPublicKey(Buffer.from(key.substr(2), 'hex')).getAddressString(),
@@ -127,6 +127,9 @@ describe('Validation.validateCredentialProof', () => {
     const atomicVC = await buildAtomicVCV1({
       credentialSubject,
       type: ['CustomCredential'],
+      // TODO: use elem DID method here
+      issuer: '',
+      keyId: '',
       privateKey: issuerPrivKey,
       issuanceDate: '2016-02-01T00:00:00.000Z',
       expirationDate: '2018-02-01T00:00:00.000Z',
@@ -150,6 +153,9 @@ describe('Validation.validateCredentialProof', () => {
     const atomicVC = await buildAtomicVCV1({
       credentialSubject,
       type: ['CustomCredential'],
+      // TODO: use elem DID method here
+      issuer: '',
+      keyId: '',
       privateKey: issuerPrivKey,
       issuanceDate: '2016-02-01T00:00:00.000Z',
       expirationDate: '2018-02-01T00:00:00.000Z',
@@ -178,6 +184,9 @@ describe('Validation.validateCredentialProof', () => {
     const atomicVC = await buildAtomicVCV1({
       credentialSubject,
       type: ['CustomCredential'],
+      // TODO: use elem DID method here
+      issuer: '',
+      keyId: '',
       privateKey: issuerPrivKey,
       issuanceDate: '2016-02-01T00:00:00.000Z',
       expirationDate: '2018-02-01T00:00:00.000Z',
@@ -206,6 +215,9 @@ describe('Validation.validateCredentialProof', () => {
     const atomicVC = await buildAtomicVCV1({
       credentialSubject,
       type: ['CustomCredential'],
+      // TODO: use elem DID method here
+      issuer: '',
+      keyId: '',
       privateKey: issuerPrivKey,
       issuanceDate: '2016-02-01T00:00:00.000Z',
       expirationDate: '2018-02-01T00:00:00.000Z',
@@ -234,6 +246,9 @@ describe('Validation.validateCredentialProof', () => {
     const atomicVC = await buildAtomicVCV1({
       credentialSubject,
       type: ['CustomCredential'],
+      // TODO: use elem DID method here
+      issuer: '',
+      keyId: '',
       privateKey: issuerPrivKey,
       issuanceDate: '2016-02-01T00:00:00.000Z',
       expirationDate: '2018-02-01T00:00:00.000Z',
@@ -262,6 +277,9 @@ describe('Validation.validateCredentialProof', () => {
     const atomicVC = await buildAtomicVCV1({
       credentialSubject,
       type: ['CustomCredential'],
+      // TODO: use elem DID method here
+      issuer: '',
+      keyId: '',
       privateKey: issuerPrivKey,
       issuanceDate: '2016-02-01T00:00:00.000Z',
       expirationDate: '2018-02-01T00:00:00.000Z',
@@ -292,6 +310,9 @@ describe('Validation.validateVerifiableCredential', () => {
     const atomicVC = await buildAtomicVCV1({
       credentialSubject,
       type: ['CustomCredential'],
+      // TODO: use elem DID method here
+      issuer: '',
+      keyId: '',
       privateKey: issuerPrivKey,
       issuanceDate: '2016-02-01T00:00:00.000Z',
       expirationDate: '2018-02-01T00:00:00.000Z',
@@ -315,6 +336,9 @@ describe('Validation.validateVerifiableCredential', () => {
     const atomicVC = await buildAtomicVCV1({
       credentialSubject,
       type: ['CustomCredential'],
+      // TODO: use elem DID method here
+      issuer: '',
+      keyId: '',
       privateKey: issuerPrivKey,
       issuanceDate: '2016-02-01T00:00:00.000Z',
       revocation: {
@@ -337,6 +361,9 @@ describe('Validation.validateVerifiableCredential', () => {
     const atomicVC = await buildAtomicVCV1({
       credentialSubject,
       type: ['CustomCredential'],
+      // TODO: use elem DID method here
+      issuer: '',
+      keyId: '',
       privateKey: issuerPrivKey,
       issuanceDate: '2016-02-01T00:00:00.000Z',
       revocation: {
@@ -364,6 +391,9 @@ describe('Validation.validateVerifiableCredential', () => {
     const atomicVC = await buildAtomicVCV1({
       credentialSubject,
       type: ['CustomCredential'],
+      // TODO: use elem DID method here
+      issuer: '',
+      keyId: '',
       privateKey: issuerPrivKey,
       issuanceDate: '2016-02-01T00:00:00.000Z',
       revocation: {
@@ -391,6 +421,9 @@ describe('Validation.validateVerifiableCredential', () => {
     const atomicVC = await buildAtomicVCV1({
       credentialSubject,
       type: ['CustomCredential'],
+      // TODO: use elem DID method here
+      issuer: '',
+      keyId: '',
       privateKey: issuerPrivKey,
       issuanceDate: '2016-02-01T00:00:00.000Z',
       revocation: {
@@ -418,6 +451,9 @@ describe('Validation.validateVerifiableCredential', () => {
     const atomicVC = await buildAtomicVCV1({
       credentialSubject,
       type: ['CustomCredential'],
+      // TODO: use elem DID method here
+      issuer: '',
+      keyId: '',
       privateKey: issuerPrivKey,
       issuanceDate: '2016-02-01T00:00:00.000Z',
       revocation: {
@@ -445,6 +481,9 @@ describe('Validation.validateVerifiableCredential', () => {
     const atomicVC = await buildAtomicVCV1({
       credentialSubject,
       type: ['CustomCredential'],
+      // TODO: use elem DID method here
+      issuer: '',
+      keyId: '',
       privateKey: issuerPrivKey,
       issuanceDate: '2016-02-01',
       revocation: {
@@ -467,6 +506,9 @@ describe('Validation.validateVerifiableCredential', () => {
     const atomicVC = await buildAtomicVCV1({
       credentialSubject,
       type: ['CustomCredential'],
+      // TODO: use elem DID method here
+      issuer: '',
+      keyId: '',
       privateKey: issuerPrivKey,
       issuanceDate: '2016-02-01T00:00:00.000Z',
       expirationDate: '2016-02-01',
@@ -490,6 +532,9 @@ describe('Validation.validateVerifiableCredential', () => {
     const atomicVC = await buildAtomicVCV1({
       credentialSubject,
       type: ['CustomCredential'],
+      // TODO: use elem DID method here
+      issuer: '',
+      keyId: '',
       privateKey: issuerPrivKey,
       issuanceDate: '2016-02-01T00:00:00.000Z',
       expirationDate: '2016-02-01',
@@ -513,6 +558,9 @@ describe('Validation.validateVerifiableCredential', () => {
     const atomicVC = await buildAtomicVCV1({
       credentialSubject,
       type: ['CustomCredential'],
+      // TODO: use elem DID method here
+      issuer: '',
+      keyId: '',
       privateKey: issuerPrivKey,
       issuanceDate: '2016-02-01T00:00:00.000Z',
       expirationDate: '2016-02-01',
@@ -543,6 +591,9 @@ describe('Validation.validateVerifiableCredential', () => {
     const atomicVC = await buildAtomicVCV1({
       credentialSubject,
       type: ['CustomCredential'],
+      // TODO: use elem DID method here
+      issuer: '',
+      keyId: '',
       privateKey: issuerPrivKey,
       issuanceDate: '2016-02-01T00:00:00.000Z',
       expirationDate: '2016-02-01',
@@ -574,6 +625,9 @@ describe('Validation.validateVerifiableCredential', () => {
     const atomicVC = await buildAtomicVCV1({
       credentialSubject,
       type: ['CustomCredential'],
+      // TODO: use elem DID method here
+      issuer: '',
+      keyId: '',
       privateKey: issuerPrivKey,
       issuanceDate: '2016-02-01T00:00:00.000Z',
       expirationDate: '2016-02-01',
@@ -607,6 +661,9 @@ describe('Validation.validateVerifiablePresentationV1', () => {
     const atomicVC = await buildAtomicVCV1({
       credentialSubject,
       type: ['CustomCredential'],
+      // TODO: use elem DID method here
+      issuer: '',
+      keyId: '',
       privateKey: issuerPrivKey,
       issuanceDate: '2016-02-01T00:00:00.000Z',
       expirationDate: '2018-02-01T00:00:00.000Z',
@@ -637,6 +694,9 @@ describe('Validation.validateVerifiablePresentationV1', () => {
     const atomicVC = await buildAtomicVCV1({
       credentialSubject,
       type: ['CustomCredential'],
+      // TODO: use elem DID method here
+      issuer: '',
+      keyId: '',
       privateKey: issuerPrivKey,
       issuanceDate: '2016-02-01T00:00:00.000Z',
       expirationDate: '2018-02-01T00:00:00.000Z',
@@ -667,6 +727,9 @@ describe('Validation.validateVerifiablePresentationV1', () => {
     const atomicVC = await buildAtomicVCV1({
       credentialSubject,
       type: ['CustomCredential'],
+      // TODO: use elem DID method here
+      issuer: '',
+      keyId: '',
       privateKey: issuerPrivKey,
       issuanceDate: '2016-02-01T00:00:00.000Z',
       expirationDate: '2018-02-01T00:00:00.000Z',
@@ -702,6 +765,9 @@ describe('Validation.validateVerifiablePresentationV1', () => {
     const atomicVC = await buildAtomicVCV1({
       credentialSubject,
       type: ['CustomCredential'],
+      // TODO: use elem DID method here
+      issuer: '',
+      keyId: '',
       privateKey: issuerPrivKey,
       issuanceDate: '2016-02-01T00:00:00.000Z',
       expirationDate: '2018-02-01T00:00:00.000Z',
@@ -742,6 +808,9 @@ describe('Validation.validateVerifiablePresentationV1', () => {
     const atomicVC = await buildAtomicVCV1({
       credentialSubject,
       type: ['CustomCredential'],
+      // TODO: use elem DID method here
+      issuer: '',
+      keyId: '',
       privateKey: issuerPrivKey,
       issuanceDate: '2016-02-01T00:00:00.000Z',
       expirationDate: '2018-02-01T00:00:00.000Z',
@@ -777,6 +846,9 @@ describe('Validation.validateVerifiablePresentationV1', () => {
     const atomicVC = await buildAtomicVCV1({
       credentialSubject,
       type: ['CustomCredential'],
+      // TODO: use elem DID method here
+      issuer: '',
+      keyId: '',
       privateKey: issuerPrivKey,
       issuanceDate: '2016-02-01T00:00:00.000Z',
       expirationDate: '2018-02-01T00:00:00.000Z',

@@ -56,6 +56,9 @@ describe('buildAtomicVCV1', () => {
     const atomicVC = await buildAtomicVCV1({
       credentialSubject: credentialSubject,
       type: ['CustomCredential'],
+      // TODO: use elem DID method here
+      issuer: '',
+      keyId: '',
       privateKey: issuerPrivKey,
       issuanceDate: '2016-02-01T00:00:00.000Z',
       expirationDate: '2018-02-01T00:00:00.000Z',
@@ -106,6 +109,9 @@ describe('buildAtomicVCV1', () => {
     const atomicVC = await buildAtomicVCV1({
       credentialSubject: credentialSubject,
       type: ['CustomCredential'],
+      // TODO: use elem DID method here
+      issuer: '',
+      keyId: '',
       privateKey: issuerPrivKey,
       issuanceDate: '2016-02-01T00:00:00.000Z',
       expirationDate: '2018-02-01T00:00:00.000Z',
@@ -162,6 +168,9 @@ describe('buildAtomicVCV1', () => {
     const atomicVC = await buildAtomicVCV1({
       credentialSubject: [credentialSubject1, credentialSubject2],
       type: ['CustomCredential'],
+      // TODO: use elem DID method here
+      issuer: '',
+      keyId: '',
       privateKey: issuerPrivKey,
       issuanceDate: '2016-02-01T00:00:00.000Z',
       expirationDate: '2018-02-01T00:00:00.000Z',
