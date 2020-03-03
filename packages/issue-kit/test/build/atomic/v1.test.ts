@@ -21,7 +21,6 @@ const generateDID = async () => {
 
   return {
     did: `did:elem:${didUniqueSuffix};elem:initial-state=${base64url.encode(JSON.stringify(createPayload))}`,
-    baseDID: `did:elem:${didUniqueSuffix}`,
     primaryKey,
     recoveryKey,
   }
