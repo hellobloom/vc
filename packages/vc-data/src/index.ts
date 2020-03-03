@@ -113,35 +113,6 @@ export type VCAMLPerson = AtomicVCV1<VCSAMLPerson>;
 export type VCAMLOrganization = AtomicVCV1<VCSAMLOrganization>;
 
 //////////////////////////////////////////////////////////////
-// Account
-//////////////////////////////////////////////////////////////
-export interface VCSAccountPerson extends Subject<Person> {
-  '@type': 'Person';
-  email?: string;
-  memberOf: {
-    '@type': 'Role';
-    roleName?: string;
-    identifier?: string;
-    startDate?: TDate;
-    endDate?: TDate;
-    memberOf: Organization;
-  };
-}
-export interface VCSAccountOrganization extends Subject<Organization> {
-  '@type': 'Organization';
-  memberOf: {
-    '@type': 'Role';
-    roleName?: string;
-    identifier?: string;
-    startDate?: TDate;
-    endDate?: TDate;
-    memberOf: Organization;
-  };
-}
-export type VCAccountPerson = AtomicVCV1<VCSAccountPerson>;
-export type VCAccountOrganization = AtomicVCV1<VCSAccountOrganization>;
-
-//////////////////////////////////////////////////////////////
 // ID document
 //////////////////////////////////////////////////////////////
 
@@ -317,35 +288,85 @@ export type VCGenderPerson = AtomicVCV1<VCSDOBPerson>;
 //////////////////////////////////////////////////////////////
 // Accounts and assets
 //////////////////////////////////////////////////////////////
-export interface AccountRole {
-  '@type': 'AccountRole';
-  member: {
+export interface MonetaryAmountR extends MonetaryAmount {
+  currency: string;
+  value: number | string;
+}
+export interface AccountStatement {
+  statementDate?: string;
+  dueDate?: string;
+}
+export interface AccountPayment {
+  paymentDate?: string;
+  amount: MonetaryAmountR;
+}
+export interface ServiceAccountStatement extends AccountStatement {
+  balanceAdjustments?: number;
+  totalBill?: MonetaryAmountR;
+  serviceAddress?: PostalAddress;
+  billingAddress?: PostalAddress;
+}
+export interface BankAccountStatement extends AccountStatement {
+  balanceAdjustments?: number;
+  totalBill?: MonetaryAmountR;
+  serviceAddress?: PostalAddress;
+  billingAddress?: PostalAddress;
+}
+export interface BankAccountTransaction {
+  transactionType: 'credit' | 'debit';
+  value: MonetaryAmountR;
+  memo?: string;
+}
+export interface BankAccountTransactionGroup {
+  identifier?: number;
+  startDate?: string;
+  endDate?: string;
+  cashflowCategory?: string;
+  cashflowSubcategory?: string;
+  payrollAgency?: boolean;
+  memo?: string;
+  length?: number; // Length in days
+  payee?: string;
+  payer?: string;
+  rank?: string;
+  frequency?: string; // 'daily', 'weekly', 'biweekly', 'monthly', 'semiMonthly', 'annually', 'irregular', ...
+  periodicity?: number;
+  valueStddev?: MonetaryAmount;
+  valueTotal?: MonetaryAmount;
+  valueMean?: MonetaryAmount;
+  valueMedian?: MonetaryAmount;
+  transactions?: MaybeArray<BankAccountTransaction>;
+}
+export interface Account {
+  '@type': 'Account';
+  identifier?: string | number;
+  organization: {
     '@type': 'Organization';
-    name: string;
-    identifier: string | number;
+    name?: string;
+    identifier?: string | number;
+    serviceTypes?: Array<string>;
+    nationality?: GovernmentOrg;
+    sameAs?: string; // Website
   };
-  identifier: string | number;
   startDate?: string;
   endDate?: string;
   accountType?: string;
   accountTypeConfidence?: number;
-}
-export interface MonetaryAmountR extends MonetaryAmount {
-  currency: string;
-  value: number | string;
+  accountStatements?: Array<AccountStatement>;
+  accountPayments?: Array<AccountPayment>;
+  value?: MonetaryAmountR;
   bankAccountCategory?: string;
-}
-export interface BankAccountRole extends AccountRole {
-  value: MonetaryAmountR;
+  hasIncome?: MaybeArray<BankAccountTransactionGroup>;
+  hasExpense?: MaybeArray<BankAccountTransactionGroup>;
+  hasTransactions?: MaybeArray<BankAccountTransaction>;
 }
 export interface VCSAccountPerson extends Subject<Person> {
   '@type': 'Person';
-  member: MaybeArray<AccountRole>;
+  hasAccount: MaybeArray<Account>;
 }
-
-export interface VCSAccountAssetsPerson extends Subject<Person> {
-  '@type': 'Person';
-  member: MaybeArray<BankAccountRole>;
+export interface VCSAccountOrganization extends Subject<Organization> {
+  '@type': 'Organization';
+  hasAccount: MaybeArray<Account>;
 }
 
 /**
@@ -378,9 +399,9 @@ export interface VCSAccountAssetsPerson extends Subject<Person> {
  * | - | 15 | education            |                                                                |
  * | - | 16 | drug                 |                                                                |
  * | - | 17 | bank                 |                                                                |
- * | M | 18 | utility              |                                                                |
- * | M | 19 | income               |                                                                |
- * | M | 20 | assets               |                                                                |
+ * | X | 18 | utility              | VCAccountPerson, VCAccountOrganization                         |
+ * | X | 19 | income               | VCAccountPerson, VCAccountOrganization                         |
+ * | X | 20 | assets               | VCAccountPerson, VCAccountOrganization                         |
  * | X | 21 | 'full-name'          | VCNamePerson, VCNameOrganization                               |
  * | X | 22 | 'birth-date'         | VCDOBPerson                                                    |
  * | X | 23 | gender               | VCGenderPerson                                                 |
@@ -395,6 +416,6 @@ export interface VCSAccountAssetsPerson extends Subject<Person> {
  * | - | 32 | audit                |                                                                |
  * | X | 33 | address              | VCAddressPerson, VCAddressOrganization                         |
  * | - | 34 | correction           |                                                                |
- * | X | 35 | account              | VCAccountPerson                                                |
+ * | X | 35 | account              | VCAccountPerson, VCAccountOrganization                         |
  * +------------------------------------------------------------------------------------------------+
  */
