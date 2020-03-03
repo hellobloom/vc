@@ -75,7 +75,7 @@ describe('buildAtomicVCV1', () => {
 
     const atomicVC = await buildAtomicVCV1({
       credentialSubject: credentialSubject,
-      type: ['CustomCredential'],
+      type: 'CustomCredential',
       issuer: {
         did: issuer.did,
         keyId: '#primary',
@@ -130,7 +130,7 @@ describe('buildAtomicVCV1', () => {
 
     const atomicVC = await buildAtomicVCV1({
       credentialSubject: credentialSubject,
-      type: ['CustomCredential'],
+      type: 'CustomCredential',
       issuer: {
         did: issuer.did,
         keyId: '#primary',
@@ -191,7 +191,7 @@ describe('buildAtomicVCV1', () => {
 
     const atomicVC = await buildAtomicVCV1({
       credentialSubject: [credentialSubject1, credentialSubject2],
-      type: ['CustomCredential'],
+      type: 'CustomCredential',
       issuer: {
         did: issuer.did,
         keyId: '#primary',
@@ -209,6 +209,75 @@ describe('buildAtomicVCV1', () => {
     expect(atomicVC).toEqual({
       '@context': ['https://www.w3.org/2018/credentials/v1'],
       type: ['VerifiableCredential', 'CustomCredential'],
+      issuer: issuer.did,
+      issuanceDate: '2016-02-01T00:00:00.000Z',
+      expirationDate: '2018-02-01T00:00:00.000Z',
+      credentialSubject: [
+        {
+          id: subject.did,
+          data: {
+            '@type': 'Thing',
+            key: 'value 1',
+          },
+        },
+        {
+          id: subject.did,
+          data: {
+            '@type': 'Thing',
+            key: 'value 2',
+          },
+        },
+      ],
+      revocation: {
+        '@context': 'https://example.com',
+        token: 'token',
+      },
+      proof: {
+        type: 'EcdsaSecp256k1Signature2019',
+        created: expect.any(String),
+        verificationMethod: `${issuer.did}#primary`,
+        proofPurpose: 'assertionMethod',
+        jws: expect.any(String),
+      },
+    })
+  })
+
+  it('builds an AtomicVCV1 with multiple types', async () => {
+    expect.assertions(1)
+
+    const subject = await generateDID()
+    const issuer = await generateDID()
+
+    const credentialSubject1 = await buildAtomicVCSubjectV1({
+      subject: subject.did,
+      data: {'@type': 'Thing', key: 'value 1'},
+    })
+
+    const credentialSubject2 = await buildAtomicVCSubjectV1({
+      subject: subject.did,
+      data: {'@type': 'Thing', key: 'value 2'},
+    })
+
+    const atomicVC = await buildAtomicVCV1({
+      credentialSubject: [credentialSubject1, credentialSubject2],
+      type: ['CustomCredential1', 'CustomCredential2'],
+      issuer: {
+        did: issuer.did,
+        keyId: '#primary',
+        privateKey: issuer.primaryKey.getPrivateKeyString(),
+        publicKey: issuer.primaryKey.getPublicKeyString(),
+      },
+      issuanceDate: '2016-02-01T00:00:00.000Z',
+      expirationDate: '2018-02-01T00:00:00.000Z',
+      revocation: {
+        '@context': 'https://example.com',
+        token: 'token',
+      },
+    })
+
+    expect(atomicVC).toEqual({
+      '@context': ['https://www.w3.org/2018/credentials/v1'],
+      type: ['VerifiableCredential', 'CustomCredential1', 'CustomCredential2'],
       issuer: issuer.did,
       issuanceDate: '2016-02-01T00:00:00.000Z',
       expirationDate: '2018-02-01T00:00:00.000Z',

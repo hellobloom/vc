@@ -1,4 +1,11 @@
-import {DIDUtils, AtomicVCV1, AtomicVCSubjectV1, BaseVCRevocationSimpleV1, SimpleThing} from '@bloomprotocol/attestations-common'
+import {
+  DIDUtils,
+  AtomicVCV1,
+  AtomicVCSubjectV1,
+  AtomicVCTypeV1,
+  BaseVCRevocationSimpleV1,
+  SimpleThing,
+} from '@bloomprotocol/attestations-common'
 import {EcdsaSecp256k1Signature2019, EcdsaSecp256k1KeyClass2019} from '@transmute/lds-ecdsa-secp256k1-2019'
 import {keyUtils} from '@transmute/es256k-jws-ts'
 
@@ -34,7 +41,7 @@ type Issuer = {
 
 export const buildAtomicVCV1 = async <S extends AtomicVCSubjectV1<{'@type': string}>, R extends BaseVCRevocationSimpleV1>({
   credentialSubject,
-  type,
+  type: _type,
   issuer,
   issuanceDate,
   expirationDate,
@@ -42,7 +49,7 @@ export const buildAtomicVCV1 = async <S extends AtomicVCSubjectV1<{'@type': stri
   context: _context,
 }: {
   credentialSubject: S | S[]
-  type: string[]
+  type: string | string[]
   issuer: Issuer
   issuanceDate: string
   expirationDate?: string
@@ -54,17 +61,15 @@ export const buildAtomicVCV1 = async <S extends AtomicVCSubjectV1<{'@type': stri
 
   if (!publicKey) throw new Error('No key found for provided keyId and publicKey')
 
-  const context = ['https://www.w3.org/2018/credentials/v1']
-
-  if (Array.isArray(_context)) {
-    context.concat(_context)
-  } else if (typeof _context === 'string') {
-    context.push(_context)
-  }
+  const context = [
+    'https://www.w3.org/2018/credentials/v1',
+    ...(Array.isArray(_context) ? _context : typeof _context === 'undefined' ? [] : [_context]),
+  ]
+  const type: AtomicVCTypeV1 = ['VerifiableCredential', ...(Array.isArray(_type) ? _type : [_type])]
 
   const unsignedCred: Omit<AtomicVCV1, 'proof'> = {
     '@context': context,
-    type: ['VerifiableCredential', ...type],
+    type,
     issuer: issuer.did,
     issuanceDate,
     expirationDate,
