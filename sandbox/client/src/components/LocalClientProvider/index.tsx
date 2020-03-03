@@ -6,7 +6,7 @@ import wretch from 'wretch'
 
 import {buildVPV1, appendQuery, generateElemDID} from './utils'
 
-const usePrivateKeyState = createPersistedState('vc-sandbox.privateKey')
+const usePrivateKeyState = createPersistedState('vc-sandbox.didConfig')
 const useSDVCsState = createPersistedState('vc-sandbox.sdvcs')
 
 type DIDConfig = {
@@ -54,6 +54,8 @@ export const LocalClientProvider: React.FC = props => {
   const [vcs, setVCs] = useSDVCsState<AtomicVCV1[]>(() => [])
 
   useEffect(() => {
+    if (typeof unmappedDIDConfig !== 'undefined') return
+
     let current = true
 
     const get = async () => {
@@ -73,15 +75,15 @@ export const LocalClientProvider: React.FC = props => {
     return () => {
       current = false
     }
-  }, [])
+  }, [unmappedDIDConfig, setDidConfig])
 
   let didConfig: DIDWalletConfig | undefined
 
   if (unmappedDIDConfig) {
     didConfig = {
       did: unmappedDIDConfig.did,
-      primaryKey: EthWallet.fromPrivateKey(Buffer.from(unmappedDIDConfig.primaryKey, 'hex')),
-      recoveryKey: EthWallet.fromPrivateKey(Buffer.from(unmappedDIDConfig.recoveryKey, 'hex')),
+      primaryKey: EthWallet.fromPrivateKey(Buffer.from(unmappedDIDConfig.primaryKey.replace('0x', ''), 'hex')),
+      recoveryKey: EthWallet.fromPrivateKey(Buffer.from(unmappedDIDConfig.recoveryKey.replace('0x', ''), 'hex')),
     }
   }
 

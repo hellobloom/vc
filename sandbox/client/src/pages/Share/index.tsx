@@ -144,7 +144,7 @@ export const Share: React.FC<ShareProps> = props => {
               }
             }}
           >
-            Share From Local Client
+            Share From Local DID
           </Button>
         )
       }

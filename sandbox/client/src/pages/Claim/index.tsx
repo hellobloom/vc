@@ -135,7 +135,7 @@ export const Claim: React.FC<ClaimProps> = props => {
             }
           }}
         >
-          Claim With Local Client
+          Claim With Local DID
         </Button>
       )
     } else {

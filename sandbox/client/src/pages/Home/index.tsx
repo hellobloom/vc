@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useState} from 'react'
 
 import {Shell} from '../../components/Shell'
 import {useLocalClient} from '../../components/LocalClientProvider'
@@ -13,6 +13,7 @@ type HomeProps = {}
 
 export const Home: React.FC<HomeProps> = props => {
   const {didConfig, vcs, regen, deleteVC} = useLocalClient()
+  const [viewFullDID, setViewFullDID] = useState(false)
 
   return (
     <Shell>
@@ -23,7 +24,15 @@ export const Home: React.FC<HomeProps> = props => {
           <h3 className="title is-3">Local DID:</h3>
           {didConfig ? (
             <React.Fragment>
-              <div className="has-text-info">{didConfig.did}</div>
+              <div
+                role="button"
+                tabIndex={0}
+                className="has-text-info home__did"
+                title={`Click to view the ${viewFullDID ? 'truncated' : 'full'} DID`}
+                onClick={() => setViewFullDID(viewFullDID => !viewFullDID)}
+              >
+                {viewFullDID ? didConfig.did : didConfig.did.split(';')[0]}
+              </div>
               <Button className="home__regen-btn" onClick={() => regen()}>
                 Regenerate DID
               </Button>
@@ -32,7 +41,7 @@ export const Home: React.FC<HomeProps> = props => {
             <BouncingDots />
           )}
           <div className="is-divider" />
-          <h3 className="title is-3">Local Attestations:</h3>
+          <h3 className="title is-3">Local Credentials:</h3>
           {vcs.length > 0 ? (
             <React.Fragment>
               {vcs.map((vc, i) => (

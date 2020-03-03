@@ -50,7 +50,7 @@ export const applyCredRoutes = (app: fastify.FastifyInstance) => {
       },
     },
     async (req, reply) => {
-      if (!req.body.data.every(({subject}) => DIDUtils.isValidDIDStructure(subject))) return reply.status(400).send({})
+      if (!req.body.data.every(({subject}) => subject === '' || DIDUtils.isValidDIDStructure(subject))) return reply.status(400).send({})
 
       const cred = await IssuedCredential.create({type: req.body.type, data: req.body.data, claimVersion: 'v1'})
 

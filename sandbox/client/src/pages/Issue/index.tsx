@@ -78,7 +78,7 @@ const AtomicVCBuilder: FC<'div', AtomicVCBuilderProps> = props => {
                 id={`${id}-subject`}
                 className="input"
                 type="text"
-                placeholder="Credential Subject (did:ethr:0x...)"
+                placeholder="Credential Subject (did:elem:Ei...)"
               />
             </div>
             <p className="help">Leave blank if subject is claiming the credential</p>
@@ -129,7 +129,7 @@ const buildOutputString = (data: DataMapping[], type: string) => {
       })
 
       const atomicVC = await buildAtomicVCV1({
-        type: ['${type}']
+        type: '${type}'
         credentialSubject,
         issuanceDate: '...',
         expirationDate: '...',
@@ -146,7 +146,7 @@ const buildOutputString = (data: DataMapping[], type: string) => {
     return codeBlock`
       ${subjectStrings}
       const atomicVC = await buildAtomicVCV1({
-        type: ['${type}']
+        type: '${type}'
         credentialSubject: [${data.map((_, i) => `credentialSubject${i}`)}],
         issuanceDate: '...',
         expirationDate: '...',
