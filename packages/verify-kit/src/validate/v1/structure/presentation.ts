@@ -11,23 +11,11 @@ import {
   BaseVCRevocationV1,
   ValidateFn,
 } from '@bloomprotocol/attestations-common'
-import {
-  RecoverableEcdsaSecp256k1Signature2019,
-  RecoverableEcdsaSecp256k1KeyClass2019,
-  Purposes,
-} from '@bloomprotocol/jsonld-recoverable-es256k'
-import EthWallet from 'ethereumjs-wallet'
+import {EcdsaSecp256k1Signature2019, EcdsaSecp256k1KeyClass2019} from '@transmute/lds-ecdsa-secp256k1-2019'
+import {keyUtils} from '@transmute/es256k-jws-ts'
 
 const jsigs = require('jsonld-signatures')
-const {RecoverableAssertionProofPurpose, RecoverableAuthenticationProofPurpose} = Purposes
-
-const stripOwnerFromDID = (value: string) => value.substr(0, value.length - 6)
-
-const isValidDIDOwnerStructure = (value: any) => {
-  if (typeof value !== 'string') return false
-
-  return DIDUtils.isValidDIDStructure(stripOwnerFromDID(value))
-}
+const {AssertionProofPurpose, AuthenticationProofPurpose} = jsigs.purposes
 
 const validateCredentialSubjectData = genValidateFn<AtomicVCSubjectV1<any>['data']>({
   '@type': Utils.isNotEmptyString,
@@ -54,28 +42,28 @@ export const validateCredentialProof = genValidateFn<AtomicVCProofV1>({
   type: Utils.isNotEmptyString,
   created: Utils.isValidRFC3339DateTime,
   proofPurpose: (value: any) => value === 'assertionMethod',
-  verificationMethod: isValidDIDOwnerStructure,
+  verificationMethod: Utils.isNotEmptyString,
   jws: Utils.isNotEmptyString,
 })
 
-const isCredentialProofValid = async (value: any, data: any) => {
+const isCredentialProofValid = async (_: any, data: any) => {
   try {
-    const didDocument = await DIDUtils.resolveDID(stripOwnerFromDID(value.verificationMethod))
-    const publicKey = didDocument.publicKey[0]
+    const didDocument = await DIDUtils.resolveDID(data.issuer)
+    const publicKey = didDocument.publicKey.find(({id}) => id.endsWith('#primary'))
+
+    if (!publicKey) return false
 
     const res = await jsigs.verify(data, {
-      suite: new RecoverableEcdsaSecp256k1Signature2019({
-        key: new RecoverableEcdsaSecp256k1KeyClass2019({
+      suite: new EcdsaSecp256k1Signature2019({
+        key: new EcdsaSecp256k1KeyClass2019({
           id: publicKey.id,
-          controller: publicKey.owner,
+          controller: data.issuer,
+          publicKeyJwk: await keyUtils.publicJWKFromPublicKeyHex(publicKey.publicKeyHex!),
         }),
       }),
       compactProof: false,
       documentLoader: DIDUtils.documentLoader,
-      purpose: new RecoverableAssertionProofPurpose({
-        addressKey: 'ethereumAddress',
-        keyToAddress: key => EthWallet.fromPublicKey(Buffer.from(key.substr(2), 'hex')).getAddressString(),
-      }),
+      purpose: new AssertionProofPurpose(),
       expansionMap: false, // TODO: remove this
     })
 
@@ -106,34 +94,33 @@ const isValidVerifiableCredential = async (value: any, data: any) => {
   return await Utils.isAsyncValid(validateVerifiableCredential)(value)
 }
 
-const validateProof = genValidateFn<VPProofV1>({
+export const validateProof = genValidateFn<VPProofV1>({
   type: Utils.isNotEmptyString,
   created: Utils.isValidRFC3339DateTime,
   proofPurpose: (value: any) => value === 'authentication',
-  verificationMethod: isValidDIDOwnerStructure,
+  verificationMethod: Utils.isNotEmptyString,
   challenge: Utils.isNotEmptyString,
   domain: Utils.isNotEmptyString,
   jws: Utils.isNotEmptyString,
 })
 
-const isPresentationProofValid = async (value: any, data: any) => {
-  // return true
-
+export const isPresentationProofValid = async (_: any, data: any) => {
   try {
-    const didDocument = await DIDUtils.resolveDID(stripOwnerFromDID(value.verificationMethod))
-    const publicKey = didDocument.publicKey[0]
+    const didDocument = await DIDUtils.resolveDID(data.holder)
+    const publicKey = didDocument.publicKey.find(({id}) => id.endsWith('#primary'))
+
+    if (!publicKey) return false
 
     const res = await jsigs.verify(data, {
-      suite: new RecoverableEcdsaSecp256k1Signature2019({
-        key: new RecoverableEcdsaSecp256k1KeyClass2019({
+      suite: new EcdsaSecp256k1Signature2019({
+        key: new EcdsaSecp256k1KeyClass2019({
           id: publicKey.id,
-          controller: publicKey.owner,
+          controller: data.holder,
+          publicKeyJwk: await keyUtils.publicJWKFromPublicKeyHex(publicKey.publicKeyHex!),
         }),
       }),
       documentLoader: DIDUtils.documentLoader,
-      purpose: new RecoverableAuthenticationProofPurpose({
-        addressKey: 'ethereumAddress',
-        keyToAddress: key => EthWallet.fromPublicKey(Buffer.from(key.substr(2), 'hex')).getAddressString(),
+      purpose: new AuthenticationProofPurpose({
         challenge: data.proof.challenge,
         domain: data.proof.domain,
       }),

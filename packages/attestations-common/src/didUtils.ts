@@ -6,7 +6,7 @@ type EnhancedDIDDocument = DIDDocument & {
   assertionMethod: []
 }
 
-const resolveElemDID = async (did: string, parsed: ParsedDID): Promise<EnhancedDIDDocument | null> => {
+const resolveElemDID = async (_: string, parsed: ParsedDID): Promise<EnhancedDIDDocument | null> => {
   if (!parsed.params) return null
   const initialState = parsed.params['elem:initial-state']
   if (!initialState) return null
@@ -15,9 +15,32 @@ const resolveElemDID = async (did: string, parsed: ParsedDID): Promise<EnhancedD
   const decodedPayload = JSON.parse(base64url.decode(decodedInitialState.payload))
   // TODO: validate payload with signautes
 
-  return {
+  const mapVerificationMethod = (method: any) => {
+    if (typeof method === 'string') {
+      return method.startsWith('#') ? `${parsed.didUrl}${method}` : method
+    } else if (typeof method === 'object') {
+      return {
+        ...method,
+        id: method.id.startsWith('#') ? `${parsed.didUrl}${method.id}` : method.id,
+      }
+    } else {
+      throw new Error('Unsupported method format')
+    }
+  }
+
+  const mappedPayload = {
     ...decodedPayload,
-    id: did,
+    publicKey: decodedPayload.publicKey.map((key: any) => ({
+      ...key,
+      id: key.id.startsWith('#') ? `${parsed.didUrl}${key.id}` : key.id,
+    })),
+    assertionMethod: (decodedPayload.assertionMethod || []).map(mapVerificationMethod),
+    authentication: (decodedPayload.authentication || []).map(mapVerificationMethod),
+  }
+
+  return {
+    ...mappedPayload,
+    id: parsed.didUrl,
   }
 }
 

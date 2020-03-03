@@ -16,9 +16,6 @@ describe('DIDUtils', () => {
     const recoveryKey = await mks.getKeyForPurpose('recovery', 0)
     const didDocumentModel = op.getDidDocumentModel(primaryKey.publicKey, recoveryKey.publicKey)
     const createPayload = await op.getCreatePayload(didDocumentModel, primaryKey)
-    console.log({createPayload})
-    console.log({createPayloadProtected: base64url.decode(createPayload.protected)})
-    console.log({createPayloadPayload: base64url.decode(createPayload.payload)})
     const didUniqueSuffix = func.getDidUniqueSuffix(createPayload)
 
     baseElemDID = `did:elem:${didUniqueSuffix}`
@@ -50,12 +47,12 @@ describe('DIDUtils', () => {
 
   describe('resolveDID', () => {
     describe('resolves', () => {
-      fit('a valid elem DID', async () => {
+      it('a valid elem DID', async () => {
         expect.assertions(1)
 
         const document = await DIDUtils.resolveDID(elemDIDWithInitialState)
 
-        expect(document.id).toEqual(baseElemDID)
+        expect(document.id).toEqual(elemDIDWithInitialState)
       })
     })
 
