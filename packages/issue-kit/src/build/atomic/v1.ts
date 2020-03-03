@@ -1,14 +1,9 @@
-import {EthUtils, AtomicVCV1, AtomicVCSubjectV1, BaseVCRevocationSimpleV1, SimpleThing} from '@bloomprotocol/attestations-common'
-import {
-  RecoverableEcdsaSecp256k1Signature2019,
-  RecoverableEcdsaSecp256k1KeyClass2019,
-  Purposes,
-} from '@bloomprotocol/jsonld-recoverable-es256k'
-import EthWallet from 'ethereumjs-wallet'
+import {DIDUtils, AtomicVCV1, AtomicVCSubjectV1, BaseVCRevocationSimpleV1, SimpleThing} from '@bloomprotocol/attestations-common'
+import {EcdsaSecp256k1Signature2019, EcdsaSecp256k1KeyClass2019} from '@transmute/lds-ecdsa-secp256k1-2019'
 import {keyUtils} from '@transmute/es256k-jws-ts'
 
 const jsigs = require('jsonld-signatures')
-const {RecoverableAssertionProofPurpose} = Purposes
+const {AssertionProofPurpose} = jsigs.purposes
 
 export const buildAtomicVCSubjectV1 = async <Data extends SimpleThing>({
   data,
@@ -17,22 +12,30 @@ export const buildAtomicVCSubjectV1 = async <Data extends SimpleThing>({
   data: Data
   subject: string
 }): Promise<AtomicVCSubjectV1<Data>> => {
-  const {didDocument: subjectDidDoc} = await EthUtils.resolveDID(subject)
+  // Here to validate the subject's DID
+  await DIDUtils.resolveDID(subject)
 
   if (data.hasOwnProperty('id')) throw Error("Data must not contain an 'id' property, that is assigned to the subject's DID")
 
   const credentialSubject: AtomicVCSubjectV1<Data> = {
-    id: subjectDidDoc.id,
+    id: subject,
     data,
   }
 
   return credentialSubject
 }
 
+type Issuer = {
+  did: string
+  keyId: string
+  publicKey: string
+  privateKey: string
+}
+
 export const buildAtomicVCV1 = async <S extends AtomicVCSubjectV1<{'@type': string}>, R extends BaseVCRevocationSimpleV1>({
   credentialSubject,
   type,
-  privateKey,
+  issuer,
   issuanceDate,
   expirationDate,
   revocation,
@@ -40,15 +43,16 @@ export const buildAtomicVCV1 = async <S extends AtomicVCSubjectV1<{'@type': stri
 }: {
   credentialSubject: S | S[]
   type: string[]
-  privateKey: Buffer
+  issuer: Issuer
   issuanceDate: string
   expirationDate?: string
   revocation: R
   context?: string | string[]
 }): Promise<AtomicVCV1> => {
-  const issuer = EthWallet.fromPrivateKey(privateKey)
-  const {didDocument: issuerDidDoc} = await EthUtils.resolveDID(`did:ethr:${issuer.getAddressString()}`)
-  const publicKey = issuerDidDoc.publicKey[0]
+  const issuerDidDoc = await DIDUtils.resolveDID(issuer.did)
+  const publicKey = issuerDidDoc.publicKey.find(({id, publicKeyHex}) => id.endsWith(issuer.keyId) && publicKeyHex === issuer.publicKey)
+
+  if (!publicKey) throw new Error('No key found for provided keyId and publicKey')
 
   const context = ['https://www.w3.org/2018/credentials/v1']
 
@@ -61,26 +65,27 @@ export const buildAtomicVCV1 = async <S extends AtomicVCSubjectV1<{'@type': stri
   const unsignedCred: Omit<AtomicVCV1, 'proof'> = {
     '@context': context,
     type: ['VerifiableCredential', ...type],
-    issuer: `did:ethr:${issuer.getAddressString()}`,
+    issuer: issuer.did,
     issuanceDate,
     expirationDate,
     credentialSubject,
     revocation,
   }
 
+  console.log('buildAtomicVCV1', {publicKey})
+
   const credential: AtomicVCV1 = await jsigs.sign(unsignedCred, {
-    suite: new RecoverableEcdsaSecp256k1Signature2019({
-      key: new RecoverableEcdsaSecp256k1KeyClass2019({
+    suite: new EcdsaSecp256k1Signature2019({
+      key: new EcdsaSecp256k1KeyClass2019({
         id: publicKey.id,
-        controller: publicKey.controller,
-        privateKeyJwk: await keyUtils.privateJWKFromPrivateKeyHex(issuer.getPrivateKeyString().replace('0x', '')),
+        controller: issuer.did,
+        privateKeyJwk: await keyUtils.privateJWKFromPrivateKeyHex(
+          issuer.privateKey.startsWith('0x') ? issuer.privateKey.substring(2) : issuer.privateKey,
+        ),
       }),
     }),
-    documentLoader: EthUtils.documentLoader,
-    purpose: new RecoverableAssertionProofPurpose({
-      addressKey: 'ethereumAddress',
-      keyToAddress: key => EthWallet.fromPublicKey(Buffer.from(key.substr(2), 'hex')).getAddressString(),
-    }),
+    documentLoader: DIDUtils.documentLoader,
+    purpose: new AssertionProofPurpose(),
     compactProof: false,
     expansionMap: false, // TODO: remove this
   })

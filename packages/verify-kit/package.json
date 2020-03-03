@@ -14,8 +14,8 @@
   "scripts": {
     "start": "tsdx watch --tsconfig ./tsconfig.build.json",
     "build": "tsdx build --tsconfig ./tsconfig.build.json",
-    "test": "CI=true tsdx test",
-    "test:watch": "tsdx test",
+    "test": "tsdx test",
+    "test:watch": "tsdx test --watch",
     "lint": "tsdx lint src test",
     "prepare": "npm run build",
     "prepublishOnly": "npm run test && npm run lint"
@@ -23,7 +23,9 @@
   "dependencies": {
     "@bloomprotocol/attestations-common": "^1.1.0-beta.0",
     "@bloomprotocol/jsonld-recoverable-es256k": "^1.0.0-beta.0",
+    "@transmute/element-lib": "^0.5.4",
     "@transmute/es256k-jws-ts": "^0.1.0",
+    "@transmute/lds-ecdsa-secp256k1-2019": "^0.1.1",
     "abi-decoder": "^2.2.2",
     "ethereumjs-util": "^6.2.0",
     "ethereumjs-wallet": "^0.6.3",
@@ -48,7 +50,7 @@
     "eslint-plugin-prettier": "^3.1.2",
     "eth-sig-util": "^2.5.2",
     "prettier": "^1.19.1",
-    "tsdx": "^0.12.1",
+    "tsdx": "^0.12.3",
     "typescript": "^3.7.5"
   },
   "jest": {

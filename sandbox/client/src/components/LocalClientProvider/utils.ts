@@ -1,4 +1,4 @@
-import {EthUtils, VPV1, AtomicVCV1} from '@bloomprotocol/attestations-common'
+import {DIDUtils, VPV1, AtomicVCV1} from '@bloomprotocol/attestations-common'
 import EthWallet from 'ethereumjs-wallet'
 import extend from 'extend'
 
@@ -27,13 +27,14 @@ export const buildVPV1 = async ({
     holder: `did:ethr:${wallet.getAddressString()}`,
   }
 
-  const {didDocument} = await EthUtils.resolveDID(`did:ethr:${wallet.getAddressString()}`)
+  // TODO: update to use did:elem
+  const didDocument = await DIDUtils.resolveDID(`did:ethr:${wallet.getAddressString()}`)
 
   const vp: VPV1<AtomicVCV1> = jsigs.sign(unsignedVP, {
     suite: new EcdsaSecp256k1Signature2019({
       key: new EcdsaSecp256k1KeyClass2019({
         id: didDocument.publicKey[0].id,
-        controller: didDocument.publicKey[0].controller,
+        controller: didDocument.publicKey[0].owner,
         privateKeyJwk: keyto.from(wallet.getPrivateKeyString().replace('0x', ''), 'blk').toJwk('private'),
       }),
     }),
