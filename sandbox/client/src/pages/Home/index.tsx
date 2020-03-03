@@ -4,14 +4,15 @@ import {Shell} from '../../components/Shell'
 import {useLocalClient} from '../../components/LocalClientProvider'
 import {Button} from '../../components/Button'
 import {JsonEditor} from '../../components/JsonEditor'
+import {Delete} from '../../components/Delete'
+import {BouncingDots} from '../../components/BouncingDots'
 
 import './index.scss'
-import {Delete} from '../../components/Delete'
 
 type HomeProps = {}
 
 export const Home: React.FC<HomeProps> = props => {
-  const {wallet, vcs, regen, deleteVC} = useLocalClient()
+  const {didConfig, vcs, regen, deleteVC} = useLocalClient()
 
   return (
     <Shell>
@@ -19,11 +20,17 @@ export const Home: React.FC<HomeProps> = props => {
       <p className="subtitle has-text-centered">Welcome to the Bloom VC sandbox!</p>
       <div className="columns is-mobile is-centered">
         <div className="column is-half-tablet">
-          <h3 className="title is-3">Local Wallet:</h3>
-          <div className="has-text-info">{wallet.getAddressString()}</div>
-          <Button className="home__regen-btn" onClick={() => regen()}>
-            Regenerate Wallet
-          </Button>
+          <h3 className="title is-3">Local DID:</h3>
+          {didConfig ? (
+            <React.Fragment>
+              <div className="has-text-info">{didConfig.did}</div>
+              <Button className="home__regen-btn" onClick={() => regen()}>
+                Regenerate DID
+              </Button>
+            </React.Fragment>
+          ) : (
+            <BouncingDots />
+          )}
           <div className="is-divider" />
           <h3 className="title is-3">Local Attestations:</h3>
           {vcs.length > 0 ? (

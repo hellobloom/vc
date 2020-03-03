@@ -1,13 +1,25 @@
-import React, {useContext} from 'react'
+import React, {useContext, useEffect} from 'react'
 import createPersistedState from 'use-persisted-state'
 import EthWallet from 'ethereumjs-wallet'
 import {AtomicVCV1} from '@bloomprotocol/attestations-common'
 import wretch from 'wretch'
 
-import {buildVPV1, appendQuery} from './utils'
+import {buildVPV1, appendQuery, generateElemDID} from './utils'
 
 const usePrivateKeyState = createPersistedState('vc-sandbox.privateKey')
 const useSDVCsState = createPersistedState('vc-sandbox.sdvcs')
+
+type DIDConfig = {
+  did: string
+  primaryKey: string
+  recoveryKey: string
+}
+
+type DIDWalletConfig = {
+  did: string
+  primaryKey: EthWallet
+  recoveryKey: EthWallet
+}
 
 type SuccessRequestResponse = {
   kind: 'success'
@@ -22,7 +34,7 @@ type RequestResponse = SuccessRequestResponse | ErrorRequestResponse
 
 type LocalClientContextProps = {
   vcs: AtomicVCV1[]
-  wallet: EthWallet
+  didConfig?: DIDWalletConfig
   regen: () => void
   deleteVC: (index: number) => void
   shareVCs: (types: string[], token: string, to: string) => Promise<RequestResponse>
@@ -31,7 +43,6 @@ type LocalClientContextProps = {
 
 const LocalClientContext = React.createContext<LocalClientContextProps>({
   vcs: [],
-  wallet: EthWallet.generate(),
   regen: () => {},
   deleteVC: () => {},
   shareVCs: async () => ({kind: 'success'}),
@@ -39,18 +50,53 @@ const LocalClientContext = React.createContext<LocalClientContextProps>({
 })
 
 export const LocalClientProvider: React.FC = props => {
-  const [privateKey, setPrivateKey] = usePrivateKeyState<string>(() => EthWallet.generate().getPrivateKeyString())
+  const [unmappedDIDConfig, setDidConfig] = usePrivateKeyState<DIDConfig | undefined>()
   const [vcs, setVCs] = useSDVCsState<AtomicVCV1[]>(() => [])
 
-  const wallet = EthWallet.fromPrivateKey(Buffer.from(privateKey.replace('0x', ''), 'hex'))
+  useEffect(() => {
+    let current = true
+
+    const get = async () => {
+      const {did, primaryKey, recoveryKey} = await generateElemDID()
+
+      if (current) {
+        setDidConfig({
+          did,
+          primaryKey: primaryKey.getPrivateKeyString(),
+          recoveryKey: recoveryKey.getPrivateKeyString(),
+        })
+      }
+    }
+
+    void get()
+
+    return () => {
+      current = false
+    }
+  }, [])
+
+  let didConfig: DIDWalletConfig | undefined
+
+  if (unmappedDIDConfig) {
+    didConfig = {
+      did: unmappedDIDConfig.did,
+      primaryKey: EthWallet.fromPrivateKey(Buffer.from(unmappedDIDConfig.primaryKey, 'hex')),
+      recoveryKey: EthWallet.fromPrivateKey(Buffer.from(unmappedDIDConfig.recoveryKey, 'hex')),
+    }
+  }
 
   return (
     <LocalClientContext.Provider
       value={{
-        wallet,
+        didConfig,
         vcs,
-        regen: () => {
-          setPrivateKey(EthWallet.generate().getPrivateKeyString())
+        regen: async () => {
+          const {did, primaryKey, recoveryKey} = await generateElemDID()
+          setDidConfig({
+            did,
+            primaryKey: primaryKey.getPrivateKeyString(),
+            recoveryKey: recoveryKey.getPrivateKeyString(),
+          })
           setVCs([])
         },
         deleteVC: index => {
@@ -59,76 +105,98 @@ export const LocalClientProvider: React.FC = props => {
           setVCs(newVCs)
         },
         shareVCs: async (types, token, to) => {
-          if (vcs.length === 0) {
-            return {
-              kind: 'error',
-              message: 'You do not have any credentials stored locally',
-            }
-          }
-
-          if (types.length === 0) {
-            return {
-              kind: 'error',
-              message: 'Must request at least one credential type to share',
-            }
-          }
-
-          const missing: string[] = []
-          const foundVCs: AtomicVCV1[] = []
-
-          types.forEach(type => {
-            // TODO: is this the way we should be checking?
-            const foundVC = vcs.find(vc => vc.type.includes(type))
-
-            if (foundVC) {
-              foundVCs.push(foundVC)
-            } else {
-              missing.push(type)
-            }
-          })
-
-          if (missing.length > 0) {
-            return {
-              kind: 'error',
-              message: `You are missing the folowing credentials:\n${missing.join('\n')}`,
-            }
-          }
-
-          const vp = await buildVPV1({wallet, atomicVCs: foundVCs, token, domain: to})
-
           try {
+            if (typeof didConfig === 'undefined') {
+              return {
+                kind: 'error',
+                message: 'You do not have a DID stored locally',
+              }
+            }
+
+            if (vcs.length === 0) {
+              return {
+                kind: 'error',
+                message: 'You do not have any credentials stored locally',
+              }
+            }
+
+            if (types.length === 0) {
+              return {
+                kind: 'error',
+                message: 'Must request at least one credential type to share',
+              }
+            }
+
+            const missing: string[] = []
+            const foundVCs: AtomicVCV1[] = []
+
+            types.forEach(type => {
+              // TODO: is this the way we should be checking?
+              const foundVC = vcs.find(vc => vc.type.includes(type))
+
+              if (foundVC) {
+                foundVCs.push(foundVC)
+              } else {
+                missing.push(type)
+              }
+            })
+
+            if (missing.length > 0) {
+              return {
+                kind: 'error',
+                message: `You are missing the folowing credentials:\n${missing.join('\n')}`,
+              }
+            }
+
+            const vp = await buildVPV1({
+              holder: {
+                did: didConfig.did,
+                keyId: `${didConfig.did}#primary`,
+                publicKey: didConfig.primaryKey.getPublicKeyString(),
+                privateKey: didConfig.primaryKey.getPrivateKeyString(),
+              },
+              atomicVCs: foundVCs,
+              token,
+              domain: to,
+            })
+
             await wretch()
               .url(appendQuery(to, {'share-kit-from': 'qr'}))
               .post(vp)
               .json()
+
+            return {kind: 'success'}
           } catch {
             return {
               kind: 'error',
               message: 'Something went wrong while sharing credentials',
             }
           }
-
-          return {kind: 'success'}
         },
         claimVC: async from => {
-          let vc: AtomicVCV1
-
           try {
-            ;({vc} = await wretch()
+            if (typeof didConfig === 'undefined') {
+              return {
+                kind: 'error',
+                message: 'You do not have a DID stored locally',
+              }
+            }
+
+            const {vc} = await wretch()
               .headers({credentials: 'same-origin', 'Content-Type': 'application/json'})
               .url(appendQuery(from, {'claim-kit-from': 'qr'}))
-              .post({subject: `did:ethr:${wallet.getAddressString()}`})
-              .json<{vc: AtomicVCV1}>())
+              .post({subject: didConfig.did})
+              .json<{vc: AtomicVCV1}>()
+
+            setVCs([...vcs, vc])
+
+            return {kind: 'success'}
           } catch {
             return {
               kind: 'error',
               message: 'Something went wrong while fetching the VC to claim',
             }
           }
-
-          setVCs([...vcs, vc])
-
-          return {kind: 'success'}
         },
       }}
     >
