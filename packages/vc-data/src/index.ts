@@ -1,12 +1,17 @@
 import {
   Person,
   Organization,
+  Corporation,
+  MonetaryAmount,
   Date as TDate,
   GenderType,
   Country,
+  GovernmentOrganization,
   State,
   City,
   AdministrativeArea,
+  PostalAddress,
+  WebSite,
 } from 'schema-dts';
 
 import {
@@ -20,6 +25,30 @@ export type Extend<T, R> = Modify<Exclude<T, string>, R>;
 export type Subject<T extends SimpleThing | string> = AtomicVCSubjectV1<
   Exclude<T, string>
 >;
+export type MaybeArray<T> = T | Array<T>;
+export type GovernmentOrg =
+  | Country
+  | State
+  | City
+  | Organization
+  | Corporation
+  | GovernmentOrganization
+  | (AdministrativeArea & {
+      identifier?: 'string'; // Issuer code
+    });
+//////////////////////////////////////////////////////////////
+// Name
+//////////////////////////////////////////////////////////////
+export interface VCSNamePerson extends Subject<Person> {
+  '@type': 'Person';
+  name: string;
+}
+export interface VCSNameOrganization extends Subject<Organization> {
+  '@type': 'Organization';
+  name: string;
+}
+export type VCNamePerson = AtomicVCV1<VCSNamePerson>;
+export type VCNameOrganization = AtomicVCV1<VCSNameOrganization>;
 
 //////////////////////////////////////////////////////////////
 // Phone
@@ -80,24 +109,8 @@ export interface VCSAMLOrganization extends Subject<Organization> {
   '@type': 'Organization';
   hasAMLSearch: TAMLSearch;
 }
-
-//////////////////////////////////////////////////////////////
-// Account
-//////////////////////////////////////////////////////////////
-export interface VCSAccountPerson extends Subject<Person> {
-  '@type': 'Person';
-  memberOf: {
-    '@type': 'Role';
-    memberOf: Organization;
-  };
-}
-export interface VCSAccountOrganization extends Subject<Organization> {
-  '@type': 'Organization';
-  memberOf: {
-    '@type': 'Role';
-    memberOf: Organization;
-  };
-}
+export type VCAMLPerson = AtomicVCV1<VCSAMLPerson>;
+export type VCAMLOrganization = AtomicVCV1<VCSAMLOrganization>;
 
 //////////////////////////////////////////////////////////////
 // ID document
@@ -121,34 +134,28 @@ export type TDocumentClass =
   | 'voter_identification'
   | 'military';
 
-export interface VCSAccountPerson extends Subject<Person> {
+export interface VCSIDDocPerson extends Subject<Person> {
   '@type': 'Person';
   age?: number;
   birthDate?: TDate;
   familyName?: string;
   givenName?: string;
-  gender?: GenderType | string;
-  name?: string;
-  nationality?: Country;
-  hasIDDocument: {
+  gender?: MaybeArray<GenderType | string>;
+  name?: MaybeArray<string>;
+  nationality?: MaybeArray<Country>;
+  hasIDDocument: MaybeArray<{
     '@type': 'IDDocumentRole';
     authenticationResult?: string;
     selfieImage?: string;
-    faceMatch: {
+    faceMatch?: MaybeArray<{
       '@type': 'IDDocumentFaceMatch';
       isMatch?: boolean;
       score?: number;
       identifier?: number;
-    };
-    hasIDDocument: {
+    }>;
+    hasIDDocument: MaybeArray<{
       '@type': 'IDDocument';
-      issuer:
-        | Country
-        | State
-        | City
-        | (AdministrativeArea & {
-            identifier?: 'string'; // Issuer code
-          });
+      issuer: GovernmentOrg & { identifier?: 'string' };
       documentType?: string;
       issueDate?: TDate;
       issueType?: string;
@@ -161,86 +168,205 @@ export interface VCSAccountPerson extends Subject<Person> {
       backImage?: string;
       generic?: boolean;
       keesingCode?: string;
+    }>;
+  }>;
+}
+export type VCIDDocPerson = AtomicVCV1<VCSIDDocPerson>;
+
+//////////////////////////////////////////////////////////////
+// Employment/delegation
+//////////////////////////////////////////////////////////////
+export interface VCSEmploymentPerson extends Subject<Person> {
+  '@type': 'Person';
+  employeeOf: MaybeArray<{
+    '@type': 'EmployeeRole';
+    employeeOf: {
+      name?: string;
+      address?: MaybeArray<PostalAddress>;
+      legalName?: string;
+      dissolutionDate?: string;
+      hasCredential?: MaybeArray<{
+        '@type': 'IncorporationCredential';
+        credentialCategory?: string;
+        additionalType?: string;
+        dateCreated?: string;
+        datePublished?: string;
+        recognizedBy?: MaybeArray<GovernmentOrg>;
+      }>;
+      telephone?: string;
+      faxNumber?: string;
+      email?: string;
+      website?: MaybeArray<WebSite>;
+    };
+  }>;
+}
+export interface VCSEmploymentOrganization extends Subject<Organization> {
+  '@type': 'Organization';
+  name?: string;
+  legalName?: string;
+  address?: MaybeArray<PostalAddress>;
+  dissolutionDate?: string;
+  hasCredential?: MaybeArray<{
+    '@type': 'IncorporationCredential';
+    credentialCategory?: string;
+    additionalType?: string;
+    dateCreated?: string;
+    datePublished?: string;
+    recognizedBy?: MaybeArray<GovernmentOrg>;
+  }>;
+  telephone?: string;
+  faxNumber?: string;
+  email?: string;
+  website?: MaybeArray<WebSite>;
+  employee: MaybeArray<{ '@type': 'EmployeeRole'; employee: Person }>;
+}
+export type VCEmploymentPerson = AtomicVCV1<VCSEmploymentPerson>;
+export type VCEmploymentOrganization = AtomicVCV1<VCSEmploymentOrganization>;
+
+//////////////////////////////////////////////////////////////
+// SSN/National ID number
+//////////////////////////////////////////////////////////////
+export interface VCSNatIDNumPerson extends Subject<Person> {
+  '@type': 'Person';
+  location: {
+    '@type': 'Role';
+    location: GovernmentOrg;
+    identifier: {
+      '@type': 'PropertyValue';
+      propertyID: string;
+      value: string | number;
     };
   };
 }
-
-//////////////////////////////////////////////////////////////
-// Organization
-//////////////////////////////////////////////////////////////
-export interface VCSEmploymentOrganization extends Subject<Organization> {
-  id: string;
-  data: {
-    '@type': 'Corporation';
-    name: string;
-    legalName: string;
-
-    additionalType: ['PublicCompany'];
-    address: [
-      {
-        '@type': 'PostalAddress';
-        streetAddress: string;
-        addressCountry: string;
-        addressLocality: string;
-        addressRegion: string;
-        postOfficeBoxNumber: string;
-        postalCode: string;
-      }
-    ];
-    dissolutionDate: string;
-    hasCredential: [
-      {
-        '@type': 'EducationalOccupationalCredential';
-        credentialCategory: string;
-        additionalType: string;
-        recognizedBy: {
-          '@type': 'GovernmentOrganization';
-          name: string;
-        };
-      },
-      {
-        '@type': 'EducationalOccupationalCredential';
-        credentialCategory: string;
-        additionalType: string;
-        dateCreated: string;
-        datePublished: string;
-        recognizedBy: {
-          '@type': 'GovernmentOrganization';
-          name: string;
-        };
-      }
-    ];
-    telephone: string;
-    faxNumber: string;
-    email: string;
-    subjectOf: [
-      {
-        '@type': 'WebSite';
-        url: string;
-      }
-    ];
-    employee: [
-      {
-        '@type': 'Person';
-        name: string;
-        identifier: string;
-        jobTitle: Array<string>;
-        hasCredential: [
-          {
-            '@type': 'EducationalOccupationalCredential';
-            credentialCategory: string;
-            identifier: string;
-            recognizedBy: [
-              {
-                '@type': 'GovernmentOrganization';
-                name: string;
-              }
-            ];
-          }
-        ];
-      }
-    ];
+export interface VCSNatIDNumOrganization extends Subject<Organization> {
+  '@type': 'Organization';
+  nationality: {
+    '@type': 'Role';
+    nationality: GovernmentOrg;
+    identifier: {
+      '@type': 'PropertyValue';
+      propertyID: string;
+      value: string | number;
+    };
   };
+}
+export type VCNatIDNumPerson = AtomicVCV1<VCSNatIDNumPerson>;
+export type VCNatIDNumOrganization = AtomicVCV1<VCSNatIDNumOrganization>;
+
+//////////////////////////////////////////////////////////////
+// Address
+//////////////////////////////////////////////////////////////
+export interface VCSAddressPerson extends Subject<Person> {
+  '@type': 'Person';
+  address: MaybeArray<PostalAddress>;
+}
+export interface VCSAddressOrganization extends Subject<Organization> {
+  '@type': 'Organization';
+  address: MaybeArray<PostalAddress>;
+}
+export type VCAddressPerson = AtomicVCV1<VCSAddressPerson>;
+export type VCAddressOrganization = AtomicVCV1<VCSAddressOrganization>;
+
+//////////////////////////////////////////////////////////////
+// Birthdate/DOB
+//////////////////////////////////////////////////////////////
+export interface VCSDOBPerson extends Subject<Person> {
+  '@type': 'Person';
+  birthDate: string;
+}
+export type VCDOBPerson = AtomicVCV1<VCSDOBPerson>;
+
+//////////////////////////////////////////////////////////////
+// Gender
+//////////////////////////////////////////////////////////////
+export interface VCSGenderPerson extends Subject<Person> {
+  '@type': 'Person';
+  gender: MaybeArray<GenderType | string>;
+}
+export type VCGenderPerson = AtomicVCV1<VCSDOBPerson>;
+
+//////////////////////////////////////////////////////////////
+// Accounts and assets
+//////////////////////////////////////////////////////////////
+export interface MonetaryAmountR extends MonetaryAmount {
+  currency: string;
+  value: number | string;
+}
+export interface AccountStatement {
+  statementDate?: string;
+  dueDate?: string;
+}
+export interface AccountPayment {
+  paymentDate?: string;
+  amount: MonetaryAmountR;
+}
+export interface ServiceAccountStatement extends AccountStatement {
+  balanceAdjustments?: number;
+  totalBill?: MonetaryAmountR;
+  serviceAddress?: PostalAddress;
+  billingAddress?: PostalAddress;
+}
+export interface BankAccountStatement extends AccountStatement {
+  balanceAdjustments?: number;
+  totalBill?: MonetaryAmountR;
+  serviceAddress?: PostalAddress;
+  billingAddress?: PostalAddress;
+}
+export interface BankAccountTransaction {
+  transactionType: 'credit' | 'debit';
+  value: MonetaryAmountR;
+  memo?: string;
+}
+export interface BankAccountTransactionGroup {
+  identifier?: number;
+  startDate?: string;
+  endDate?: string;
+  cashflowCategory?: string;
+  cashflowSubcategory?: string;
+  payrollAgency?: boolean;
+  memo?: string;
+  length?: number; // Length in days
+  payee?: string;
+  payer?: string;
+  rank?: string;
+  frequency?: string; // 'daily', 'weekly', 'biweekly', 'monthly', 'semiMonthly', 'annually', 'irregular', ...
+  periodicity?: number;
+  valueStddev?: MonetaryAmount;
+  valueTotal?: MonetaryAmount;
+  valueMean?: MonetaryAmount;
+  valueMedian?: MonetaryAmount;
+  transactions?: MaybeArray<BankAccountTransaction>;
+}
+export interface Account {
+  '@type': 'Account';
+  identifier?: string | number;
+  organization: {
+    '@type': 'Organization';
+    name?: string;
+    identifier?: string | number;
+    serviceTypes?: Array<string>;
+    nationality?: GovernmentOrg;
+    sameAs?: string; // Website
+  };
+  startDate?: string;
+  endDate?: string;
+  accountType?: string;
+  accountTypeConfidence?: number;
+  accountStatements?: Array<AccountStatement>;
+  accountPayments?: Array<AccountPayment>;
+  value?: MonetaryAmountR;
+  bankAccountCategory?: string;
+  hasIncome?: MaybeArray<BankAccountTransactionGroup>;
+  hasExpense?: MaybeArray<BankAccountTransactionGroup>;
+  hasTransactions?: MaybeArray<BankAccountTransaction>;
+}
+export interface VCSAccountPerson extends Subject<Person> {
+  '@type': 'Person';
+  hasAccount: MaybeArray<Account>;
+}
+export interface VCSAccountOrganization extends Subject<Organization> {
+  '@type': 'Organization';
+  hasAccount: MaybeArray<Account>;
 }
 
 /**
@@ -254,42 +380,42 @@ export interface VCSEmploymentOrganization extends Subject<Organization> {
  * | - | Attestations without a known production implementation |
  * +------------------------------------------------------------+
  *
- * +--------------------------------------------------------------------------------------------+
- * | X | 0  | phone			    |																|
- * | X | 1  | email			    |																|
- * | D | 2  | facebook		    |																|
- * | X | 3  | sanction-screen   |																|
- * | M | 4  | pep-screen        | 																|
- * | M | 5  | id-document       |																|
- * | D | 6  | google            |																|
- * | D | 7  | linkedin			|																|
- * | D | 8  | twitter			|																|
- * | - | 9  | payroll			|																|
- * | M | 10 | ssn			    |																|
- * | - | 11 | criminal			|																|
- * | - | 12 | offense			|																|
- * | - | 13 | driving			|																|
- * | X | 14 | employment		|																|
- * | - | 15 | education			|																|
- * | - | 16 | drug			    |																|
- * | - | 17 | bank			    |																|
- * | M | 18 | utility			|																|
- * | M | 19 | income			|																|
- * | M | 20 | assets			|																|
- * | M | 21 | 'full-name'       |																|
- * | M | 22 | 'birth-date'      |																|
- * | M | 23 | gender			|																|
- * | - | 24 | group			    |																|
- * | - | 25 | meta			    |																|
- * | - | 26 | office			|																|
- * | - | 27 | credential	    |																|
- * | - | 28 | medical			|																|
- * | - | 29 | biometric			|																|
- * | - | 30 | supplemental	    |																|
- * | - | 31 | vouch			    |																|
- * | - | 32 | audit			    |																|
- * | M | 33 | address			|																|
- * | - | 34 | correction		|																|
- * | X | 35 | account			|																|
- * +--------------------------------------------------------------------------------------------+
+ * +------------------------------------------------------------------------------------------------+
+ * | X | 0  | phone                | VCPhonePerson, VCPhoneOrganization                             |
+ * | X | 1  | email                | VCEmailPerson, VCEmailOrganization                             |
+ * | D | 2  | facebook             | VCAccountPerson                                                |
+ * | X | 3  | sanction-screen      | VCAMLPerson, VCAMLOrganization                                 |
+ * | X | 4  | pep-screen           | VCAMLPerson, VCAMLOrganization                                 |
+ * | X | 5  | id-document          | VCIDDocPerson                                                  |
+ * | D | 6  | google               | VCAccountPerson                                                |
+ * | D | 7  | linkedin             | VCAccountPerson                                                |
+ * | D | 8  | twitter              | VCAccountPerson                                                |
+ * | - | 9  | payroll              |                                                                |
+ * | X | 10 | ssn                  | VCNatIDNumPerson, VCNatIDNumOrganization                       |
+ * | - | 11 | criminal             |                                                                |
+ * | - | 12 | offense              |                                                                |
+ * | - | 13 | driving              |                                                                |
+ * | X | 14 | employment           | VCEmploymentPerson, VCEmploymentOrganization                   |
+ * | - | 15 | education            |                                                                |
+ * | - | 16 | drug                 |                                                                |
+ * | - | 17 | bank                 |                                                                |
+ * | X | 18 | utility              | VCAccountPerson, VCAccountOrganization                         |
+ * | X | 19 | income               | VCAccountPerson, VCAccountOrganization                         |
+ * | X | 20 | assets               | VCAccountPerson, VCAccountOrganization                         |
+ * | X | 21 | 'full-name'          | VCNamePerson, VCNameOrganization                               |
+ * | X | 22 | 'birth-date'         | VCDOBPerson                                                    |
+ * | X | 23 | gender               | VCGenderPerson                                                 |
+ * | - | 24 | group                |                                                                |
+ * | - | 25 | meta                 |                                                                |
+ * | - | 26 | office               |                                                                |
+ * | - | 27 | credential           |                                                                |
+ * | - | 28 | medical              |                                                                |
+ * | - | 29 | biometric            |                                                                |
+ * | - | 30 | supplemental         |                                                                |
+ * | - | 31 | vouch                |                                                                |
+ * | - | 32 | audit                |                                                                |
+ * | X | 33 | address              | VCAddressPerson, VCAddressOrganization                         |
+ * | - | 34 | correction           |                                                                |
+ * | X | 35 | account              | VCAccountPerson, VCAccountOrganization                         |
+ * +------------------------------------------------------------------------------------------------+
  */
