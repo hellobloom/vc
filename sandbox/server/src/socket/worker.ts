@@ -60,13 +60,10 @@ export const handleMessage = (msg: ConsumeMessage, channel: any) => {
 
     channel.ack(msg)
 
-    // console.log('AMQP message content', msg.content.toString())
     const decoded = JSON.parse(msg.content.toString())
-    console.log('AMQP message decoded', decoded)
     const uSockets = socketMapping[decoded.recipient]
 
     if (!uSockets || uSockets.length === 0) {
-      console.log('Zero interested sockets')
       return
     }
 

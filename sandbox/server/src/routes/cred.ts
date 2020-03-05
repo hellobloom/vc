@@ -3,14 +3,13 @@ import S from 'fluent-schema'
 import {buildAtomicVCV1, buildAtomicVCSubjectV1} from '@bloomprotocol/issue-kit'
 import {DIDUtils} from '@bloomprotocol/attestations-common'
 import dayjs from 'dayjs'
-import EthWallet from 'ethereumjs-wallet'
-import base64url from 'base64url'
 
-const {op, func} = require('@transmute/element-lib')
+const {MnemonicKeySystem} = require('@transmute/element-lib')
 
 import {IssuedCredential} from '@server/models'
 import {claimCookieKey} from '@server/cookies'
 import {sendNotification} from '@server/socket/sender'
+import {getEnv} from '@server/env'
 
 type DataMapping = {
   datum: {'@type': string}
@@ -128,8 +127,6 @@ export const applyCredRoutes = (app: fastify.FastifyInstance) => {
       try {
         const credentialSubject = await Promise.all(
           cred.data.map(async ({datum, subject}) => {
-            console.log({subject})
-
             return await buildAtomicVCSubjectV1({
               data: JSON.parse(JSON.stringify(datum).replace('{{claimer}}', subject)),
               subject: subject || req.body.subject,
@@ -137,20 +134,11 @@ export const applyCredRoutes = (app: fastify.FastifyInstance) => {
           }),
         )
 
-        console.log({credentialSubject})
+        const mks = new MnemonicKeySystem(getEnv().issuerMnemonic)
+        const primaryKey = await mks.getKeyForPurpose('primary', 0)
+        const recoveryKey = await mks.getKeyForPurpose('recovery', 0)
 
-        const primaryKey = EthWallet.fromPrivateKey(Buffer.from('ca2eeb77a6d85f208cd852307c7ef2e66df2962e9b3ca4943923b6ffc38c8277', 'hex'))
-        const recoveryKey = EthWallet.fromPrivateKey(Buffer.from('ae6ae8e5ccbfb04590405997ee2d52d2b330726137b875053c36d94e974d162f', 'hex'))
-
-        const didDocumentModel = {
-          ...op.getDidDocumentModel(primaryKey.getPublicKeyString(), recoveryKey.getPublicKeyString()),
-          '@context': 'https://w3id.org/security/v2',
-          authentication: ['#primary'],
-          assertionMethod: ['#primary'],
-        }
-        const createPayload = await op.getCreatePayload(didDocumentModel, {privateKey: primaryKey.getPrivateKey()})
-        const didUniqueSuffix = func.getDidUniqueSuffix(createPayload)
-        const did = `did:elem:${didUniqueSuffix};elem:initial-state=${base64url.encode(JSON.stringify(createPayload))}`
+        const did = await DIDUtils.createElemDID({primaryKey, recoveryKey})
 
         const vc = await buildAtomicVCV1({
           credentialSubject,
@@ -163,8 +151,8 @@ export const applyCredRoutes = (app: fastify.FastifyInstance) => {
           issuer: {
             did,
             keyId: '#primary',
-            privateKey: primaryKey.getPrivateKeyString(),
-            publicKey: primaryKey.getPublicKeyString(),
+            privateKey: primaryKey.privateKey,
+            publicKey: primaryKey.publicKey,
           },
           revocation: {
             '@context': 'placeholder',
