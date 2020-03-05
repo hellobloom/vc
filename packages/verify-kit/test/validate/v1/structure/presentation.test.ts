@@ -1,44 +1,38 @@
 import {EthUtils, DIDUtils, Utils, AtomicVCV1, VPV1} from '@bloomprotocol/attestations-common'
 import {buildAtomicVCSubjectV1, buildAtomicVCV1} from '@bloomprotocol/issue-kit'
 import {EcdsaSecp256k1KeyClass2019, EcdsaSecp256k1Signature2019} from '@transmute/lds-ecdsa-secp256k1-2019'
-import EthWallet from 'ethereumjs-wallet'
 import {keyUtils} from '@transmute/es256k-jws-ts'
-import base64url from 'base64url'
-const {op, func} = require('@transmute/element-lib')
 
+const {MnemonicKeySystem} = require('@transmute/element-lib')
 const jsigs = require('jsonld-signatures')
-const {AuthenticationProofPurpose} = jsigs.purposes
 
 import * as Validation from '../../../../src/validate/v1/structure'
 
-type DIDConfig = {
-  did: string
-  primaryKey: EthWallet
-  recoveryKey: EthWallet
-}
+const {AuthenticationProofPurpose} = jsigs.purposes
 
-const generateDID = async (): Promise<DIDConfig> => {
-  const primaryKey = EthWallet.generate()
-  const recoveryKey = EthWallet.generate()
+const generateDID = async () => {
+  const mks = new MnemonicKeySystem(MnemonicKeySystem.generateMnemonic())
+  const primaryKey = await mks.getKeyForPurpose('primary', 0)
+  const recoveryKey = await mks.getKeyForPurpose('recovery', 0)
 
-  const didDocumentModel = {
-    ...op.getDidDocumentModel(primaryKey.getPublicKeyString(), recoveryKey.getPublicKeyString()),
-    '@context': 'https://w3id.org/security/v2',
-    authentication: ['#primary'],
-    assertionMethod: ['#primary'],
-  }
-  const createPayload = await op.getCreatePayload(didDocumentModel, {privateKey: primaryKey.getPrivateKey()})
-  const didUniqueSuffix = func.getDidUniqueSuffix(createPayload)
+  const did = await DIDUtils.createElemDID({primaryKey, recoveryKey})
 
   return {
-    did: `did:elem:${didUniqueSuffix};elem:initial-state=${base64url.encode(JSON.stringify(createPayload))}`,
+    did,
     primaryKey,
     recoveryKey,
   }
 }
 
+type Holder = {
+  did: string
+  keyId: string
+  publicKey: string
+  privateKey: string
+}
+
 const buildVerifiablePresentation = async ({
-  didConfig,
+  holder,
   atomicCredentials,
   token,
   domain,
@@ -46,10 +40,10 @@ const buildVerifiablePresentation = async ({
   atomicCredentials: AtomicVCV1[]
   token: string
   domain: string
-  didConfig: DIDConfig
+  holder: Holder
 }): Promise<VPV1> => {
-  const didDocument = await DIDUtils.resolveDID(didConfig.did)
-  const publicKey = didDocument.publicKey.find(({id}) => id.endsWith('#primary'))
+  const didDocument = await DIDUtils.resolveDID(holder.did)
+  const publicKey = didDocument.publicKey.find(({id}) => id.endsWith(holder.keyId))
 
   if (!publicKey) throw new Error('Cannot find primary key')
 
@@ -57,17 +51,17 @@ const buildVerifiablePresentation = async ({
     '@context': ['https://www.w3.org/2018/credentials/v1'],
     type: ['VerifiablePresentation'],
     verifiableCredential: atomicCredentials,
-    holder: didConfig.did,
+    holder: holder.did,
   }
-
-  const privateKeyJwk = await keyUtils.privateJWKFromPrivateKeyHex(didConfig.primaryKey.getPrivateKeyString().replace('0x', ''))
 
   const vp: VPV1 = await jsigs.sign(unsignedVP, {
     suite: new EcdsaSecp256k1Signature2019({
       key: new EcdsaSecp256k1KeyClass2019({
         id: publicKey.id,
-        controller: didConfig.did,
-        privateKeyJwk,
+        controller: holder.did,
+        privateKeyJwk: await keyUtils.privateJWKFromPrivateKeyHex(
+          holder.privateKey.startsWith('0x') ? holder.privateKey.substring(2) : holder.privateKey,
+        ),
       }),
     }),
     documentLoader: DIDUtils.documentLoader,
@@ -86,10 +80,10 @@ describe('Validation.validateCredentialSubject', () => {
   it('passes', async () => {
     expect.assertions(1)
 
-    const didConfig = await generateDID()
+    const {did} = await generateDID()
 
     const credentialSubject = await buildAtomicVCSubjectV1({
-      subject: didConfig.did,
+      subject: did,
       data: {'@type': 'Thing'},
     })
 
@@ -99,10 +93,10 @@ describe('Validation.validateCredentialSubject', () => {
   it('fails with empty subject', async () => {
     expect.assertions(1)
 
-    const didConfig = await generateDID()
+    const {did} = await generateDID()
 
     const credentialSubject = await buildAtomicVCSubjectV1({
-      subject: didConfig.did,
+      subject: did,
       data: {'@type': 'Thing'},
     })
 
@@ -117,10 +111,10 @@ describe('Validation.validateCredentialSubject', () => {
   it('fails with empty type', async () => {
     expect.assertions(1)
 
-    const didConfig = await generateDID()
+    const {did} = await generateDID()
 
     const credentialSubject = await buildAtomicVCSubjectV1({
-      subject: didConfig.did,
+      subject: did,
       data: {'@type': ''},
     })
 
@@ -142,11 +136,11 @@ describe('Validation.validateCredentialProof', () => {
   it('passes', async () => {
     expect.assertions(1)
 
-    const subjectDID = await generateDID()
-    const issuerDID = await generateDID()
+    const {did: subjectDID} = await generateDID()
+    const issuer = await generateDID()
 
     const credentialSubject = await buildAtomicVCSubjectV1({
-      subject: subjectDID.did,
+      subject: subjectDID,
       data: {'@type': 'Thing'},
     })
 
@@ -154,10 +148,10 @@ describe('Validation.validateCredentialProof', () => {
       credentialSubject,
       type: ['CustomCredential'],
       issuer: {
-        did: issuerDID.did,
+        did: issuer.did,
         keyId: '#primary',
-        privateKey: issuerDID.primaryKey.getPrivateKeyString(),
-        publicKey: issuerDID.primaryKey.getPublicKeyString(),
+        privateKey: issuer.primaryKey.privateKey,
+        publicKey: issuer.primaryKey.publicKey,
       },
       issuanceDate: '2016-02-01T00:00:00.000Z',
       expirationDate: '2018-02-01T00:00:00.000Z',
@@ -173,11 +167,11 @@ describe('Validation.validateCredentialProof', () => {
   it('fails with invalid type', async () => {
     expect.assertions(1)
 
-    const subjectDID = await generateDID()
-    const issuerDID = await generateDID()
+    const {did: subjectDID} = await generateDID()
+    const issuer = await generateDID()
 
     const credentialSubject = await buildAtomicVCSubjectV1({
-      subject: subjectDID.did,
+      subject: subjectDID,
       data: {'@type': 'Thing'},
     })
 
@@ -185,10 +179,10 @@ describe('Validation.validateCredentialProof', () => {
       credentialSubject,
       type: ['CustomCredential'],
       issuer: {
-        did: issuerDID.did,
+        did: issuer.did,
         keyId: '#primary',
-        privateKey: issuerDID.primaryKey.getPrivateKeyString(),
-        publicKey: issuerDID.primaryKey.getPublicKeyString(),
+        privateKey: issuer.primaryKey.privateKey,
+        publicKey: issuer.primaryKey.publicKey,
       },
       issuanceDate: '2016-02-01T00:00:00.000Z',
       expirationDate: '2018-02-01T00:00:00.000Z',
@@ -209,11 +203,11 @@ describe('Validation.validateCredentialProof', () => {
   it('fails with invalid created', async () => {
     expect.assertions(1)
 
-    const subjectDID = await generateDID()
-    const issuerDID = await generateDID()
+    const {did: subjectDID} = await generateDID()
+    const issuer = await generateDID()
 
     const credentialSubject = await buildAtomicVCSubjectV1({
-      subject: subjectDID.did,
+      subject: subjectDID,
       data: {'@type': 'Thing'},
     })
 
@@ -221,10 +215,10 @@ describe('Validation.validateCredentialProof', () => {
       credentialSubject,
       type: ['CustomCredential'],
       issuer: {
-        did: issuerDID.did,
+        did: issuer.did,
         keyId: '#primary',
-        privateKey: issuerDID.primaryKey.getPrivateKeyString(),
-        publicKey: issuerDID.primaryKey.getPublicKeyString(),
+        privateKey: issuer.primaryKey.privateKey,
+        publicKey: issuer.primaryKey.publicKey,
       },
       issuanceDate: '2016-02-01T00:00:00.000Z',
       expirationDate: '2018-02-01T00:00:00.000Z',
@@ -245,11 +239,11 @@ describe('Validation.validateCredentialProof', () => {
   it('fails with invalid proofPurpose', async () => {
     expect.assertions(1)
 
-    const subjectDID = await generateDID()
-    const issuerDID = await generateDID()
+    const {did: subjectDID} = await generateDID()
+    const issuer = await generateDID()
 
     const credentialSubject = await buildAtomicVCSubjectV1({
-      subject: subjectDID.did,
+      subject: subjectDID,
       data: {'@type': 'Thing'},
     })
 
@@ -257,10 +251,10 @@ describe('Validation.validateCredentialProof', () => {
       credentialSubject,
       type: ['CustomCredential'],
       issuer: {
-        did: issuerDID.did,
+        did: issuer.did,
         keyId: '#primary',
-        privateKey: issuerDID.primaryKey.getPrivateKeyString(),
-        publicKey: issuerDID.primaryKey.getPublicKeyString(),
+        privateKey: issuer.primaryKey.privateKey,
+        publicKey: issuer.primaryKey.publicKey,
       },
       issuanceDate: '2016-02-01T00:00:00.000Z',
       expirationDate: '2018-02-01T00:00:00.000Z',
@@ -281,11 +275,11 @@ describe('Validation.validateCredentialProof', () => {
   it('fails with invalid verificationMethod', async () => {
     expect.assertions(1)
 
-    const subjectDID = await generateDID()
-    const issuerDID = await generateDID()
+    const {did: subjectDID} = await generateDID()
+    const issuer = await generateDID()
 
     const credentialSubject = await buildAtomicVCSubjectV1({
-      subject: subjectDID.did,
+      subject: subjectDID,
       data: {'@type': 'Thing'},
     })
 
@@ -293,10 +287,10 @@ describe('Validation.validateCredentialProof', () => {
       credentialSubject,
       type: ['CustomCredential'],
       issuer: {
-        did: issuerDID.did,
+        did: issuer.did,
         keyId: '#primary',
-        privateKey: issuerDID.primaryKey.getPrivateKeyString(),
-        publicKey: issuerDID.primaryKey.getPublicKeyString(),
+        privateKey: issuer.primaryKey.privateKey,
+        publicKey: issuer.primaryKey.publicKey,
       },
       issuanceDate: '2016-02-01T00:00:00.000Z',
       expirationDate: '2018-02-01T00:00:00.000Z',
@@ -317,11 +311,11 @@ describe('Validation.validateCredentialProof', () => {
   it('fails with invalid jws', async () => {
     expect.assertions(1)
 
-    const subjectDID = await generateDID()
-    const issuerDID = await generateDID()
+    const {did: subjectDID} = await generateDID()
+    const issuer = await generateDID()
 
     const credentialSubject = await buildAtomicVCSubjectV1({
-      subject: subjectDID.did,
+      subject: subjectDID,
       data: {'@type': 'Thing'},
     })
 
@@ -329,10 +323,10 @@ describe('Validation.validateCredentialProof', () => {
       credentialSubject,
       type: ['CustomCredential'],
       issuer: {
-        did: issuerDID.did,
+        did: issuer.did,
         keyId: '#primary',
-        privateKey: issuerDID.primaryKey.getPrivateKeyString(),
-        publicKey: issuerDID.primaryKey.getPublicKeyString(),
+        privateKey: issuer.primaryKey.privateKey,
+        publicKey: issuer.primaryKey.publicKey,
       },
       issuanceDate: '2016-02-01T00:00:00.000Z',
       expirationDate: '2018-02-01T00:00:00.000Z',
@@ -355,11 +349,11 @@ describe('Validation.validateVerifiableCredential', () => {
   it('passes', async () => {
     expect.assertions(1)
 
-    const subjectDID = await generateDID()
-    const issuerDID = await generateDID()
+    const {did: subjectDID} = await generateDID()
+    const issuer = await generateDID()
 
     const credentialSubject = await buildAtomicVCSubjectV1({
-      subject: subjectDID.did,
+      subject: subjectDID,
       data: {'@type': 'Thing'},
     })
 
@@ -367,10 +361,10 @@ describe('Validation.validateVerifiableCredential', () => {
       credentialSubject,
       type: ['CustomCredential'],
       issuer: {
-        did: issuerDID.did,
+        did: issuer.did,
         keyId: '#primary',
-        privateKey: issuerDID.primaryKey.getPrivateKeyString(),
-        publicKey: issuerDID.primaryKey.getPublicKeyString(),
+        privateKey: issuer.primaryKey.privateKey,
+        publicKey: issuer.primaryKey.publicKey,
       },
       issuanceDate: '2016-02-01T00:00:00.000Z',
       expirationDate: '2018-02-01T00:00:00.000Z',
@@ -386,11 +380,11 @@ describe('Validation.validateVerifiableCredential', () => {
   it('passes wihtout an expiration date', async () => {
     expect.assertions(1)
 
-    const subjectDID = await generateDID()
-    const issuerDID = await generateDID()
+    const {did: subjectDID} = await generateDID()
+    const issuer = await generateDID()
 
     const credentialSubject = await buildAtomicVCSubjectV1({
-      subject: subjectDID.did,
+      subject: subjectDID,
       data: {'@type': 'Thing'},
     })
 
@@ -398,10 +392,10 @@ describe('Validation.validateVerifiableCredential', () => {
       credentialSubject,
       type: ['CustomCredential'],
       issuer: {
-        did: issuerDID.did,
+        did: issuer.did,
         keyId: '#primary',
-        privateKey: issuerDID.primaryKey.getPrivateKeyString(),
-        publicKey: issuerDID.primaryKey.getPublicKeyString(),
+        privateKey: issuer.primaryKey.privateKey,
+        publicKey: issuer.primaryKey.publicKey,
       },
       issuanceDate: '2016-02-01T00:00:00.000Z',
       revocation: {
@@ -416,11 +410,11 @@ describe('Validation.validateVerifiableCredential', () => {
   it('fails with invalid @context', async () => {
     expect.assertions(1)
 
-    const subjectDID = await generateDID()
-    const issuerDID = await generateDID()
+    const {did: subjectDID} = await generateDID()
+    const issuer = await generateDID()
 
     const credentialSubject = await buildAtomicVCSubjectV1({
-      subject: subjectDID.did,
+      subject: subjectDID,
       data: {'@type': 'Thing'},
     })
 
@@ -428,10 +422,10 @@ describe('Validation.validateVerifiableCredential', () => {
       credentialSubject,
       type: ['CustomCredential'],
       issuer: {
-        did: issuerDID.did,
+        did: issuer.did,
         keyId: '#primary',
-        privateKey: issuerDID.primaryKey.getPrivateKeyString(),
-        publicKey: issuerDID.primaryKey.getPublicKeyString(),
+        privateKey: issuer.primaryKey.privateKey,
+        publicKey: issuer.primaryKey.publicKey,
       },
       issuanceDate: '2016-02-01T00:00:00.000Z',
       revocation: {
@@ -451,11 +445,11 @@ describe('Validation.validateVerifiableCredential', () => {
   it('fails with invalid id', async () => {
     expect.assertions(1)
 
-    const subjectDID = await generateDID()
-    const issuerDID = await generateDID()
+    const {did: subjectDID} = await generateDID()
+    const issuer = await generateDID()
 
     const credentialSubject = await buildAtomicVCSubjectV1({
-      subject: subjectDID.did,
+      subject: subjectDID,
       data: {'@type': 'Thing'},
     })
 
@@ -463,10 +457,10 @@ describe('Validation.validateVerifiableCredential', () => {
       credentialSubject,
       type: ['CustomCredential'],
       issuer: {
-        did: issuerDID.did,
+        did: issuer.did,
         keyId: '#primary',
-        privateKey: issuerDID.primaryKey.getPrivateKeyString(),
-        publicKey: issuerDID.primaryKey.getPublicKeyString(),
+        privateKey: issuer.primaryKey.privateKey,
+        publicKey: issuer.primaryKey.publicKey,
       },
       issuanceDate: '2016-02-01T00:00:00.000Z',
       revocation: {
@@ -486,11 +480,11 @@ describe('Validation.validateVerifiableCredential', () => {
   it('fails with invalid type', async () => {
     expect.assertions(1)
 
-    const subjectDID = await generateDID()
-    const issuerDID = await generateDID()
+    const {did: subjectDID} = await generateDID()
+    const issuer = await generateDID()
 
     const credentialSubject = await buildAtomicVCSubjectV1({
-      subject: subjectDID.did,
+      subject: subjectDID,
       data: {'@type': 'Thing'},
     })
 
@@ -498,10 +492,10 @@ describe('Validation.validateVerifiableCredential', () => {
       credentialSubject,
       type: ['CustomCredential'],
       issuer: {
-        did: issuerDID.did,
+        did: issuer.did,
         keyId: '#primary',
-        privateKey: issuerDID.primaryKey.getPrivateKeyString(),
-        publicKey: issuerDID.primaryKey.getPublicKeyString(),
+        privateKey: issuer.primaryKey.privateKey,
+        publicKey: issuer.primaryKey.publicKey,
       },
       issuanceDate: '2016-02-01T00:00:00.000Z',
       revocation: {
@@ -521,11 +515,11 @@ describe('Validation.validateVerifiableCredential', () => {
   it('fails with invalid issuer', async () => {
     expect.assertions(1)
 
-    const subjectDID = await generateDID()
-    const issuerDID = await generateDID()
+    const {did: subjectDID} = await generateDID()
+    const issuer = await generateDID()
 
     const credentialSubject = await buildAtomicVCSubjectV1({
-      subject: subjectDID.did,
+      subject: subjectDID,
       data: {'@type': 'Thing'},
     })
 
@@ -533,10 +527,10 @@ describe('Validation.validateVerifiableCredential', () => {
       credentialSubject,
       type: ['CustomCredential'],
       issuer: {
-        did: issuerDID.did,
+        did: issuer.did,
         keyId: '#primary',
-        privateKey: issuerDID.primaryKey.getPrivateKeyString(),
-        publicKey: issuerDID.primaryKey.getPublicKeyString(),
+        privateKey: issuer.primaryKey.privateKey,
+        publicKey: issuer.primaryKey.publicKey,
       },
       issuanceDate: '2016-02-01T00:00:00.000Z',
       revocation: {
@@ -556,11 +550,11 @@ describe('Validation.validateVerifiableCredential', () => {
   it('fails with invalid issuanceDate', async () => {
     expect.assertions(1)
 
-    const subjectDID = await generateDID()
-    const issuerDID = await generateDID()
+    const {did: subjectDID} = await generateDID()
+    const issuer = await generateDID()
 
     const credentialSubject = await buildAtomicVCSubjectV1({
-      subject: subjectDID.did,
+      subject: subjectDID,
       data: {'@type': 'Thing'},
     })
 
@@ -568,10 +562,10 @@ describe('Validation.validateVerifiableCredential', () => {
       credentialSubject,
       type: ['CustomCredential'],
       issuer: {
-        did: issuerDID.did,
+        did: issuer.did,
         keyId: '#primary',
-        privateKey: issuerDID.primaryKey.getPrivateKeyString(),
-        publicKey: issuerDID.primaryKey.getPublicKeyString(),
+        privateKey: issuer.primaryKey.privateKey,
+        publicKey: issuer.primaryKey.publicKey,
       },
       issuanceDate: '2016-02-01',
       revocation: {
@@ -586,11 +580,11 @@ describe('Validation.validateVerifiableCredential', () => {
   it('fails with invalid expirationDate', async () => {
     expect.assertions(1)
 
-    const subjectDID = await generateDID()
-    const issuerDID = await generateDID()
+    const {did: subjectDID} = await generateDID()
+    const issuer = await generateDID()
 
     const credentialSubject = await buildAtomicVCSubjectV1({
-      subject: subjectDID.did,
+      subject: subjectDID,
       data: {'@type': 'Thing'},
     })
 
@@ -598,10 +592,10 @@ describe('Validation.validateVerifiableCredential', () => {
       credentialSubject,
       type: ['CustomCredential'],
       issuer: {
-        did: issuerDID.did,
+        did: issuer.did,
         keyId: '#primary',
-        privateKey: issuerDID.primaryKey.getPrivateKeyString(),
-        publicKey: issuerDID.primaryKey.getPublicKeyString(),
+        privateKey: issuer.primaryKey.privateKey,
+        publicKey: issuer.primaryKey.publicKey,
       },
       issuanceDate: '2016-02-01T00:00:00.000Z',
       expirationDate: '2016-02-01',
@@ -617,11 +611,11 @@ describe('Validation.validateVerifiableCredential', () => {
   it('fails with invalid credentialSubject', async () => {
     expect.assertions(1)
 
-    const subjectDID = await generateDID()
-    const issuerDID = await generateDID()
+    const {did: subjectDID} = await generateDID()
+    const issuer = await generateDID()
 
     const credentialSubject = await buildAtomicVCSubjectV1({
-      subject: subjectDID.did,
+      subject: subjectDID,
       data: {'@type': ''},
     })
 
@@ -629,10 +623,10 @@ describe('Validation.validateVerifiableCredential', () => {
       credentialSubject,
       type: ['CustomCredential'],
       issuer: {
-        did: issuerDID.did,
+        did: issuer.did,
         keyId: '#primary',
-        privateKey: issuerDID.primaryKey.getPrivateKeyString(),
-        publicKey: issuerDID.primaryKey.getPublicKeyString(),
+        privateKey: issuer.primaryKey.privateKey,
+        publicKey: issuer.primaryKey.publicKey,
       },
       issuanceDate: '2016-02-01T00:00:00.000Z',
       expirationDate: '2016-02-01',
@@ -648,11 +642,11 @@ describe('Validation.validateVerifiableCredential', () => {
   it('fails with invalid revocation', async () => {
     expect.assertions(1)
 
-    const subjectDID = await generateDID()
-    const issuerDID = await generateDID()
+    const {did: subjectDID} = await generateDID()
+    const issuer = await generateDID()
 
     const credentialSubject = await buildAtomicVCSubjectV1({
-      subject: subjectDID.did,
+      subject: subjectDID,
       data: {'@type': ''},
     })
 
@@ -660,10 +654,10 @@ describe('Validation.validateVerifiableCredential', () => {
       credentialSubject,
       type: ['CustomCredential'],
       issuer: {
-        did: issuerDID.did,
+        did: issuer.did,
         keyId: '#primary',
-        privateKey: issuerDID.primaryKey.getPrivateKeyString(),
-        publicKey: issuerDID.primaryKey.getPublicKeyString(),
+        privateKey: issuer.primaryKey.privateKey,
+        publicKey: issuer.primaryKey.publicKey,
       },
       issuanceDate: '2016-02-01T00:00:00.000Z',
       expirationDate: '2016-02-01',
@@ -686,11 +680,11 @@ describe('Validation.validateVerifiableCredential', () => {
   it('fails with structurally invalid proof', async () => {
     expect.assertions(1)
 
-    const subjectDID = await generateDID()
-    const issuerDID = await generateDID()
+    const {did: subjectDID} = await generateDID()
+    const issuer = await generateDID()
 
     const credentialSubject = await buildAtomicVCSubjectV1({
-      subject: subjectDID.did,
+      subject: subjectDID,
       data: {'@type': ''},
     })
 
@@ -698,10 +692,10 @@ describe('Validation.validateVerifiableCredential', () => {
       credentialSubject,
       type: ['CustomCredential'],
       issuer: {
-        did: issuerDID.did,
+        did: issuer.did,
         keyId: '#primary',
-        privateKey: issuerDID.primaryKey.getPrivateKeyString(),
-        publicKey: issuerDID.primaryKey.getPublicKeyString(),
+        privateKey: issuer.primaryKey.privateKey,
+        publicKey: issuer.primaryKey.publicKey,
       },
       issuanceDate: '2016-02-01T00:00:00.000Z',
       expirationDate: '2016-02-01',
@@ -725,11 +719,11 @@ describe('Validation.validateVerifiableCredential', () => {
   it('fails with invalid proof', async () => {
     expect.assertions(1)
 
-    const subjectDID = await generateDID()
-    const issuerDID = await generateDID()
+    const {did: subjectDID} = await generateDID()
+    const issuer = await generateDID()
 
     const credentialSubject = await buildAtomicVCSubjectV1({
-      subject: subjectDID.did,
+      subject: subjectDID,
       data: {'@type': ''},
     })
 
@@ -737,10 +731,10 @@ describe('Validation.validateVerifiableCredential', () => {
       credentialSubject,
       type: ['CustomCredential'],
       issuer: {
-        did: issuerDID.did,
+        did: issuer.did,
         keyId: '#primary',
-        privateKey: issuerDID.primaryKey.getPrivateKeyString(),
-        publicKey: issuerDID.primaryKey.getPublicKeyString(),
+        privateKey: issuer.primaryKey.privateKey,
+        publicKey: issuer.primaryKey.publicKey,
       },
       issuanceDate: '2016-02-01T00:00:00.000Z',
       expirationDate: '2016-02-01',
@@ -766,11 +760,11 @@ describe('Validation.validateVerifiablePresentationV1', () => {
   it('passes', async () => {
     expect.assertions(1)
 
-    const subjectDID = await generateDID()
-    const issuerDID = await generateDID()
+    const subject = await generateDID()
+    const issuer = await generateDID()
 
     const credentialSubject = await buildAtomicVCSubjectV1({
-      subject: subjectDID.did,
+      subject: subject.did,
       data: {'@type': 'Thing'},
     })
 
@@ -778,10 +772,10 @@ describe('Validation.validateVerifiablePresentationV1', () => {
       credentialSubject,
       type: ['CustomCredential'],
       issuer: {
-        did: issuerDID.did,
+        did: issuer.did,
         keyId: '#primary',
-        privateKey: issuerDID.primaryKey.getPrivateKeyString(),
-        publicKey: issuerDID.primaryKey.getPublicKeyString(),
+        privateKey: issuer.primaryKey.privateKey,
+        publicKey: issuer.primaryKey.publicKey,
       },
       issuanceDate: '2016-02-01T00:00:00.000Z',
       expirationDate: '2018-02-01T00:00:00.000Z',
@@ -792,7 +786,12 @@ describe('Validation.validateVerifiablePresentationV1', () => {
     })
 
     const vp = await buildVerifiablePresentation({
-      didConfig: subjectDID,
+      holder: {
+        keyId: '#primary',
+        did: subject.did,
+        privateKey: subject.primaryKey.privateKey,
+        publicKey: subject.primaryKey.publicKey,
+      },
       atomicCredentials: [atomicVC],
       token: EthUtils.generateNonce(),
       domain: 'https://bloom.co/receiveData',
@@ -804,12 +803,12 @@ describe('Validation.validateVerifiablePresentationV1', () => {
   it('fails when subject and sharer differ', async () => {
     expect.assertions(1)
 
-    const subjectDID = await generateDID()
-    const separateSubjectDID = await generateDID()
-    const issuerDID = await generateDID()
+    const {did: subjectDID} = await generateDID()
+    const invalidSubject = await generateDID()
+    const issuer = await generateDID()
 
     const credentialSubject = await buildAtomicVCSubjectV1({
-      subject: subjectDID.did,
+      subject: subjectDID,
       data: {'@type': 'Thing'},
     })
 
@@ -817,10 +816,10 @@ describe('Validation.validateVerifiablePresentationV1', () => {
       credentialSubject,
       type: ['CustomCredential'],
       issuer: {
-        did: issuerDID.did,
+        did: issuer.did,
         keyId: '#primary',
-        privateKey: issuerDID.primaryKey.getPrivateKeyString(),
-        publicKey: issuerDID.primaryKey.getPublicKeyString(),
+        privateKey: issuer.primaryKey.privateKey,
+        publicKey: issuer.primaryKey.publicKey,
       },
       issuanceDate: '2016-02-01T00:00:00.000Z',
       expirationDate: '2018-02-01T00:00:00.000Z',
@@ -831,7 +830,12 @@ describe('Validation.validateVerifiablePresentationV1', () => {
     })
 
     const vp = await buildVerifiablePresentation({
-      didConfig: separateSubjectDID,
+      holder: {
+        keyId: '#primary',
+        did: invalidSubject.did,
+        privateKey: invalidSubject.primaryKey.privateKey,
+        publicKey: invalidSubject.primaryKey.publicKey,
+      },
       atomicCredentials: [atomicVC],
       token: EthUtils.generateNonce(),
       domain: 'https://bloom.co/receiveData',
@@ -843,11 +847,11 @@ describe('Validation.validateVerifiablePresentationV1', () => {
   it('fails with invalid type', async () => {
     expect.assertions(1)
 
-    const subjectDID = await generateDID()
-    const issuerDID = await generateDID()
+    const subject = await generateDID()
+    const issuer = await generateDID()
 
     const credentialSubject = await buildAtomicVCSubjectV1({
-      subject: subjectDID.did,
+      subject: subject.did,
       data: {'@type': 'Thing'},
     })
 
@@ -855,10 +859,10 @@ describe('Validation.validateVerifiablePresentationV1', () => {
       credentialSubject,
       type: ['CustomCredential'],
       issuer: {
-        did: issuerDID.did,
+        did: issuer.did,
         keyId: '#primary',
-        privateKey: issuerDID.primaryKey.getPrivateKeyString(),
-        publicKey: issuerDID.primaryKey.getPublicKeyString(),
+        privateKey: issuer.primaryKey.privateKey,
+        publicKey: issuer.primaryKey.publicKey,
       },
       issuanceDate: '2016-02-01T00:00:00.000Z',
       expirationDate: '2018-02-01T00:00:00.000Z',
@@ -869,7 +873,12 @@ describe('Validation.validateVerifiablePresentationV1', () => {
     })
 
     const vp = await buildVerifiablePresentation({
-      didConfig: subjectDID,
+      holder: {
+        keyId: '#primary',
+        did: subject.did,
+        privateKey: subject.primaryKey.privateKey,
+        publicKey: subject.primaryKey.publicKey,
+      },
       atomicCredentials: [atomicVC],
       token: EthUtils.generateNonce(),
       domain: 'https://bloom.co/receiveData',
@@ -886,11 +895,11 @@ describe('Validation.validateVerifiablePresentationV1', () => {
   it('fails with invalid verifiableCredential', async () => {
     expect.assertions(1)
 
-    const subjectDID = await generateDID()
-    const issuerDID = await generateDID()
+    const subject = await generateDID()
+    const issuer = await generateDID()
 
     const credentialSubject = await buildAtomicVCSubjectV1({
-      subject: subjectDID.did,
+      subject: subject.did,
       data: {'@type': 'Thing'},
     })
 
@@ -898,10 +907,10 @@ describe('Validation.validateVerifiablePresentationV1', () => {
       credentialSubject,
       type: ['CustomCredential'],
       issuer: {
-        did: issuerDID.did,
+        did: issuer.did,
         keyId: '#primary',
-        privateKey: issuerDID.primaryKey.getPrivateKeyString(),
-        publicKey: issuerDID.primaryKey.getPublicKeyString(),
+        privateKey: issuer.primaryKey.privateKey,
+        publicKey: issuer.primaryKey.publicKey,
       },
       issuanceDate: '2016-02-01T00:00:00.000Z',
       expirationDate: '2018-02-01T00:00:00.000Z',
@@ -912,7 +921,12 @@ describe('Validation.validateVerifiablePresentationV1', () => {
     })
 
     const vp = await buildVerifiablePresentation({
-      didConfig: subjectDID,
+      holder: {
+        keyId: '#primary',
+        did: subject.did,
+        privateKey: subject.primaryKey.privateKey,
+        publicKey: subject.primaryKey.publicKey,
+      },
       atomicCredentials: [atomicVC],
       token: EthUtils.generateNonce(),
       domain: 'https://bloom.co/receiveData',
@@ -934,11 +948,11 @@ describe('Validation.validateVerifiablePresentationV1', () => {
   it('fails with invalid holder', async () => {
     expect.assertions(1)
 
-    const subjectDID = await generateDID()
-    const issuerDID = await generateDID()
+    const subject = await generateDID()
+    const issuer = await generateDID()
 
     const credentialSubject = await buildAtomicVCSubjectV1({
-      subject: subjectDID.did,
+      subject: subject.did,
       data: {'@type': 'Thing'},
     })
 
@@ -946,10 +960,10 @@ describe('Validation.validateVerifiablePresentationV1', () => {
       credentialSubject,
       type: ['CustomCredential'],
       issuer: {
-        did: issuerDID.did,
+        did: issuer.did,
         keyId: '#primary',
-        privateKey: issuerDID.primaryKey.getPrivateKeyString(),
-        publicKey: issuerDID.primaryKey.getPublicKeyString(),
+        privateKey: issuer.primaryKey.privateKey,
+        publicKey: issuer.primaryKey.publicKey,
       },
       issuanceDate: '2016-02-01T00:00:00.000Z',
       expirationDate: '2018-02-01T00:00:00.000Z',
@@ -960,7 +974,12 @@ describe('Validation.validateVerifiablePresentationV1', () => {
     })
 
     const vp = await buildVerifiablePresentation({
-      didConfig: subjectDID,
+      holder: {
+        keyId: '#primary',
+        did: subject.did,
+        privateKey: subject.primaryKey.privateKey,
+        publicKey: subject.primaryKey.publicKey,
+      },
       atomicCredentials: [atomicVC],
       token: EthUtils.generateNonce(),
       domain: 'https://bloom.co/receiveData',
@@ -977,11 +996,11 @@ describe('Validation.validateVerifiablePresentationV1', () => {
   it('fails with invalid proof', async () => {
     expect.assertions(1)
 
-    const subjectDID = await generateDID()
-    const issuerDID = await generateDID()
+    const subject = await generateDID()
+    const issuer = await generateDID()
 
     const credentialSubject = await buildAtomicVCSubjectV1({
-      subject: subjectDID.did,
+      subject: subject.did,
       data: {'@type': 'Thing'},
     })
 
@@ -989,10 +1008,10 @@ describe('Validation.validateVerifiablePresentationV1', () => {
       credentialSubject,
       type: ['CustomCredential'],
       issuer: {
-        did: issuerDID.did,
+        did: issuer.did,
         keyId: '#primary',
-        privateKey: issuerDID.primaryKey.getPrivateKeyString(),
-        publicKey: issuerDID.primaryKey.getPublicKeyString(),
+        privateKey: issuer.primaryKey.privateKey,
+        publicKey: issuer.primaryKey.publicKey,
       },
       issuanceDate: '2016-02-01T00:00:00.000Z',
       expirationDate: '2018-02-01T00:00:00.000Z',
@@ -1003,7 +1022,12 @@ describe('Validation.validateVerifiablePresentationV1', () => {
     })
 
     const vp = await buildVerifiablePresentation({
-      didConfig: subjectDID,
+      holder: {
+        keyId: '#primary',
+        did: subject.did,
+        privateKey: subject.primaryKey.privateKey,
+        publicKey: subject.primaryKey.publicKey,
+      },
       atomicCredentials: [atomicVC],
       token: EthUtils.generateNonce(),
       domain: 'https://bloom.co/receiveData',
