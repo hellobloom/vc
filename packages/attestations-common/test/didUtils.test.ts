@@ -52,7 +52,7 @@ describe('DIDUtils', () => {
 
         const document = await DIDUtils.resolveDID(elemDIDWithInitialState)
 
-        expect(document.id).toEqual(elemDIDWithInitialState)
+        expect(document.id).toEqual(baseElemDID)
       })
     })
 

@@ -1,4 +1,9 @@
 .home {
+  &__did {
+    cursor: pointer;
+    word-break: break-all;
+  }
+
   &__regen-btn {
     margin-top: 0.7rem;
   }

@@ -89,9 +89,12 @@ export const validateVerifiableCredential = genAsyncValidateFn<AtomicVCV1>({
 })
 
 const isValidVerifiableCredential = async (value: any, data: any) => {
-  if (value.credentialSubject.id !== data.holder) return false
+  // TODO: Does the holder check even make sense?
+  const anySubjectsMatchHolder = (Array.isArray(value.credentialSubject) ? value.credentialSubject : [value.credentialSubject]).some(
+    ({id}: {id: string}) => id === data.holder,
+  )
 
-  return await Utils.isAsyncValid(validateVerifiableCredential)(value)
+  return anySubjectsMatchHolder && (await Utils.isAsyncValid(validateVerifiableCredential)(value))
 }
 
 export const validateProof = genValidateFn<VPProofV1>({

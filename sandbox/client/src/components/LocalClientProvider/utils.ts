@@ -1,16 +1,51 @@
 import {DIDUtils, VPV1, AtomicVCV1} from '@bloomprotocol/attestations-common'
 import EthWallet from 'ethereumjs-wallet'
 import extend from 'extend'
+import base64url from 'base64url'
+import {keyUtils} from '@transmute/es256k-jws-ts'
 
-const {EcdsaSecp256k1KeyClass2019, EcdsaSecp256k1Signature2019, defaultDocumentLoader} = require('@transmute/lds-ecdsa-secp256k1-2019')
-const keyto = require('@trust/keyto')
+const {op, func} = require('@transmute/element-lib')
+const {EcdsaSecp256k1KeyClass2019, EcdsaSecp256k1Signature2019} = require('@transmute/lds-ecdsa-secp256k1-2019')
 const jsigs = require('jsonld-signatures')
 const url = require('url')
 
 const {AuthenticationProofPurpose} = jsigs.purposes
 
+type DIDConfig = {
+  did: string
+  primaryKey: EthWallet
+  recoveryKey: EthWallet
+}
+
+export const generateElemDID = async (): Promise<DIDConfig> => {
+  const primaryKey = EthWallet.generate()
+  const recoveryKey = EthWallet.generate()
+
+  const didDocumentModel = {
+    ...op.getDidDocumentModel(primaryKey.getPublicKeyString(), recoveryKey.getPublicKeyString()),
+    '@context': 'https://w3id.org/security/v2',
+    authentication: ['#primary'],
+    assertionMethod: ['#primary'],
+  }
+  const createPayload = await op.getCreatePayload(didDocumentModel, {privateKey: primaryKey.getPrivateKey()})
+  const didUniqueSuffix = func.getDidUniqueSuffix(createPayload)
+
+  return {
+    did: `did:elem:${didUniqueSuffix};elem:initial-state=${base64url.encode(JSON.stringify(createPayload))}`,
+    primaryKey,
+    recoveryKey,
+  }
+}
+
+type Holder = {
+  did: string
+  keyId: string
+  publicKey: string
+  privateKey: string
+}
+
 export const buildVPV1 = async ({
-  wallet,
+  holder,
   atomicVCs,
   token,
   domain,
@@ -18,31 +53,36 @@ export const buildVPV1 = async ({
   atomicVCs: AtomicVCV1[]
   token: string
   domain: string
-  wallet: EthWallet
+  holder: Holder
 }): Promise<VPV1> => {
+  const issuerDidDoc = await DIDUtils.resolveDID(holder.did)
+  const publicKey = issuerDidDoc.publicKey.find(({id, publicKeyHex}) => id.endsWith(holder.keyId) && publicKeyHex === holder.publicKey)
+
+  if (!publicKey) throw new Error('No key found for provided keyId and publicKey')
+
   const unsignedVP: Omit<VPV1<AtomicVCV1>, 'proof'> = {
     '@context': ['https://www.w3.org/2018/credentials/v1'],
     type: ['VerifiablePresentation'],
     verifiableCredential: atomicVCs,
-    holder: `did:ethr:${wallet.getAddressString()}`,
+    holder: holder.did,
   }
-
-  // TODO: update to use did:elem
-  const didDocument = await DIDUtils.resolveDID(`did:ethr:${wallet.getAddressString()}`)
 
   const vp: VPV1<AtomicVCV1> = jsigs.sign(unsignedVP, {
     suite: new EcdsaSecp256k1Signature2019({
       key: new EcdsaSecp256k1KeyClass2019({
-        id: didDocument.publicKey[0].id,
-        controller: didDocument.publicKey[0].owner,
-        privateKeyJwk: keyto.from(wallet.getPrivateKeyString().replace('0x', ''), 'blk').toJwk('private'),
+        id: publicKey.id,
+        controller: holder.did,
+        privateKeyJwk: await keyUtils.privateJWKFromPrivateKeyHex(
+          holder.privateKey.startsWith('0x') ? holder.privateKey.substring(2) : holder.privateKey,
+        ),
       }),
     }),
-    documentLoader: defaultDocumentLoader,
+    documentLoader: DIDUtils.documentLoader,
     purpose: new AuthenticationProofPurpose({
       challenge: token,
       domain: domain,
     }),
+    compactProof: false,
     expansionMap: false, // TODO: remove this
   })
 
