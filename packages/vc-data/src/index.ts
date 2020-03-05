@@ -176,50 +176,41 @@ export type VCIDDocPerson = AtomicVCV1<VCSIDDocPerson>;
 //////////////////////////////////////////////////////////////
 // Employment/delegation
 //////////////////////////////////////////////////////////////
-export interface VCSEmploymentPerson extends Subject<Person> {
-  '@type': 'Person';
-  employeeOf: MaybeArray<{
-    '@type': 'EmployeeRole';
-    employeeOf: {
-      name?: string;
-      address?: MaybeArray<PostalAddress>;
-      legalName?: string;
-      dissolutionDate?: string;
-      hasCredential?: MaybeArray<{
-        '@type': 'IncorporationCredential';
-        credentialCategory?: string;
-        additionalType?: string;
-        dateCreated?: string;
-        datePublished?: string;
-        recognizedBy?: MaybeArray<GovernmentOrg>;
-      }>;
-      telephone?: string;
-      faxNumber?: string;
-      email?: string;
-      website?: MaybeArray<WebSite>;
-    };
-  }>;
+export interface IncorporationCredential {
+  '@type': 'IncorporationCredential';
+  credentialCategory?: string;
+  additionalType?: string;
+  dateCreated?: string;
+  datePublished?: string;
+  recognizedBy?: MaybeArray<GovernmentOrg>;
 }
-export interface VCSEmploymentOrganization extends Subject<Organization> {
+export interface OrganizationE extends Subject<Organization> {
   '@type': 'Organization';
   name?: string;
-  legalName?: string;
   address?: MaybeArray<PostalAddress>;
+  legalName?: string;
   dissolutionDate?: string;
-  hasCredential?: MaybeArray<{
-    '@type': 'IncorporationCredential';
-    credentialCategory?: string;
-    additionalType?: string;
-    dateCreated?: string;
-    datePublished?: string;
-    recognizedBy?: MaybeArray<GovernmentOrg>;
-  }>;
+  hasCredential?: MaybeArray<IncorporationCredential>;
   telephone?: string;
   faxNumber?: string;
   email?: string;
   website?: MaybeArray<WebSite>;
-  employee: MaybeArray<{ '@type': 'EmployeeRole'; employee: Person }>;
 }
+export interface EmployeeRoleOrganization {
+  '@type': 'EmployeeRole';
+  employeeOf: OrganizationE;
+}
+export interface EmployeeRolePerson {
+  '@type': 'EmployeeRole';
+  employee: Person;
+}
+export interface VCSEmploymentPerson extends Subject<Person> {
+  '@type': 'Person';
+  employeeOf: MaybeArray<EmployeeRoleOrganization>;
+}
+export type VCSEmploymentOrganization = OrganizationE & {
+  employee: MaybeArray<EmployeeRolePerson>;
+};
 export type VCEmploymentPerson = AtomicVCV1<VCSEmploymentPerson>;
 export type VCEmploymentOrganization = AtomicVCV1<VCSEmploymentOrganization>;
 
@@ -283,7 +274,7 @@ export interface VCSGenderPerson extends Subject<Person> {
   '@type': 'Person';
   gender: MaybeArray<GenderType | string>;
 }
-export type VCGenderPerson = AtomicVCV1<VCSDOBPerson>;
+export type VCGenderPerson = AtomicVCV1<VCSGenderPerson>;
 
 //////////////////////////////////////////////////////////////
 // Accounts and assets
@@ -368,6 +359,121 @@ export interface VCSAccountOrganization extends Subject<Organization> {
   '@type': 'Organization';
   hasAccount: MaybeArray<Account>;
 }
+export type VCAccountPerson = AtomicVCV1<VCSAccountPerson>;
+export type VCAccountOrganization = AtomicVCV1<VCSAccountOrganization>;
+
+//////////////////////////////////////////////////////////////
+// Credit score
+//////////////////////////////////////////////////////////////
+export interface TradelinePayStatus {
+  date: string;
+  status: string;
+}
+export interface TradelineRemark {
+  remark: string;
+  remarkCode: string;
+}
+export interface Tradeline {
+  '@type': 'Tradeline';
+  accountType?: string;
+  accountNumber?: string | number;
+  creditType?: string;
+  balanceCurrent?: MonetaryAmountR;
+  balanceMax?: MonetaryAmountR;
+  balancePercentage?: number;
+  rating?: string;
+  open?: boolean;
+  statement?: string;
+
+  subscriberCode?: string;
+  verifiedDate?: string;
+  reportedDate?: string;
+  openedDate?: string;
+  accountStatusDate?: string;
+  closedDate?: string;
+  bureau?: string;
+  accountCondition?: string;
+  accountDesignator?: string;
+  disputeFlag?: string;
+  industryCode?: string;
+  accountIsOpen?: boolean;
+  payStatus?: string;
+  verificationIndicator?: string;
+  remark?: MaybeArray<TradelineRemark>;
+
+  monthsReviewed: string;
+  monthlyPayment: string;
+  late90Count: string;
+  late60Count: string;
+  late30Count: string;
+  dateLatePayment: string;
+  termMonths: string;
+  collateral: string;
+  amountPastDue: MonetaryAmountR;
+  worstPastStatusCount: string;
+  paymentFrequency?: string;
+  termType?: string;
+  worstPayStatus?: string;
+  payStatuses: Array<TradelinePayStatus>;
+  creditLimit?: string;
+
+  creditor: string | Organization;
+  position: string;
+}
+export interface CreditScore {
+  '@type': 'CreditScore';
+  score: number;
+  scoreType: string;
+  populationRank?: number;
+  provider?: string;
+  lastUpdatedDate?: string;
+  utilizationPercentage?: number;
+  historyStartDate?: string;
+  paymentHistoryPercentage?: number;
+  statement?: string;
+  tradelines?: Array<Tradeline>;
+
+  // Snapshot data
+  creditDataSuppressed: string;
+  totalAccounts: string;
+  totalClosedAccounts: string;
+  delinquentAccounts: string;
+  derogatoryAccounts: string;
+  openAccounts: string;
+  totalBalances: string;
+  totalMonthlyPayments: string;
+  numberOfInquiries: string;
+  totalPublicRecords: string;
+  recentInquiries: string;
+  balanceOpenRevolvingAccounts: string;
+  totalOpenRevolvingAccounts: string;
+  balanceOpenInstallmentAccounts: string;
+  totalOpenInstallmentAccounts: string;
+  balanceOpenMortgageAccounts: string;
+  totalOpenMortgageAccounts: string;
+  balanceOpenCollectionAccounts: string;
+  totalOpenCollectionAccounts: string;
+  balanceOpenOtherAccounts: string;
+  totalOpenOtherAccounts: string;
+  availableCredit: string;
+  utilization: string;
+  onTimePaymentPercentage: string;
+  latePaymentPercentage: string;
+  recentTradelinesOpened: string;
+  dateOfOldestTrade: string;
+  ageOfCredit: string;
+  paymentHistory: string;
+  securityFreeze: string;
+  fraudAlert: string;
+}
+export interface VCSCreditScorePerson extends Subject<Person> {
+  '@type': 'Person';
+  birthDate?: string;
+  name?: string;
+  employeeOf?: EmployeeRoleOrganization;
+  hasCreditScore: MaybeArray<CreditScore>;
+}
+export type VCCreditScorePerson = AtomicVCV1<VCSCreditScorePerson>;
 
 /**
  * +--------- Table of implemented attestation types -----------+
