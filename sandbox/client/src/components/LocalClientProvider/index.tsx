@@ -1,24 +1,18 @@
 import React, {useContext, useEffect} from 'react'
 import createPersistedState from 'use-persisted-state'
-import EthWallet from 'ethereumjs-wallet'
 import {AtomicVCV1} from '@bloomprotocol/attestations-common'
 import wretch from 'wretch'
 
 import {buildVPV1, appendQuery, generateElemDID} from './utils'
+
+const {MnemonicKeySystem} = require('@transmute/element-lib')
 
 const usePrivateKeyState = createPersistedState('vc-sandbox.didConfig')
 const useSDVCsState = createPersistedState('vc-sandbox.sdvcs')
 
 type DIDConfig = {
   did: string
-  primaryKey: string
-  recoveryKey: string
-}
-
-type DIDWalletConfig = {
-  did: string
-  primaryKey: EthWallet
-  recoveryKey: EthWallet
+  menmonic: string
 }
 
 type SuccessRequestResponse = {
@@ -34,7 +28,7 @@ type RequestResponse = SuccessRequestResponse | ErrorRequestResponse
 
 type LocalClientContextProps = {
   vcs: AtomicVCV1[]
-  didConfig?: DIDWalletConfig
+  didConfig?: DIDConfig
   regen: () => void
   deleteVC: (index: number) => void
   shareVCs: (types: string[], token: string, to: string) => Promise<RequestResponse>
@@ -50,24 +44,17 @@ const LocalClientContext = React.createContext<LocalClientContextProps>({
 })
 
 export const LocalClientProvider: React.FC = props => {
-  const [unmappedDIDConfig, setDidConfig] = usePrivateKeyState<DIDConfig | undefined>()
+  const [didConfig, setDidConfig] = usePrivateKeyState<DIDConfig | undefined>()
   const [vcs, setVCs] = useSDVCsState<AtomicVCV1[]>(() => [])
 
   useEffect(() => {
-    if (typeof unmappedDIDConfig !== 'undefined') return
+    if (typeof didConfig !== 'undefined') return
 
     let current = true
 
     const get = async () => {
-      const {did, primaryKey, recoveryKey} = await generateElemDID()
-
-      if (current) {
-        setDidConfig({
-          did,
-          primaryKey: primaryKey.getPrivateKeyString(),
-          recoveryKey: recoveryKey.getPrivateKeyString(),
-        })
-      }
+      const config = await generateElemDID()
+      if (current) setDidConfig(config)
     }
 
     void get()
@@ -75,17 +62,7 @@ export const LocalClientProvider: React.FC = props => {
     return () => {
       current = false
     }
-  }, [unmappedDIDConfig, setDidConfig])
-
-  let didConfig: DIDWalletConfig | undefined
-
-  if (unmappedDIDConfig) {
-    didConfig = {
-      did: unmappedDIDConfig.did,
-      primaryKey: EthWallet.fromPrivateKey(Buffer.from(unmappedDIDConfig.primaryKey.replace('0x', ''), 'hex')),
-      recoveryKey: EthWallet.fromPrivateKey(Buffer.from(unmappedDIDConfig.recoveryKey.replace('0x', ''), 'hex')),
-    }
-  }
+  }, [didConfig, setDidConfig])
 
   return (
     <LocalClientContext.Provider
@@ -93,12 +70,7 @@ export const LocalClientProvider: React.FC = props => {
         didConfig,
         vcs,
         regen: async () => {
-          const {did, primaryKey, recoveryKey} = await generateElemDID()
-          setDidConfig({
-            did,
-            primaryKey: primaryKey.getPrivateKeyString(),
-            recoveryKey: recoveryKey.getPrivateKeyString(),
-          })
+          setDidConfig(await generateElemDID())
           setVCs([])
         },
         deleteVC: index => {
@@ -150,12 +122,14 @@ export const LocalClientProvider: React.FC = props => {
               }
             }
 
+            const {publicKey, privateKey} = await new MnemonicKeySystem(didConfig?.menmonic).getKeyForPurpose('primary', 0)
+
             const vp = await buildVPV1({
               holder: {
                 did: didConfig.did,
-                keyId: `${didConfig.did}#primary`,
-                publicKey: didConfig.primaryKey.getPublicKeyString(),
-                privateKey: didConfig.primaryKey.getPrivateKeyString(),
+                keyId: '#primary',
+                publicKey,
+                privateKey,
               },
               atomicVCs: foundVCs,
               token,

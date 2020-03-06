@@ -74,6 +74,7 @@ type EnvConfig = {
     queue: string
     exchange?: string
   }
+  issuerMnemonic: string
 }
 
 export const getEnv = (): EnvConfig => ({
@@ -82,4 +83,5 @@ export const getEnv = (): EnvConfig => ({
   appServerUrl: getVar({name: 'APP_SERVER_URL', type: 'string'}),
   sessionSecret: getVar({name: 'SESSION_SECRET', type: 'string'}),
   amqp: getVar({name: 'AMQP', type: 'object'}),
+  issuerMnemonic: getVar({name: 'ISSUER_MNEMONIC', type: 'string'}),
 })

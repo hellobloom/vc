@@ -1,19 +1,53 @@
 import base64url from 'base64url'
-import {Resolver, DIDDocument, ParsedDID} from 'did-resolver'
-const jsonld = require('jsonld')
+import {Resolver, DIDDocument as _DIDDocument, ParsedDID, PublicKey} from 'did-resolver'
 
-type EnhancedDIDDocument = DIDDocument & {
+const jsonld = require('jsonld')
+const {op, func} = require('@transmute/element-lib')
+
+type DIDDocument = _DIDDocument & {
   assertionMethod: []
 }
 
-const resolveElemDID = async (_: string, parsed: ParsedDID): Promise<EnhancedDIDDocument | null> => {
-  if (!parsed.params) return null
-  const initialState = parsed.params['elem:initial-state']
-  if (!initialState) return null
+type KeyPair = {
+  publicKey: string
+  privateKey: string
+}
 
-  const decodedInitialState = JSON.parse(base64url.decode(initialState))
-  const decodedPayload = JSON.parse(base64url.decode(decodedInitialState.payload))
-  // TODO: validate payload with signautes
+export const createElemDID = async ({
+  primaryKey,
+  recoveryKey,
+}: {
+  primaryKey: KeyPair
+  recoveryKey: Omit<KeyPair, 'privateKey'>
+}): Promise<string> => {
+  const didDocumentModel = {
+    ...op.getDidDocumentModel(primaryKey.publicKey, recoveryKey.publicKey),
+    '@context': 'https://w3id.org/security/v2',
+    authentication: ['#primary'],
+    assertionMethod: ['#primary'],
+  }
+  const createPayload = await op.getCreatePayload(didDocumentModel, {privateKey: primaryKey.privateKey})
+  const didUniqueSuffix = func.getDidUniqueSuffix(createPayload)
+
+  return `did:elem:${didUniqueSuffix};elem:initial-state=${base64url.encode(JSON.stringify(createPayload))}`
+}
+
+const resolveElemDID = async (_: string, parsed: ParsedDID): Promise<DIDDocument | null> => {
+  if (!parsed.params) throw new Error('Element DID must have the elem:intial-state matrix param')
+  const initialState = parsed.params['elem:initial-state']
+  if (!initialState) throw new Error('Element DID must have the elem:intial-state matrix param')
+
+  const {protected: encodedHeader, payload: encodedPayload, signature} = JSON.parse(base64url.decode(initialState))
+
+  const decodedHeader = JSON.parse(base64url.decode(encodedHeader))
+  const decodedPayload = JSON.parse(base64url.decode(encodedPayload))
+  const publicKey = decodedPayload.publicKey.find(({id}: PublicKey) => id === decodedHeader.kid)
+
+  if (!publicKey) throw new Error(`Cannot find public key with id: ${decodedHeader.kid}`)
+
+  const isSigValid = func.verifyOperationSignature(encodedHeader, encodedPayload, signature, publicKey.publicKeyHex)
+
+  if (!isSigValid) throw new Error('Cannot validate create operation')
 
   const prependBaseDID = (field: any) => {
     if (typeof field === 'string') {
@@ -54,13 +88,13 @@ export const isValidDIDStructure = (value: any): value is string => {
   return false
 }
 
-export const resolveDID = async (did: string): Promise<EnhancedDIDDocument> => {
+export const resolveDID = async (did: string): Promise<DIDDocument> => {
   if (!isValidDIDStructure(did)) {
     throw Error(`unable to resolve did document: ${did}`)
   }
 
   const resolver = new Resolver({elem: resolveElemDID})
-  const didDocument = (await resolver.resolve(did)) as EnhancedDIDDocument
+  const didDocument = (await resolver.resolve(did)) as DIDDocument
 
   if (!didDocument) {
     throw Error(`unable to resolve did document: ${did}`)

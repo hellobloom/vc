@@ -1,39 +1,25 @@
 import {DIDUtils, VPV1, AtomicVCV1} from '@bloomprotocol/attestations-common'
-import EthWallet from 'ethereumjs-wallet'
 import extend from 'extend'
-import base64url from 'base64url'
 import {keyUtils} from '@transmute/es256k-jws-ts'
 
-const {op, func} = require('@transmute/element-lib')
+const {MnemonicKeySystem} = require('@transmute/element-lib')
 const {EcdsaSecp256k1KeyClass2019, EcdsaSecp256k1Signature2019} = require('@transmute/lds-ecdsa-secp256k1-2019')
 const jsigs = require('jsonld-signatures')
 const url = require('url')
 
 const {AuthenticationProofPurpose} = jsigs.purposes
 
-type DIDConfig = {
-  did: string
-  primaryKey: EthWallet
-  recoveryKey: EthWallet
-}
+export const generateElemDID = async () => {
+  const menmonic: string = MnemonicKeySystem.generateMnemonic()
+  const mks = new MnemonicKeySystem(menmonic)
+  const primaryKey = await mks.getKeyForPurpose('primary', 0)
+  const recoveryKey = await mks.getKeyForPurpose('recovery', 0)
 
-export const generateElemDID = async (): Promise<DIDConfig> => {
-  const primaryKey = EthWallet.generate()
-  const recoveryKey = EthWallet.generate()
-
-  const didDocumentModel = {
-    ...op.getDidDocumentModel(primaryKey.getPublicKeyString(), recoveryKey.getPublicKeyString()),
-    '@context': 'https://w3id.org/security/v2',
-    authentication: ['#primary'],
-    assertionMethod: ['#primary'],
-  }
-  const createPayload = await op.getCreatePayload(didDocumentModel, {privateKey: primaryKey.getPrivateKey()})
-  const didUniqueSuffix = func.getDidUniqueSuffix(createPayload)
+  const did = await DIDUtils.createElemDID({primaryKey, recoveryKey})
 
   return {
-    did: `did:elem:${didUniqueSuffix};elem:initial-state=${base64url.encode(JSON.stringify(createPayload))}`,
-    primaryKey,
-    recoveryKey,
+    did,
+    menmonic,
   }
 }
 

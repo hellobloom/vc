@@ -1,26 +1,18 @@
-import EthWallet from 'ethereumjs-wallet'
-import base64url from 'base64url'
-const {op, func} = require('@transmute/element-lib')
+import {DIDUtils} from '@bloomprotocol/attestations-common'
+
+const {MnemonicKeySystem} = require('@transmute/element-lib')
 
 import {buildAtomicVCSubjectV1, buildAtomicVCV1} from '../../../src/build/atomic/v1'
 
 const generateDID = async () => {
-  const primaryKey = EthWallet.generate()
-  const recoveryKey = EthWallet.generate()
+  const mks = new MnemonicKeySystem(MnemonicKeySystem.generateMnemonic())
+  const primaryKey = await mks.getKeyForPurpose('primary', 0)
+  const recoveryKey = await mks.getKeyForPurpose('recovery', 0)
 
-  const didDocumentModel = {
-    ...op.getDidDocumentModel(primaryKey.getPublicKeyString(), recoveryKey.getPublicKeyString()),
-    '@context': 'https://w3id.org/security/v2',
-    authentication: ['#primary'],
-    assertionMethod: ['#primary'],
-  }
-  const createPayload = await op.getCreatePayload(didDocumentModel, {privateKey: primaryKey.getPrivateKey()})
-  const didUniqueSuffix = func.getDidUniqueSuffix(createPayload)
-
-  console.log({didDocumentModel})
+  const did = await DIDUtils.createElemDID({primaryKey, recoveryKey})
 
   return {
-    did: `did:elem:${didUniqueSuffix};elem:initial-state=${base64url.encode(JSON.stringify(createPayload))}`,
+    did,
     primaryKey,
     recoveryKey,
   }
@@ -65,11 +57,11 @@ describe('buildAtomicVCV1', () => {
   it('builds an AtomicVCV1', async () => {
     expect.assertions(1)
 
-    const subject = await generateDID()
+    const {did: subjectDID} = await generateDID()
     const issuer = await generateDID()
 
     const credentialSubject = await buildAtomicVCSubjectV1({
-      subject: subject.did,
+      subject: subjectDID,
       data: {'@type': 'Thing', key: 'value'},
     })
 
@@ -79,8 +71,8 @@ describe('buildAtomicVCV1', () => {
       issuer: {
         did: issuer.did,
         keyId: '#primary',
-        privateKey: issuer.primaryKey.getPrivateKeyString(),
-        publicKey: issuer.primaryKey.getPublicKeyString(),
+        privateKey: issuer.primaryKey.privateKey,
+        publicKey: issuer.primaryKey.publicKey,
       },
       issuanceDate: '2016-02-01T00:00:00.000Z',
       expirationDate: '2018-02-01T00:00:00.000Z',
@@ -97,7 +89,7 @@ describe('buildAtomicVCV1', () => {
       issuanceDate: '2016-02-01T00:00:00.000Z',
       expirationDate: '2018-02-01T00:00:00.000Z',
       credentialSubject: {
-        id: subject.did,
+        id: subjectDID,
         data: {
           '@type': 'Thing',
           key: 'value',
@@ -120,11 +112,11 @@ describe('buildAtomicVCV1', () => {
   it('builds an AtomicVCV1 with custom contexts', async () => {
     expect.assertions(1)
 
-    const subject = await generateDID()
+    const {did: subjectDID} = await generateDID()
     const issuer = await generateDID()
 
     const credentialSubject = await buildAtomicVCSubjectV1({
-      subject: subject.did,
+      subject: subjectDID,
       data: {'@type': 'Thing', key: 'value'},
     })
 
@@ -134,8 +126,8 @@ describe('buildAtomicVCV1', () => {
       issuer: {
         did: issuer.did,
         keyId: '#primary',
-        privateKey: issuer.primaryKey.getPrivateKeyString(),
-        publicKey: issuer.primaryKey.getPublicKeyString(),
+        privateKey: issuer.primaryKey.privateKey,
+        publicKey: issuer.primaryKey.publicKey,
       },
       issuanceDate: '2016-02-01T00:00:00.000Z',
       expirationDate: '2018-02-01T00:00:00.000Z',
@@ -153,7 +145,7 @@ describe('buildAtomicVCV1', () => {
       issuanceDate: '2016-02-01T00:00:00.000Z',
       expirationDate: '2018-02-01T00:00:00.000Z',
       credentialSubject: {
-        id: subject.did,
+        id: subjectDID,
         data: {
           '@type': 'Thing',
           key: 'value',
@@ -176,16 +168,16 @@ describe('buildAtomicVCV1', () => {
   it('builds an AtomicVCV1 with multiple credentials', async () => {
     expect.assertions(1)
 
-    const subject = await generateDID()
+    const {did: subjectDID} = await generateDID()
     const issuer = await generateDID()
 
     const credentialSubject1 = await buildAtomicVCSubjectV1({
-      subject: subject.did,
+      subject: subjectDID,
       data: {'@type': 'Thing', key: 'value 1'},
     })
 
     const credentialSubject2 = await buildAtomicVCSubjectV1({
-      subject: subject.did,
+      subject: subjectDID,
       data: {'@type': 'Thing', key: 'value 2'},
     })
 
@@ -195,8 +187,8 @@ describe('buildAtomicVCV1', () => {
       issuer: {
         did: issuer.did,
         keyId: '#primary',
-        privateKey: issuer.primaryKey.getPrivateKeyString(),
-        publicKey: issuer.primaryKey.getPublicKeyString(),
+        privateKey: issuer.primaryKey.privateKey,
+        publicKey: issuer.primaryKey.publicKey,
       },
       issuanceDate: '2016-02-01T00:00:00.000Z',
       expirationDate: '2018-02-01T00:00:00.000Z',
@@ -214,14 +206,14 @@ describe('buildAtomicVCV1', () => {
       expirationDate: '2018-02-01T00:00:00.000Z',
       credentialSubject: [
         {
-          id: subject.did,
+          id: subjectDID,
           data: {
             '@type': 'Thing',
             key: 'value 1',
           },
         },
         {
-          id: subject.did,
+          id: subjectDID,
           data: {
             '@type': 'Thing',
             key: 'value 2',
@@ -245,16 +237,16 @@ describe('buildAtomicVCV1', () => {
   it('builds an AtomicVCV1 with multiple types', async () => {
     expect.assertions(1)
 
-    const subject = await generateDID()
+    const {did: subjectDID} = await generateDID()
     const issuer = await generateDID()
 
     const credentialSubject1 = await buildAtomicVCSubjectV1({
-      subject: subject.did,
+      subject: subjectDID,
       data: {'@type': 'Thing', key: 'value 1'},
     })
 
     const credentialSubject2 = await buildAtomicVCSubjectV1({
-      subject: subject.did,
+      subject: subjectDID,
       data: {'@type': 'Thing', key: 'value 2'},
     })
 
@@ -264,8 +256,8 @@ describe('buildAtomicVCV1', () => {
       issuer: {
         did: issuer.did,
         keyId: '#primary',
-        privateKey: issuer.primaryKey.getPrivateKeyString(),
-        publicKey: issuer.primaryKey.getPublicKeyString(),
+        privateKey: issuer.primaryKey.privateKey,
+        publicKey: issuer.primaryKey.publicKey,
       },
       issuanceDate: '2016-02-01T00:00:00.000Z',
       expirationDate: '2018-02-01T00:00:00.000Z',
@@ -283,14 +275,14 @@ describe('buildAtomicVCV1', () => {
       expirationDate: '2018-02-01T00:00:00.000Z',
       credentialSubject: [
         {
-          id: subject.did,
+          id: subjectDID,
           data: {
             '@type': 'Thing',
             key: 'value 1',
           },
         },
         {
-          id: subject.did,
+          id: subjectDID,
           data: {
             '@type': 'Thing',
             key: 'value 2',
