@@ -42,6 +42,26 @@ export const Shell: FC<'div', ShellProps> = props => {
             <NavLink to={sitemap.request} className="navbar-item" activeClassName="is-active">
               Request Credentials
             </NavLink>
+            <div className="navbar-item has-dropdown is-hoverable">
+              <div className="navbar-link">Well Known</div>
+              <div className="navbar-dropdown">
+                <a className="navbar-item" href="/.well-known/did.json">
+                  <span>
+                    <strong>DID</strong>
+                    <br />
+                    The DID document for the issuer
+                  </span>
+                </a>
+                <hr className="navbar-divider" />
+                <a className="navbar-item" href="/.well-known/did-configuration.json">
+                  <span>
+                    <strong>DID Configuration</strong>
+                    <br />
+                    The DID donfiguration and domain linkage
+                  </span>
+                </a>
+              </div>
+            </div>
           </div>
         </div>
       </nav>
