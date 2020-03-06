@@ -27,11 +27,13 @@ export const applyWellKnownRoutes = (app: fastify.FastifyInstance) => {
 
     const did = await DIDUtils.createElemDID({primaryKey, recoveryKey})
 
+    const url = env.host ? env.host : `localhost:${env.port}`
+
     const credentialSubject = await buildAtomicVCSubjectV1({
       subject: did,
       data: {
         '@type': 'Thing',
-        url: env.host,
+        url,
       },
     })
     const vc = await buildAtomicVCV1({
