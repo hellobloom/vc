@@ -475,6 +475,33 @@ export interface VCSCreditScorePerson extends Subject<Person> {
 }
 export type VCCreditScorePerson = AtomicVCV1<VCSCreditScorePerson>;
 
+//////////////////////////////////////////////////////////////
+// Meta/aggregation
+//////////////////////////////////////////////////////////////
+export interface ReceivedCredentialRole {
+  '@type': 'ReceivedCredentialRole';
+  startDate?: string;
+  endDate?: string;
+  aggregator?: string;
+  contextsSome?: Array<string>;
+  contextsAll?: Array<string>;
+  contextsNot?: Array<string>;
+  reporterDidSome?: Array<string>;
+  reporterDidAll?: Array<string>;
+  reporterDidNot?: Array<string>;
+  receivedCredentials: MaybeArray<string | AtomicVCV1>;
+}
+export interface VCSMetaPerson extends Subject<Person> {
+  '@type': 'Person';
+  receivedCredentials: MaybeArray<ReceivedCredentialRole>;
+}
+export interface VCSMetaOrganization extends Subject<Organization> {
+  '@type': 'Organization';
+  receivedCredentials: MaybeArray<ReceivedCredentialRole>;
+}
+export type VCMetaPerson = AtomicVCV1<VCSMetaPerson>;
+export type VCMetaOrganization = AtomicVCV1<VCSMetaOrganization>;
+
 /**
  * +--------- Table of implemented attestation types -----------+
  *
@@ -512,7 +539,7 @@ export type VCCreditScorePerson = AtomicVCV1<VCSCreditScorePerson>;
  * | X | 22 | 'birth-date'         | VCDOBPerson                                                    |
  * | X | 23 | gender               | VCGenderPerson                                                 |
  * | - | 24 | group                |                                                                |
- * | - | 25 | meta                 |                                                                |
+ * | X | 25 | meta                 | VCMeta                                                         |
  * | - | 26 | office               |                                                                |
  * | - | 27 | credential           |                                                                |
  * | - | 28 | medical              |                                                                |
