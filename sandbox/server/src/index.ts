@@ -5,7 +5,7 @@ import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 
 import {getEnv} from '@server/env'
-import {applyApiRoutes} from '@server/routes'
+import {applyRoutes} from '@server/routes'
 import {applySocketWorker} from '@server/socket/worker'
 import {initModels} from '@server/models'
 
@@ -26,7 +26,7 @@ const main = async () => {
     app.listen(env.port)
   }
 
-  applyApiRoutes(app)
+  applyRoutes(app)
   applySocketWorker(app)
 
   app.all('*', (_, reply) => {
