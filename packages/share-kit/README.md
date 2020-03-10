@@ -9,9 +9,20 @@ Easily allow your users to share their verified personal information directly wi
   - [Implementations](#implementations)
   - [Usage](#usage)
     - [RequestData](#requestdata)
-    - [TAttestationTypeNames](#tattestationtypenames)
-      - [TAttestationTypeNames Subtypes](#tattestationtypenames-subtypes)
+      - [Version 1](#version-1)
       - [Appending to URL](#appending-to-url)
+    - [RequestPayloadData](#requestpayloaddata)
+      - [Version 1](#payload-version-1)
+        - [Attestations](#payload-version-1-attestation)
+        - [Authentication](#payload-version-1-authentication)
+      - [Types](#types)
+        - [Type Names](#type-names)
+        - [Detailed Configs](#detailed-configs)
+          - [Version 1](#detailed-configs-version-1)
+      - [Notes](#notes)
+        - [Provider vs Attester](#provider-vs-attester)
+        - [Server Side Checks](#server-side-checks)
+    - [Example](#example)
     - [QROptions](#qroptions)
     - [ButtonOptions](#buttonoptions)
       - [ButtonType](#buttontype)
@@ -40,70 +51,123 @@ npm install --save @bloomprotocol/share-kit
 ```typescript
 import {renderRequestElement, RequestData, QROptions} from '@bloomprotocol/share-kit'
 
-const requestData: RequestData = {...}
+const requestData: RequestData = {
+  version: 1,
+  token: '11bf5b37-e0b8-42e0-8dcf-dc8c4aefc000',
+  url: 'https://mysite.com/api/share-kit/receive',
+  payload_url: 'https://mysite.com/api/share-kit/payload/11bf5b37-e0b8-42e0-8dcf-dc8c4aefc000',
+}
 const qrOptions: Partial<QROptions> = {
   size: 200,
 }
-const callbackUrl = 'https://mysite.com/bloom-callback'
+const buttonOptions: ButtonOptions = {
+  callbackUrl: 'https://mysite.com/api/share-kit/bloom-callback/11bf5b37-e0b8-42e0-8dcf-dc8c4aefc000',
+}
+
 const container = document.createElement('div')
 
-const {update, remove} = renderRequestElement({container, requestData, qrOptions, callbackUrl})
+const {update, remove} = renderRequestElement({container, requestData, qrOptions, buttonOptions})
 
 // Update the element
-update({requestData: newRequestData, qrOptions: newQROptions, callbackUrl: newCallbackUrl})
+update({requestData: newRequestData, qrOptions: newQROptions, buttonOptions: newButtonOptions})
 
 // Remove the element
 remove()
 ```
 
-<h2 id="request-types">Types</h3>
+### RequestData
 
-### RequestDataAuthentication
+Data to be rendered into the request element.
 
-Data to be rendered into the RequestQRCode for authentication requests.
+QR codes can only contain so much data so instead of providing all the data to Share Kit directly you provide a `payload_url` that returns the necessary information.
 
-| Name                   | Description                                                                                     | Type     |
-| ---------------------- | ----------------------------------------------------------------------------------------------- | -------- |
-| action                 | Action type                                                                                     | `Action` |
-| token                  | Unique string to identify this data request                                                     | `string` |
-| url                    | The API endpoint to POST the `ResponseData` to.<br/> See [below](#appending-to-URL) for details | `string` |
-| org_logo_url           | A url of the logo to display to the user when requesting data                                   | `string` |
-| org_name               | The name of the organization requesting data                                                    | `string` |
-| org_usage_policy_url   | The url of the usage policy for the organization requesting data                                | `string` |
-| org_privacy_policy_url | The url of the privacy policy for the organization requesting data                              | `string` |
+#### Version 1
 
-### RequestDataAttestation
+| Name        | Description                                                                                     | Type     |
+| ----------- | ----------------------------------------------------------------------------------------------- | -------- |
+| version     | The version of the request data structure                                                       | `1`      |
+| token       | Unique string to identify this data request                                                     | `string` |
+| url         | The API endpoint to POST the `ResponseData` to.<br/> See [below](#appending-to-URL) for details | `string` |
+| payload_url | The url the user's app will GET `RequestPayloadData` from                                       | `string` |
 
-Data to be rendered into the RequestQRCode for attestation sharing requests.
+#### Appending to URL
 
-| Name                   | Description                                                                                     | Type                                              |
-| ---------------------- | ----------------------------------------------------------------------------------------------- | ------------------------------------------------- |
-| action                 | Action type                                                                                     | `Action`                                          |
-| token                  | Unique string to identify this data request                                                     | `string`                                          |
-| url                    | The API endpoint to POST the `ResponseData` to.<br/> See [below](#appending-to-URL) for details | `string`                                          |
-| org_logo_url           | A url of the logo to display to the user when requesting data                                   | `string`                                          |
-| org_name               | The name of the organization requesting data                                                    | `string`                                          |
-| types                  | The type of attestions required and the amount needed                                           | [`TAttestationTypeNames`](#TAttestationTypeNames) |
-| org_usage_policy_url   | The url of the usage policy for the organization requesting data                                | `string`                                          |
-| org_privacy_policy_url | The url of the privacy policy for the organization requesting data                              | `string`                                          |
+The user can share by tapping a button or scanning a QR code, sometimes you'll need to know the difference so the query param `share-kit-from` is appended to your url.
 
-### TAttestationTypeNames
+The param will either be `share-kit-from=qr` OR `share-kit-from=button`.
 
-| Type              | Description                       | Source     | Platforms |
-| ----------------- | --------------------------------- | ---------- | --------- |
-| 'phone'           | SMS verification                  | Twilio     | iOS, Web  |
-| 'email'           | Email verification                | Mailgun    | iOS, Web  |
-| 'facebook'        | Facebook verification             | Facebook   | iOS, Web  |
-| 'google'          | Google verification               | Google     | iOS, Web  |
-| 'linkedin'        | LinkedIn verification             | LinkedIn   | iOS, Web  |
-| 'twitter'         | Twitter verification              | Twitter    | iOS, Web  |
-| 'id-document'     | Identity document verification    | Acuant     | Web       |
-| 'sanction-screen' | Sanction person screening         | BlockScore | iOS, Web  |
-| 'pep-screen'      | Politically exposed person screen | KYC2020    | iOS, Web  |
-| 'income'          | Income verification               | Quovo      | Web       |
-| 'assets'          | Assets verification               | Quovo      | Web       |
+```diff
+- 'https://mysite.com/api/share-kit/receive'
++ 'https://mysite.com/api/share-kit/receive?share-kit-from=qr'
+```
 
-#### TAttestationTypeNames Subtypes
+Works if your url already has a query param too!
+
+```diff
+- 'https://mysite.com/api/share-kit/receive?my-param='
++ 'https://mysite.com/api/share-kit/receive?my-param=&share-kit-from=qr'
+```
+
+### RequestPayloadData
+
+The rest of the data necessary for sharing verified data.
+
+<h4 id="payload-version-1">Version 1</h4>
+
+| Name                   | Description                                                        | Type     |
+| ---------------------- | ------------------------------------------------------------------ | -------- |
+| version                | The version of the payload data                                    | `1`      |
+| org_logo_url           | A url of the logo to display to the user when requesting data      | `string` |
+| org_name               | The name of the organization requesting data                       | `string` |
+| org_usage_policy_url   | The url of the usage policy for the organization requesting data   | `string` |
+| org_privacy_policy_url | The url of the privacy policy for the organization requesting data | `string` |
+
+<h5 id="payload-version-1-attestation">Attestation</h5>
+
+In addition to [above](#payload-version-1)
+
+| Name               | Description                                                         | Type                | Required |
+| ------------------ | ------------------------------------------------------------------- | ------------------- | -------- |
+| action             | The action to take                                                  | `attestation`       | Y        |
+| types              | The type of attestions required and the amount needed               | See [below](#types) | Y        |
+| attester_whitelist | List of attester ETH addresses to accept any attestation from       | `string[]`          | N        |
+| attester_blacklist | List of attester ETH addresses to _not_ accept any attestation from | `string[]`          | N        |
+
+<h5 id="payload-version-1-authentication">Authentication</h5>
+
+In addition to [above](#payload-version-1)
+
+| Name   | Description        | Type             |
+| ------ | ------------------ | ---------------- |
+| action | The action to take | `authentication` |
+
+#### Types
+
+`types` can be set to a list of [Type Names](#type-names) or [Detailed Configs](#detailed-configs).
+
+##### Type Names
+
+> Types
+
+| Type              | Description                                                                                       | Source     | Platforms |
+| ----------------- | ------------------------------------------------------------------------------------------------- | ---------- | --------- |
+| 'phone'           | SMS verification                                                                                  | Twilio     | iOS, Web  |
+| 'email'           | Email verification                                                                                | Mailgun    | iOS, Web  |
+| 'facebook'        | Facebook verification                                                                             | Facebook   | iOS, Web  |
+| 'google'          | Google verification                                                                               | Google     | iOS, Web  |
+| 'linkedin'        | LinkedIn verification                                                                             | LinkedIn   | iOS, Web  |
+| 'twitter'         | Twitter verification                                                                              | Twitter    | iOS, Web  |
+| 'id-document'     | Identity document verification                                                                    | Acuant     | Web       |
+| 'sanction-screen' | Sanction person screening                                                                         | BlockScore | iOS, Web  |
+| 'pep-screen'      | Politically exposed person screen                                                                 | KYC2020    | iOS, Web  |
+| 'income'          | Income verification                                                                               | Quovo      | Web       |
+| 'assets'          | Assets verification                                                                               | Quovo      | Web       |
+| 'full-name'       | Subtype of 'facebook', 'linkedin', 'sanction-screen', 'pep-screen', and 'id-document' attestation | -          | iOS, Web  |
+| 'birth-date'      | Subtype of 'sanction-screen', 'pep-screen', and 'id-document' attestations                        | -          | iOS, Web  |
+| 'gender'          | Subtype of 'id-document' attestation                                                              | -          | Web       |
+| 'supplemental'    | Subtype of 'income' and 'assets' attestations                                                     | -          | Web       |
+
+> Subtypes
 
 | Type           | Description                                                                                       | Platforms |
 | -------------- | ------------------------------------------------------------------------------------------------- | --------- |
@@ -114,60 +178,116 @@ Data to be rendered into the RequestQRCode for attestation sharing requests.
 
 For more information, see the [full list of attestation types](https://github.com/hellobloom/attestations-lib/blob/8192e222f66c9c9ec8a57f6e0e135f21acf4677b/src/AttestationTypes.ts#L8) that are implemented / planned to be implemented.
 
-#### Appending to URL
+##### Detailed Configs
 
-The user can share by tapping a button or scanning a QR code, sometimes you'll need to know the difference so the query param `share-kit-from` is appended to your url.
+Detailed configs allow you to control exactly what attestation data you will recieve.
 
-The param will either be `share-kit-from=qr` OR `share-kit-from=button`.
+<h6 id="detailed-configs-version-1">Version 1</h6>
 
-```
-// Input
-'https://receive-kit.bloom.co/api/receive'
+| Name               | Description                                                            | Type                    | Required |
+| ------------------ | ---------------------------------------------------------------------- | ----------------------- | -------- |
+| name               | The name of the attestation                                            | `TAttestationTypeNames` | Y        |
+| optional           | Whether the attestation is required to be completed                    | `boolean`               | N        |
+| completed_after    | Signifies that the attestation has to be completed after a given date  | `string`                | N        |
+| completed_before   | Signifies that the attestation has to be completed before a given date | `string`                | N        |
+| provider_whitelist | List of provider names to accept an attestation from                   | `string[]`              | N        |
+| provider_blacklist | List of provider names to _not_ accept an attestation from             | `string[]`              | N        |
+| attester_whitelist | List of attester ETH addresses to accept an attestation from           | `string[]`              | N        |
+| attester_blacklist | List of attester ETH addresses to _not_ accept an attestation from     | `string[]`              | N        |
 
-// Output
-'https://receive-kit.bloom.co/api/receive?share-kit-from=qr'
-```
+#### Notes
 
-Works if your url already has a query param too!
+##### Provider vs Attester
 
-```
-// Input
-'https://receive-kit.bloom.co/api/receive?my-param=',
+A provider is the party who supplies the data to be verified and an attester is the party that signs the data gotten from the provider. Sometimes the provider can be the same as the attester.
 
-// Output
-'https://receive-kit.bloom.co/api/receive?my-param=&share-kit-from=qr',
-```
+In the options above the provider will be the _name_ of the data provider while the attester will the be eth address of the signer.
 
-<h3 id="request-example">Example</h3>
+##### Server Side Checks
 
-# Attestation data request:
+The filtering options above (`completed_(after)|(before)`, `(provider)|(attester)_(black)|(white)list`) are meant to improve user expience when sharing attestations. When users attempt to share attestations from their mobile app they will be restricited by the provided filters. But due to the nature of how they share data directly to your server people can share data outside of the app.
 
-```ts
-{
-  action: Action.attestation,
-  token: '0x8f31e48a585fd12ba58e70e03292cac712cbae39bc7eb980ec189aa88e24d043',
-  url: 'https://receive-kit.bloom.co/api/receive',
-  org_logo_url: 'https://bloom.co/images/notif/bloom-logo.png',
-  org_name: 'Bloom',
-  org_usage_policy_url: 'https://bloom.co/legal/terms',
-  org_privacy_policy_url: 'https://bloom.co/legal/privacy',
-  types: ['full-name', 'phone', 'email'],
-}
-```
+This means that the completed data, provider, and attester still need to be verified on your backend after receiving the data. You can do this while you are validating the overall structure and proofs with [Verify Kit](https://github.com/hellobloom/verify-kit).
 
-# Authentication/login request:
+### Example
 
 ```ts
-{
-  action: Action.authentication,
-  token: '0xabcdee48a585fd12ba58e70e03292cac7fbac958b591baf9cbe9ac157cbadefa',
-  url: 'https://receive-kit.bloom.co/api/receive',
-  org_logo_url: 'https://bloom.co/images/notif/bloom-logo.png',
-  org_name: 'Bloom',
-  org_usage_policy_url: 'https://bloom.co/legal/terms',
-  org_privacy_policy_url: 'https://bloom.co/legal/privacy',
-  types: [],
+// Server
+
+import {RequestData, RequestPayloadData} from '@bloomprotocol/share-kit'
+import {uuid} from 'uuidv4'
+
+app.get('/api/share-kit/get-token', function(req, res) {
+  const token = uuid()
+  const requestPayloadData: RequestPayloadData = {
+    version: 1,
+    // Enforce that all attestations come from a specified attester
+    attester_whitelist: ['0x123...'],
+    types: [
+      {
+        // Enforce that this attestation came from an ID document (acuant)
+        name: 'full-name',
+        provider_whitelist: ['acuant'],
+      },
+      {
+        name: 'phone',
+        completed_after: dayjs()
+          .subtract(1, 'year')
+          .toISOString(),
+        // Enfoce that this attestation comes from a different specified attester
+        attester_whitelist: ['0x456...'],
+      },
+      'email',
+      {
+        name: 'address',
+        optional: true,
+      },
+    ],
+    org_logo_url: 'https://mysite.com/images/my-logo.png',
+    org_name: 'My Site',
+    org_usage_policy_url: 'https://mysite.com/legal/terms',
+    org_privacy_policy_url: 'https://mysite.com/legal/privacy',
+  }
+
+  storeRequestPayloadDataForToken(token, requestPayloadData)
+
+  res.json({token})
+})
+
+app.get('/api/share-kit/payload/:token', function(req, res) {
+  const token = req.params.token
+
+  const requestPayloadData: RequestPayloadData = getRequestPayloadDataForToken(token)
+
+  res.json(requestPayloadData)
+})
+```
+
+```ts
+// Client
+
+import {renderRequestElement, RequestData, QROptions, Action, ButtonOptions} from '@bloomprotocol/share-kit'
+
+const res = await fetch('/api/share-kit/get-token')
+const json = await res.json()
+const {token} = json
+
+const requestData: RequestData = {
+  version: 1,
+  token: token,
+  url: `https://mysite.com/api/share-kit/receive/${token}`,
+  payload_url: `https://mysite.com/api/share-kit/payload/${token}`,
 }
+const qrOptions: Partial<QROptions> = {
+  size: 200,
+}
+const buttonOptions: ButtonOptions = {
+  callbackUrl: `https://mysite.com/share-kit/callback/${token}`,
+}
+
+const container = document.createElement('div')
+
+const {update, remove} = renderRequestElement({container, requestData, qrOptions, buttonOptions})
 ```
 
 ![Sample QR](https://github.com/hellobloom/attestations-es/raw/master/assets/share-kit/sampleQR.png)

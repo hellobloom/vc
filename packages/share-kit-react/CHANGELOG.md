@@ -1,8 +1,8 @@
-## 4.5.2
+## 4.6.0
 
 **Improvements**
 
-- Bump to latest [share-kit](https://github.com/hellobloom/attestations-es/tree/master/packages/share-kit)
+- Bump to latest [share-kit](https://github.com/hellobloom/attestations-ts/tree/master/packages/share-kit)
 
 ## 4.5.1
 
