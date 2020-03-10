@@ -1,8 +1,8 @@
-## 1.1.2
+## 1.2.0
 
 **Improvements**
 
-- Bump to latest [share-kit](https://github.com/hellobloom/attestations-es/tree/master/packages/share-kit)
+- Bump to latest [share-kit](https://github.com/hellobloom/attestations-ts/tree/master/packages/share-kit)
 
 ## 1.1.1
 

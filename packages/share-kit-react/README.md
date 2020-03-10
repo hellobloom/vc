@@ -56,6 +56,13 @@ const qrOptions: Partial<QROptions> = {
   }}
 />
 
+// Always render a button
+<RequestElement
+  requestData={requestData}
+  buttonOptions={buttonOptions}
+  shouldRenderButton
+/>
+
 // Passing props to the container
 <RequestElement
   requestData={requestData}

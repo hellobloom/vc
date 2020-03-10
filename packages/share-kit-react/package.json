@@ -1,6 +1,6 @@
 {
   "name": "@bloomprotocol/share-kit-react",
-  "version": "4.5.2-beta.0",
+  "version": "4.6.0-beta.0",
   "description": "React wrapper for @bloomprotocol/share-kit",
   "main": "dist/index.js",
   "module": "dist/share-kit.esm.js",
@@ -22,7 +22,7 @@
     "storybook": "start-storybook -p 9001"
   },
   "dependencies": {
-    "@bloomprotocol/share-kit": "^7.6.2-beta.0",
+    "@bloomprotocol/share-kit": "7.7.0-beta.0",
     "react-forward-props": "^1.1.2",
     "tslib": "^1.10.0"
   },
