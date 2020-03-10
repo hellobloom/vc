@@ -6,12 +6,13 @@ import {
   State,
   City,
   AdministrativeArea,
+  MonetaryAmount,
   // Person,
   // MonetaryAmount,
   // Date as TDate,
   // GenderType,
-  // PostalAddress,
-  // WebSite,
+  PostalAddress,
+  WebSite,
 } from 'schema-dts';
 
 import { AtomicVCSubjectV1, SimpleThing } from '@bloomprotocol/vc-common';
@@ -47,4 +48,26 @@ export interface MonetaryAmountR extends MonetaryAmount {
 export interface EmployeeRoleOrganization {
   '@type': 'EmployeeRole';
   employeeOf: OrganizationE;
+}
+
+export interface OrganizationE extends Subject<Organization> {
+  '@type': 'Organization';
+  name?: string;
+  address?: MaybeArray<PostalAddress>;
+  legalName?: string;
+  dissolutionDate?: string;
+  hasCredential?: MaybeArray<IncorporationCredential>;
+  telephone?: string;
+  faxNumber?: string;
+  email?: string;
+  website?: MaybeArray<WebSite>;
+}
+
+export interface IncorporationCredential {
+  '@type': 'IncorporationCredential';
+  credentialCategory?: string;
+  additionalType?: string;
+  dateCreated?: string;
+  datePublished?: string;
+  recognizedBy?: MaybeArray<GovernmentOrg>;
 }
