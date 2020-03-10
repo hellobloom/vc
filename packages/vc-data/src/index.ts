@@ -1,17 +1,17 @@
-export * from './base';
-export * from './name';
-export * from './phone';
-export * from './email';
-export * from './aml';
-export * from './iddocument';
-export * from './nationalid';
-export * from './address';
-export * from './dob';
-export * from './gender';
-export * from './account';
-export * from './employment';
-export * from './credit';
-export * from './meta';
+export * from './base'
+export * from './name'
+export * from './phone'
+export * from './email'
+export * from './aml'
+export * from './iddocument'
+export * from './nationalid'
+export * from './address'
+export * from './dob'
+export * from './gender'
+export * from './account'
+export * from './employment'
+export * from './credit'
+export * from './meta'
 
 /**
  * +--------- Table of implemented attestation types -----------+

@@ -13,17 +13,15 @@ import {
   // GenderType,
   PostalAddress,
   WebSite,
-} from 'schema-dts';
+} from 'schema-dts'
 
-import { AtomicVCSubjectV1, SimpleThing } from '@bloomprotocol/vc-common';
+import {AtomicVCSubjectV1, SimpleThing} from '@bloomprotocol/vc-common'
 
-export type Modify<T, R> = Pick<T, Exclude<keyof T, keyof R>> & R;
-export type Extend<T, R> = Modify<Exclude<T, string>, R>;
-export type Subject<T extends SimpleThing | string> = AtomicVCSubjectV1<
-  Exclude<T, string>
->;
+export type Modify<T, R> = Pick<T, Exclude<keyof T, keyof R>> & R
+export type Extend<T, R> = Modify<Exclude<T, string>, R>
+export type Subject<T extends SimpleThing | string> = AtomicVCSubjectV1<Exclude<T, string>>
 
-export type MaybeArray<T> = T | Array<T>;
+export type MaybeArray<T> = T | Array<T>
 
 ///////////////////////////////////////////////////////
 // schema-dts type extensions
@@ -37,37 +35,37 @@ export type GovernmentOrg =
   | Corporation
   | GovernmentOrganization
   | (AdministrativeArea & {
-      identifier?: 'string'; // Issuer code
-    });
+      identifier?: 'string' // Issuer code
+    })
 
-export interface MonetaryAmountR extends MonetaryAmount {
-  currency: string;
-  value: number | string;
+export type MonetaryAmountR = MonetaryAmount & {
+  currency: string
+  value: number | string
 }
 
-export interface EmployeeRoleOrganization {
-  '@type': 'EmployeeRole';
-  employeeOf: OrganizationE;
+export type EmployeeRoleOrganization = {
+  '@type': 'EmployeeRole'
+  employeeOf: OrganizationE
 }
 
-export interface OrganizationE extends Subject<Organization> {
-  '@type': 'Organization';
-  name?: string;
-  address?: MaybeArray<PostalAddress>;
-  legalName?: string;
-  dissolutionDate?: string;
-  hasCredential?: MaybeArray<IncorporationCredential>;
-  telephone?: string;
-  faxNumber?: string;
-  email?: string;
-  website?: MaybeArray<WebSite>;
+export type OrganizationE = Subject<Organization> & {
+  '@type': 'Organization'
+  name?: string
+  address?: MaybeArray<PostalAddress>
+  legalName?: string
+  dissolutionDate?: string
+  hasCredential?: MaybeArray<IncorporationCredential>
+  telephone?: string
+  faxNumber?: string
+  email?: string
+  website?: MaybeArray<WebSite>
 }
 
-export interface IncorporationCredential {
-  '@type': 'IncorporationCredential';
-  credentialCategory?: string;
-  additionalType?: string;
-  dateCreated?: string;
-  datePublished?: string;
-  recognizedBy?: MaybeArray<GovernmentOrg>;
+export type IncorporationCredential = {
+  '@type': 'IncorporationCredential'
+  credentialCategory?: string
+  additionalType?: string
+  dateCreated?: string
+  datePublished?: string
+  recognizedBy?: MaybeArray<GovernmentOrg>
 }
