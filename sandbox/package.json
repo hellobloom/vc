@@ -1,0 +1,11 @@
+{
+  "name": "vc-sandbox",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "node ./bin/dev.js",
+    "reset-dev": "./bin/reset-dev"
+  },
+  "dependencies": {
+    "ngrok": "^3.2.7"
+  }
+}

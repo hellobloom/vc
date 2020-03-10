@@ -1,0 +1,16 @@
+.share {
+  &__shared-data-container {
+    & > ul {
+      padding: 1rem;
+    }
+  }
+
+  &__qr-container {
+    display: flex;
+    justify-content: center;
+  }
+
+  &__error-message {
+    margin-top: 0.5rem;
+  }
+}

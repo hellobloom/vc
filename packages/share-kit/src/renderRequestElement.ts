@@ -1,5 +1,5 @@
-import Bowser from 'bowser'
 import {Options as QROptions} from '@bloomprotocol/qr'
+import Bowser from 'bowser'
 
 import {ButtonOptions, RequestData, ShouldRenderButton, RequestElementResult} from './types'
 import {renderRequestButton} from './elements/renderRequestButton'

@@ -1,5 +1,5 @@
 import * as B from './base'
-import {IBaseAttIDDocData, IBaseAttIDDoc} from '../AttestationData'
+import {IBaseAttIDDocData, IBaseAttIDDoc} from '../types/data/v0'
 
 type TSingleLevelProps = keyof NonNullable<IBaseAttIDDocData> &
   Exclude<keyof NonNullable<IBaseAttIDDocData>, 'biographic' | 'classification' | 'facematch_result' | 'images'>

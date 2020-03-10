@@ -14,6 +14,20 @@
 - Deprecate the old `RequestData` structure in favor of the `payload_url` pattern
   - These types will be removed in v8.0.0
 
+**Miscellaneous**:
+
+- Bump to latest `@bloomprotocol/attestations-common`
+
+## 7.6.1
+
+**Bug fixes**:
+
+- Include tslib in dependencies
+
+**Miscellaneous**:
+
+- Bump to latest `@bloomprotocol/qr`
+
 ## 7.6.0
 
 **Improvements**

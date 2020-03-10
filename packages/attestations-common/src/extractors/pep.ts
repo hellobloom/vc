@@ -1,5 +1,5 @@
 import * as B from './base'
-import {IBaseAttPEPData, IBaseAttPEP} from '../AttestationData'
+import {IBaseAttPEPData, IBaseAttPEP} from '../types/data/v0'
 
 export const fields: Array<keyof IBaseAttPEPData> = ['date', 'name', 'country', 'search_summary']
 export const ssfields: Array<keyof IBaseAttPEPData['search_summary']> = [

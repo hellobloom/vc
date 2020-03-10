@@ -4,7 +4,7 @@ import randomBytes from 'randombytes'
 import * as ethSigUtil from 'eth-sig-util'
 import EthWallet from 'ethereumjs-wallet'
 
-import {MerkleTree} from './merketreejs'
+import {MerkleTree} from './merkletreejs'
 import {
   IIssuedClaimNode,
   ISignedClaimNode,
@@ -17,11 +17,11 @@ import {
   IDataNodeLegacy,
   IFormattedTypedData,
   IProof,
+  AttestationTypeID,
 } from './types'
 import {orderedStringify, isNotEmptyString} from './utils'
 import {validateDateTime} from './RFC3339DateTime'
 import {genValidateFn} from './validation'
-import {AttestationTypeID} from './AttestationTypes'
 
 export const hashMessage = (message: string): string => ethUtil.addHexPrefix(keccak256(message))
 

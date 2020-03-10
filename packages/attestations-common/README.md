@@ -49,7 +49,7 @@ const emailData = extract(emailCredential.credentialSubject.data, 'email', 'emai
 ## AttestationData
 
 ```typescript
-import {AttestationData} from '@bloomprotocol/attestations-common'
+import {AttestationDataV0} from '@bloomprotocol/attestations-common'
 ```
 
 We define some extensible interfaces that the attestation data will be formatted in. These are use when extracting the data from the VC.

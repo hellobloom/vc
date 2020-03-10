@@ -1,0 +1,19 @@
+#!/bin/bash
+
+mkdir ./db/migrations/build
+
+if [ -z "$1" ]; then
+  ENVIRONMENT='development'
+else
+  ENVIRONMENT="$1"
+fi
+
+for filename in ./db/migrations/*.ts; do
+  ./node_modules/.bin/tsc -t es2017 -module CommonJS -outDir ./db/migrations/build $filename
+done
+
+cp -rf ./db/dump ./db/migrations/build/db
+
+./node_modules/.bin/sequelize-cli db:migrate - env $ENVIRONMENT
+
+rm -Rf ./db/migrations/build

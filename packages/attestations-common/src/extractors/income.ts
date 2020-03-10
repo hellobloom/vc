@@ -1,4 +1,4 @@
-import {IBaseAttIncome} from '../AttestationData'
+import {IBaseAttIncome} from '../types/data/v0'
 
 export const extractIncome = (a: IBaseAttIncome, valType: string): IBaseAttIncome | string | number | null => {
   if (!a.summary) {

@@ -1,5 +1,5 @@
 import * as B from './base'
-import {TAddress, IBaseAttAddress, IBaseAttAddressProvider} from '../AttestationData'
+import {TAddress, IBaseAttAddress, IBaseAttAddressProvider} from '../types/data/v0'
 
 export const fields: Array<keyof TAddress> = [
   'full',

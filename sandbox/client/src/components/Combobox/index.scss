@@ -1,0 +1,21 @@
+[data-reach-combobox-popover] {
+  &[hidden] {
+    display: none;
+  }
+
+  display: block;
+}
+
+[data-reach-combobox-option] {
+  cursor: pointer;
+
+  &:hover {
+    background-color: #f5f5f5;
+    color: #0a0a0a;
+  }
+
+  &[aria-selected='true'] {
+    background-color: #3273dc;
+    color: #fff;
+  }
+}

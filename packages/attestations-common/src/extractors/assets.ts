@@ -1,5 +1,5 @@
 import * as B from './base'
-import {IBaseAttAssets} from '../AttestationData'
+import {IBaseAttAssets} from '../types/data/v0'
 
 export const extractAssets = (a: IBaseAttAssets, valType: string): IBaseAttAssets | string | number | null => {
   // Naive one-account implementation.  Will need future improvement, like adding together values with currency

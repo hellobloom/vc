@@ -201,6 +201,6 @@ app.post('/scan', async (req, res) => {
 
 # Using Verify Kit for BloomID Sign-In
 
-In conjuction with this libary you will use [Share Kit](https://github.com/hellobloom/attestations-ts/tree/master/packages/share-kit) to render an element to request users share their data with you.
+In conjuction with this libary you will use [Share Kit](https://github.com/hellobloom/attestations-es/tree/master/packages/share-kit) to render an element to request users share their data with you.
 
 Complete examples are available at [Bloom Starter](https://github.com/hellobloom/bloom-starter).

@@ -1,20 +1,33 @@
 import {IVerifiableAuth} from '@bloomprotocol/attestations-common'
 
-import {validateVerifiableAuth} from './structure/auth'
-import {ValidationResponse} from './utils'
+import {validateVerifiableAuthResponseV0} from './v0'
+import {ValidationResponse} from './shared/types'
 
-export const validateVerifiableAuthResponse = (data: any): ValidationResponse<IVerifiableAuth> => {
-  const outcome = validateVerifiableAuth(data)
+type Version = 'v0'
 
-  if (outcome.kind === 'invalid_param') {
+type VersionToResponse = {
+  v0: IVerifiableAuth
+}
+
+type ValidateVerifiableAuthOptions<V extends Version> = {
+  version?: V
+}
+
+export const validateVerifiableAuthResponse = <V extends Version = 'v0'>(
+  data: any,
+  {version}: ValidateVerifiableAuthOptions<V> = {},
+): ValidationResponse<VersionToResponse[V]> => {
+  if (typeof version === 'undefined' || version === 'v0') {
+    return validateVerifiableAuthResponseV0(data)
+  } else {
     return {
       kind: 'invalid',
-      errors: [{key: outcome.kind, message: outcome.message}],
+      errors: [
+        {
+          key: 'invalid_version',
+          message: `Invalid version passed: ${version}`,
+        },
+      ],
     }
-  }
-
-  return {
-    kind: 'validated',
-    data: outcome.data,
   }
 }

@@ -1,0 +1,5 @@
+#!/bin/bash
+
+echo "Building server"
+node_modules/.bin/tsc -p tsconfig.build.json
+echo "Done building server"

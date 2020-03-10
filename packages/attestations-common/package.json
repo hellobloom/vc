@@ -1,6 +1,6 @@
 {
   "name": "@bloomprotocol/attestations-common",
-  "version": "1.0.0",
+  "version": "1.1.0-beta.0",
   "main": "dist/index.js",
   "module": "dist/attestations-common.esm.js",
   "typings": "dist/index.d.ts",
@@ -14,22 +14,32 @@
   "scripts": {
     "start": "tsdx watch --tsconfig ./tsconfig.build.json",
     "build": "tsdx build --tsconfig ./tsconfig.build.json",
-    "test": "CI=true tsdx test",
-    "test:watch": "tsdx test",
+    "test": "tsdx test",
+    "test:watch": "tsdx test --watch",
     "lint": "tsdx lint src test",
     "prepare": "npm run build",
     "prepublishOnly": "npm run test && npm run lint"
   },
   "dependencies": {
+    "@decentralized-identity/did-common-typescript": "^0.1.19",
+    "@transmute/element-lib": "^0.5.2",
+    "@transmute/es256k-jws-ts": "^0.1.0",
+    "@transmute/lds-ecdsa-secp256k1-2019": "^0.1.1",
+    "@trust/keyto": "^1.0.0",
     "@types/crypto-js": "^3.1.43",
     "@types/eth-sig-util": "^2.1.0",
     "@types/randombytes": "^2.0.0",
+    "bitcoin-ts": "^1.12.0",
     "crypto-js": "^3.1.9-1",
+    "did-resolver": "^1.1.0",
     "eth-sig-util": "^2.5.2",
     "ethereumjs-util": "^6.2.0",
     "ethereumjs-wallet": "^0.6.3",
     "js-sha3": "^0.8.0",
-    "randombytes": "^2.1.0"
+    "jsonld": "^2.0.2",
+    "randombytes": "^2.1.0",
+    "schema-dts": "^0.5.1",
+    "tslib": "^1.10.0"
   },
   "devDependencies": {
     "@bloomprotocol/eslint-config": "^1.0.0-beta.1",
@@ -43,9 +53,8 @@
     "eslint-config-prettier": "^6.9.0",
     "eslint-plugin-prettier": "^3.1.2",
     "prettier": "^1.19.1",
-    "tsdx": "^0.12.1",
-    "tslib": "^1.10.0",
-    "typescript": "^3.7.4"
+    "tsdx": "^0.12.3",
+    "typescript": "^3.7.5"
   },
   "jest": {
     "moduleFileExtensions": [

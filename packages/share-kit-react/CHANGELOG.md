@@ -4,11 +4,21 @@
 
 - Bump to latest [share-kit](https://github.com/hellobloom/attestations-ts/tree/master/packages/share-kit)
 
+## 4.5.1
+
+**Bug fixes**:
+
+- Include tslib in dependencies
+
+**Miscellaneous**:
+
+- Bump to latest `@bloomprotocol/qr`
+
 ## 4.5.0
 
 **Improvements**
 
-- Bump to latest [share-kit](https://github.com/hellobloom/attestations-ts/tree/master/packages/share-kit)
+- Bump to latest [share-kit](https://github.com/hellobloom/attestations-es/tree/master/packages/share-kit)
 
 ## 4.3.0
 
@@ -20,7 +30,7 @@
 
 **Improvements**
 
-- Bump to latest [share-kit](https://github.com/hellobloom/attestations-ts/tree/master/packages/share-kit) to fix appending to `requestData.url`
+- Bump to latest [share-kit](https://github.com/hellobloom/attestations-es/tree/master/packages/share-kit) to fix appending to `requestData.url`
 
 ## 4.2.1
 
@@ -32,13 +42,13 @@
 
 **Improvements**
 
-- Bump to latest [share-kit](https://github.com/hellobloom/attestations-ts/tree/master/packages/share-kit) to include updated text for `verify` buttons
+- Bump to latest [share-kit](https://github.com/hellobloom/attestations-es/tree/master/packages/share-kit) to include updated text for `verify` buttons
 
 ## 4.1.0
 
 **Improvements**
 
-- Bump to latest [share-kit](https://github.com/hellobloom/attestations-ts/tree/master/packages/share-kit) to include button variations
+- Bump to latest [share-kit](https://github.com/hellobloom/attestations-es/tree/master/packages/share-kit) to include button variations
 - Add `React.HTMLAttributes<HTMLDivElement>` to `RequestElementProps` to support passing extra DOM props
 
 **Misc**
