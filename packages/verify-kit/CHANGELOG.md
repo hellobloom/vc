@@ -2,7 +2,7 @@
 
 **Improvements**
 
-- Implement validation of new VC/VP types from [attestations-common][attestations-common]
+- Implement validation of new VC/VP types from [vc-common][vc-common]
 
 ## 2.0.1
 
@@ -20,10 +20,10 @@
 **Breaking**
 
 - Most functions have been removed from the public API. The two main entry points are now `validateVerifiablePresentationResponse` and `validateVerifiableAuthResponse`
-- All `type`s have been removed from this library, they are exported by [attestations-common][attestation-common] now.
+- All `type`s have been removed from this library, they are exported by [vc-common][attestation-common] now.
 
 ## 1.0.0
 
 - Initial release
 
-[attestation-common]: https://github.com/hellobloom/attestations-es/tree/master/packages/attestations-common
+[attestation-common]: https://github.com/hellobloom/attestations-es/tree/master/packages/vc-common

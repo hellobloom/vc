@@ -1,5 +1,5 @@
 import fastify from 'fastify'
-import {DIDUtils} from '@bloomprotocol/attestations-common'
+import {DIDUtils} from '@bloomprotocol/vc-common'
 import dayjs from 'dayjs'
 import {buildAtomicVCV1, buildAtomicVCSubjectV1} from '@bloomprotocol/issue-kit'
 

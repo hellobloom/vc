@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
-    "@bloomprotocol/attestations-common": "^1.1.0-beta.0",
+    "@bloomprotocol/vc-common": "^1.1.0-beta.0",
     "@bloomprotocol/claim-kit-react": "^1.0.0-beta.0",
     "@bloomprotocol/share-kit-react": "^4.5.2-beta.0",
     "@reach/auto-id": "^0.8.0",

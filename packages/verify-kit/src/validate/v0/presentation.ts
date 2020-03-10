@@ -4,7 +4,7 @@ import {
   DataVersions,
   IVerifiedDataLegacy,
   IVerifiedDataOnChain,
-} from '@bloomprotocol/attestations-common'
+} from '@bloomprotocol/vc-common'
 
 import {getDecodedLogValueByName, TDecodedLog, getDecodedTxEventLogs} from '../../txUtils'
 import {SharedValidateVerifiablePresentationOptions, ValidationError, ValidationResponse} from '../shared/types'

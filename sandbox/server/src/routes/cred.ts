@@ -1,7 +1,7 @@
 import fastify from 'fastify'
 import S from 'fluent-schema'
 import {buildAtomicVCV1, buildAtomicVCSubjectV1} from '@bloomprotocol/issue-kit'
-import {DIDUtils} from '@bloomprotocol/attestations-common'
+import {DIDUtils} from '@bloomprotocol/vc-common'
 import dayjs from 'dayjs'
 
 const {MnemonicKeySystem} = require('@transmute/element-lib')

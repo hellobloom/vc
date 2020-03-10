@@ -2,7 +2,7 @@
 
 Shared types and utility functions for attestation related kits
 
-- [Attestations Commons Kit](#attestations-commons-kit)
+- [Attestations Commons Kit](#vc-commons-kit)
   - [Installation](#installation)
   - [Extrator](#extractor)
   - [AttestationData](#attestationdata)
@@ -39,7 +39,7 @@ npm install --save @bloomprotocol/att-comm-kit
 The `extractor` function helps extract data from a verifiable credential.
 
 ```typescript
-import {IVerifiableCredential, extract} from '@bloomprotocol/attestations-common'
+import {IVerifiableCredential, extract} from '@bloomprotocol/vc-common'
 
 const emailCredential: IVerifiableCredential = {...}
 
@@ -49,7 +49,7 @@ const emailData = extract(emailCredential.credentialSubject.data, 'email', 'emai
 ## AttestationData
 
 ```typescript
-import {AttestationDataV0} from '@bloomprotocol/attestations-common'
+import {AttestationDataV0} from '@bloomprotocol/vc-common'
 ```
 
 We define some extensible interfaces that the attestation data will be formatted in. These are use when extracting the data from the VC.

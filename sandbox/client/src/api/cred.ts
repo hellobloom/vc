@@ -1,5 +1,5 @@
 import * as http from './http'
-import {AtomicVCV1} from '@bloomprotocol/attestations-common'
+import {AtomicVCV1} from '@bloomprotocol/vc-common'
 
 export const create = ({type, data}: {type: string; data: {}}) => http.post<{id: string}>('/api/v1/cred/create', {type, data})
 

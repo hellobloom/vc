@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import {IProof} from '@bloomprotocol/attestations-common'
+import {IProof} from '@bloomprotocol/vc-common'
 import CryptoJS from 'crypto-js'
 
 export class MerkleTree {

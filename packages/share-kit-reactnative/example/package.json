@@ -8,9 +8,9 @@
     "ios": "react-native run-ios",
     "test": "jest",
     "lint": "eslint .",
-    "copy-deps": "npm run copy-share-kit && npm run copy-attestations-common",
+    "copy-deps": "npm run copy-share-kit && npm run copy-vc-common",
     "copy-share-kit": "copyfiles \"../../share-kit/**\" node_modules/@bloomprotocol/thisisneededforwhateverreason/share-kit",
-    "copy-attestations-common": "copyfiles \"../../attestations-common/**\" node_modules/@bloomprotocol/thisisneededforwhateverreason/attestations-common"
+    "copy-vc-common": "copyfiles \"../../vc-common/**\" node_modules/@bloomprotocol/thisisneededforwhateverreason/vc-common"
   },
   "dependencies": {
     "react": "16.8.6",

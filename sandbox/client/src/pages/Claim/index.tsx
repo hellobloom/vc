@@ -4,7 +4,7 @@ import {useParams, Redirect} from 'react-router-dom'
 import {isUuid} from 'uuidv4'
 import {ClaimElement} from '@bloomprotocol/claim-kit-react'
 import clsx from 'clsx'
-import {AtomicVCV1} from '@bloomprotocol/attestations-common'
+import {AtomicVCV1} from '@bloomprotocol/vc-common'
 
 import {Shell} from '../../components/Shell'
 import {sitemap} from '../../sitemap'

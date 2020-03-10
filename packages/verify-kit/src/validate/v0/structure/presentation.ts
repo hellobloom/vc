@@ -6,7 +6,7 @@ import {
   IMerkleProofShare,
   IProof,
   IVerifiablePresentation,
-} from '@bloomprotocol/attestations-common'
+} from '@bloomprotocol/vc-common'
 import * as EthU from 'ethereumjs-util'
 
 import {hashCredentials} from '../../../utils'

@@ -1,6 +1,6 @@
 import React, {useState, useEffect} from 'react'
 import {RequestElement, Action} from '@bloomprotocol/share-kit-react'
-import {TAttestationTypeNames} from '@bloomprotocol/attestations-common'
+import {TAttestationTypeNames} from '@bloomprotocol/vc-common'
 import {useParams, Redirect} from 'react-router-dom'
 import {isUuid} from 'uuidv4'
 import bowser from 'bowser'

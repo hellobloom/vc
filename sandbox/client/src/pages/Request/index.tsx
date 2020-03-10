@@ -1,5 +1,5 @@
 import React, {useState, useMemo} from 'react'
-import {AttestationTypeNames, AttestationTypes} from '@bloomprotocol/attestations-common'
+import {AttestationTypeNames, AttestationTypes} from '@bloomprotocol/vc-common'
 import {codeBlock} from 'common-tags'
 import {Link} from 'react-router-dom'
 import {FC} from 'react-forward-props'

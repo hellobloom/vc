@@ -37,7 +37,7 @@ const claimNode = buildClaimNodeV1({
 Create a verifiable credential (`SDVCV1`) of selectively discloseable claim nodes.
 
 ```typescript
-import {VCClaimNodeV1} from '@bloomprotocol/attestations-common'
+import {VCClaimNodeV1} from '@bloomprotocol/vc-common'
 import {buildSDVCV1} from '@bloomprotocol/issue-kit'
 
 const claimNodes: VCClaimNodeV1[] = [...]
@@ -57,7 +57,7 @@ const credential = buildSDVCV1({
 Convert a `SDVCV1` to a `SDBatchVCV1`
 
 ```typescript
-import {VCClaimNodeV1} from '@bloomprotocol/attestations-common'
+import {VCClaimNodeV1} from '@bloomprotocol/vc-common'
 import {buildSDVCV1, buildSDBatchVCV1} from '@bloomprotocol/issue-kit'
 
 const claimNodes: VCClaimNodeV1[] = [...]

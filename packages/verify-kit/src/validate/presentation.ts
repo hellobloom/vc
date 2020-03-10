@@ -1,4 +1,4 @@
-import {IVerifiablePresentation, VPV1} from '@bloomprotocol/attestations-common'
+import {IVerifiablePresentation, VPV1} from '@bloomprotocol/vc-common'
 
 import {validateVerifiablePresentationResponseV0, ValidateVerifiablePresentationResponseOptionsV0} from './v0'
 import {validateVerifiablePresentationResponseV1, ValidateVerifiablePresentationResponseOptionsV1} from './v1'

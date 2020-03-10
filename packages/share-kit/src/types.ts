@@ -1,4 +1,4 @@
-import {TAttestationTypeNames} from '@bloomprotocol/attestations-common'
+import {TAttestationTypeNames} from '@bloomprotocol/vc-common'
 import {Options as QROptions} from '@bloomprotocol/qr'
 import Bowser from 'bowser'
 

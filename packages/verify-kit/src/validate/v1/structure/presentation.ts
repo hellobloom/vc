@@ -10,7 +10,7 @@ import {
   AtomicVCProofV1,
   BaseVCRevocationV1,
   ValidateFn,
-} from '@bloomprotocol/attestations-common'
+} from '@bloomprotocol/vc-common'
 import {EcdsaSecp256k1Signature2019, EcdsaSecp256k1KeyClass2019} from '@transmute/lds-ecdsa-secp256k1-2019'
 import {keyUtils} from '@transmute/es256k-jws-ts'
 

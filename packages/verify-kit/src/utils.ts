@@ -1,4 +1,4 @@
-import {EthUtils, IProof, IMerkleProofShare, IVerifiableCredential} from '@bloomprotocol/attestations-common'
+import {EthUtils, IProof, IMerkleProofShare, IVerifiableCredential} from '@bloomprotocol/vc-common'
 
 export const formatMerkleProofForShare = (proof: IProof[]): IMerkleProofShare[] =>
   proof.map(({position, data}) => ({

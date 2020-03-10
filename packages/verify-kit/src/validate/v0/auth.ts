@@ -1,4 +1,4 @@
-import {IVerifiableAuth} from '@bloomprotocol/attestations-common'
+import {IVerifiableAuth} from '@bloomprotocol/vc-common'
 
 import {validateVerifiableAuth} from './structure/auth'
 import {ValidationResponse} from '../shared/types'

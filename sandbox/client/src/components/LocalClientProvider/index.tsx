@@ -1,6 +1,6 @@
 import React, {useContext, useEffect} from 'react'
 import createPersistedState from 'use-persisted-state'
-import {AtomicVCV1} from '@bloomprotocol/attestations-common'
+import {AtomicVCV1} from '@bloomprotocol/vc-common'
 import wretch from 'wretch'
 
 import {buildVPV1, appendQuery, generateElemDID} from './utils'

@@ -1,5 +1,5 @@
 import {Sequelize, Model, DataTypes, UUIDV4} from 'sequelize'
-import {AtomicVCV1} from '@bloomprotocol/attestations-common'
+import {AtomicVCV1} from '@bloomprotocol/vc-common'
 
 export type DataMapping = {
   datum: {'@type': string}

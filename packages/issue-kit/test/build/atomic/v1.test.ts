@@ -1,4 +1,4 @@
-import {DIDUtils} from '@bloomprotocol/attestations-common'
+import {DIDUtils} from '@bloomprotocol/vc-common'
 
 const {MnemonicKeySystem} = require('@transmute/element-lib')
 

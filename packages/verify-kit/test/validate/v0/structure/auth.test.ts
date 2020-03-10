@@ -1,4 +1,4 @@
-import {EthUtils, Utils} from '@bloomprotocol/attestations-common'
+import {EthUtils, Utils} from '@bloomprotocol/vc-common'
 import * as EthU from 'ethereumjs-util'
 import EthWallet from 'ethereumjs-wallet'
 

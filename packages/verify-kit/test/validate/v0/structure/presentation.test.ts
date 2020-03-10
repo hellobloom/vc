@@ -7,7 +7,7 @@ import {
   Utils,
   IIssuanceNode,
   IProof,
-} from '@bloomprotocol/attestations-common'
+} from '@bloomprotocol/vc-common'
 import * as EthU from 'ethereumjs-util'
 import EthWallet from 'ethereumjs-wallet'
 import * as ethSigUtil from 'eth-sig-util'

@@ -2,7 +2,7 @@
 
 **Miscellaneous**:
 
-- Bump to latest `@bloomprotocol/attestations-common`
+- Bump to latest `@bloomprotocol/vc-common`
 
 ## 7.6.1
 
@@ -19,7 +19,7 @@
 **Improvements**
 
 - Use the `@bloomprotocol/qr` package to render the QR code
-- Use the `@bloomprotocol/attestations-common` for shared types
+- Use the `@bloomprotocol/vc-common` for shared types
 
 ## 7.3.0
 

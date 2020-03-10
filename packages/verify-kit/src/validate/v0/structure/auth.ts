@@ -1,4 +1,4 @@
-import {genValidateFn, Utils, EthUtils, IVerifiableAuth} from '@bloomprotocol/attestations-common'
+import {genValidateFn, Utils, EthUtils, IVerifiableAuth} from '@bloomprotocol/vc-common'
 import * as EthU from 'ethereumjs-util'
 import {keccak256} from 'js-sha3'
 

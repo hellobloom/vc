@@ -10,7 +10,7 @@ import {
   SDLegacyVCV1,
   SDVCV1,
   SDBatchVCV1,
-} from '@bloomprotocol/attestations-common'
+} from '@bloomprotocol/vc-common'
 import {uuid} from 'uuidv4'
 import {keccak256} from 'js-sha3'
 import EthWallet from 'ethereumjs-wallet'

@@ -1,4 +1,4 @@
-import {EthUtils} from '@bloomprotocol/attestations-common'
+import {EthUtils} from '@bloomprotocol/vc-common'
 import * as ethUtil from 'ethereumjs-util'
 import {keccak256} from 'js-sha3'
 import randomBytes from 'randombytes'

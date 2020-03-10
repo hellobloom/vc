@@ -21,7 +21,7 @@
     "prepublishOnly": "npm run test && npm run lint"
   },
   "dependencies": {
-    "@bloomprotocol/attestations-common": "^1.1.0-beta.0",
+    "@bloomprotocol/vc-common": "^1.1.0-beta.0",
     "@transmute/element-lib": "^0.5.4",
     "@transmute/es256k-jws-ts": "^0.1.0",
     "@transmute/lds-ecdsa-secp256k1-2019": "^0.1.1",

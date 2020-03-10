@@ -29,7 +29,7 @@
   "author": "djvs",
   "module": "dist/vc-data.esm.js",
   "dependencies": {
-    "@bloomprotocol/attestations-common": "^1.1.0-beta.0",
+    "@bloomprotocol/vc-common": "^1.1.0-beta.0",
     "schema-dts": "^0.5.1"
   },
   "devDependencies": {

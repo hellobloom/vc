@@ -1,4 +1,4 @@
-import {DIDUtils, VPV1, AtomicVCV1} from '@bloomprotocol/attestations-common'
+import {DIDUtils, VPV1, AtomicVCV1} from '@bloomprotocol/vc-common'
 import extend from 'extend'
 import {keyUtils} from '@transmute/es256k-jws-ts'
 

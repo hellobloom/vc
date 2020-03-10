@@ -1,4 +1,4 @@
-import {VPV1, AtomicVCV1} from '@bloomprotocol/attestations-common'
+import {VPV1, AtomicVCV1} from '@bloomprotocol/vc-common'
 
 // import {TDecodedLog, getDecodedLogValueByName, getDecodedTxEventLogs} from '../../txUtils'
 import {ValidationResponse, SharedValidateVerifiablePresentationOptions} from '../shared/types'

@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
-    "@bloomprotocol/attestations-common": "^1.1.0-beta.0",
+    "@bloomprotocol/vc-common": "^1.1.0-beta.0",
     "@bloomprotocol/issue-kit": "^1.0.0-beta.0",
     "@bloomprotocol/verify-kit": "^2.1.0-beta.0",
     "@transmute/element-lib": "^0.5.4",
