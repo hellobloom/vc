@@ -1,6 +1,6 @@
 ---
-id: types
-title: Types
+id: credential-types
+title: Credential Types
 hide_title: true
 ---
 

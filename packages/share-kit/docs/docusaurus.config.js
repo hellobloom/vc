@@ -1,16 +1,16 @@
 module.exports = {
-  title: 'My Site',
+  title: 'Share Kit | Bloom Documentation',
   tagline: 'The tagline of my site',
   url: 'https://bloom.co',
   baseUrl: '/documentation/share-kit/',
-  favicon: 'img/favicon.ico',
+  favicon: 'img/favicon.png',
   organizationName: 'hellobloom',
   projectName: 'attestations-es',
   themeConfig: {
     navbar: {
-      title: 'My Site',
+      title: 'Bloom',
       logo: {
-        alt: 'My Site Logo',
+        alt: 'Bloom',
         src: 'img/logo.svg',
       },
       links: [
