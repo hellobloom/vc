@@ -1,4 +1,4 @@
-![Claim Kit](https://github.com/hellobloom/attestations-es/raw/master/assets/claim-kit/logo.png)
+![Claim Kit](https://github.com/hellobloom/vc/raw/master/assets/claim-kit/logo.png)
 
 # Claim Kit
 

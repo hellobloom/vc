@@ -1,8 +1,8 @@
-![Share Kit React Native](https://github.com/hellobloom/attestations-es/raw/master/assets/share-kit/logo.png)
+![Share Kit React Native](https://github.com/hellobloom/vc/raw/master/assets/share-kit/logo.png)
 
 # Share Kit React Native
 
-React Native wrapper for [Share Kit](https://github.com/hellobloom/attestations-es/tree/master/packages/share-kit#readme)
+React Native wrapper for [Share Kit](https://github.com/hellobloom/vc/tree/master/packages/share-kit#readme)
 
 - [Share Kit React Native](#share-kit-react-native)
   - [Installation](#installation)
@@ -43,7 +43,7 @@ const buttonCallbackUrl = 'https://mysite.com/bloom-callback'
 
 ## More
 
-For more information and documentation see [Share Kit](https://github.com/hellobloom/attestations-es/tree/master/packages/share-kit#readme)
+For more information and documentation see [Share Kit](https://github.com/hellobloom/vc/tree/master/packages/share-kit#readme)
 
 ## Storyboard Demo
 

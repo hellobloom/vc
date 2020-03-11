@@ -5,7 +5,7 @@
   "module": "dist/claim-kit.esm.js",
   "typings": "dist/index.d.ts",
   "description": "Easily allow users to claim verifiable credentials.",
-  "repository": "https://github.com/hellobloom/attestations-es",
+  "repository": "https://github.com/hellobloom/vc",
   "author": "Bloom Team <team@bloom.co>",
   "license": "Apache-2.0",
   "files": [

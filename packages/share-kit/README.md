@@ -1,4 +1,4 @@
-![Share Kit](https://github.com/hellobloom/attestations-es/raw/master/assets/share-kit/logo.png)
+![Share Kit](https://github.com/hellobloom/vc/raw/master/assets/share-kit/logo.png)
 
 # Share Kit
 

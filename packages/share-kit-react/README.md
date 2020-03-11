@@ -1,8 +1,8 @@
-![Share Kit React](https://github.com/hellobloom/attestations-es/raw/master/assets/share-kit/logo.png)
+![Share Kit React](https://github.com/hellobloom/vc/raw/master/assets/share-kit/logo.png)
 
 # Share Kit React
 
-React wrapper for [Share Kit](https://github.com/hellobloom/attestations-es/tree/master/packages/share-kit#readme)
+React wrapper for [Share Kit](https://github.com/hellobloom/vc/tree/master/packages/share-kit#readme)
 
 - [Share Kit React](#share-kit-react)
   - [Installation](#installation)
@@ -73,4 +73,4 @@ const qrOptions: Partial<QROptions> = {
 
 ## More
 
-For more information and documentation see [Share Kit](https://github.com/hellobloom/attestations-es/tree/master/packages/share-kit#readme)
+For more information and documentation see [Share Kit](https://github.com/hellobloom/vc/tree/master/packages/share-kit#readme)

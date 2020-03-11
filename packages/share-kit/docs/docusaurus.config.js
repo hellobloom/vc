@@ -5,7 +5,7 @@ module.exports = {
   baseUrl: '/documentation/share-kit/',
   favicon: 'img/favicon.png',
   organizationName: 'hellobloom',
-  projectName: 'attestations-es',
+  projectName: 'vc',
   themeConfig: {
     navbar: {
       title: 'Bloom',
@@ -15,7 +15,7 @@ module.exports = {
       },
       links: [
         {
-          href: 'https://github.com/hellobloom/attestations-es',
+          href: 'https://github.com/hellobloom/vc',
           label: 'GitHub',
           position: 'right',
         },
