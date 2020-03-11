@@ -24,10 +24,6 @@ module.exports = {
     },
     {
       type: 'doc',
-      id: 'demo',
-    },
-    {
-      type: 'doc',
       id: 'notes',
     },
   ],
