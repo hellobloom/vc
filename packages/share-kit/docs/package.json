@@ -9,7 +9,8 @@
     "deploy": "docusaurus deploy"
   },
   "dependencies": {
-    "@bloomprotcol/share-kit": "../",
+    "@bloomprotcol/share-kit": "../../share-kit",
+    "@bloomprotcol/vc-common": "../../vc-common",
     "@docusaurus/core": "^2.0.0-alpha.48",
     "@docusaurus/preset-classic": "^2.0.0-alpha.48",
     "@reach/auto-id": "^0.8.6",
