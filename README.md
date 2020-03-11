@@ -1,6 +1,6 @@
-# Attestations ES
+# VC
 
-Attestation related kits for TS/JS
+Verifiable Credential related libraries for TS/JS
 
 ## Requesting Credentials
 
