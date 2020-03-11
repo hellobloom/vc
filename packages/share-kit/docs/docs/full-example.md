@@ -6,7 +6,9 @@ hide_title: true
 
 # Full Example
 
-Below is a full example of requesting a user share their credentials with your server
+Below is a full example of requesting a user share their credentials with your server.
+
+For a demo visit our [VC Sandbox](https://sandbox.bloom.co).
 
 ## Server
 
