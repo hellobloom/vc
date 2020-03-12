@@ -1,69 +1,65 @@
-import {BaseVCV1, BaseVCTypeV1, BaseVCSubjectV1, VCSignedClaimNodeV1, VCLegacySignedDataNodeV1} from '../shared/v1'
+import {SimpleThing} from '../shared/v1'
+import {AtomicVCV1} from '../atomic/v1'
+// import {Subject, MaybeArray, MonetaryAmountR, EmployeeRoleOrganization} from './base'
+// import {Person, Organization} from 'schema-dts'
 
-// Legacy
-
-export type SDLegacyVCTypeV1 = [BaseVCTypeV1[0], 'SDVerifiableLegacyCredential', ...string[]]
-
-export type SDLegacyVCSubjectV1 = BaseVCSubjectV1 & {
-  dataNodes: VCLegacySignedDataNodeV1[]
+export type SDVCNode = {
+  '@type'?: string
+  '@nodeId': string
+}
+export type SDVCStructuralPartialNode = {
+  '@type': 'VCStructure'
+  data: {nodes: [SDVCNode]}
+}
+export type SDVCEdge = {
+  property: string
+  source: string
+  target: string
+}
+export type SDVCStructuralPartialEdge = {
+  '@type': 'VCStructure'
+  data: {edges: [SDVCEdge]}
+}
+export type SDVCFull<T extends SimpleThing> = {
+  id: string
+  sdvcClass: 'Full'
+  data: T
+}
+export type SDVCStructuralFull = {
+  id: string
+  sdvcClass: 'StructuralFull'
+  data: {
+    '@type': 'VCStructure'
+    nodes: Array<SDVCNode>
+    edges: Array<SDVCEdge>
+  }
+}
+export type SDVCStructuralPartial = {
+  id: string
+  sdvcClass: 'StructuralPartial'
+  data: SDVCStructuralPartialNode | SDVCStructuralPartialEdge
+}
+export type SDVCNodePropertyList = {
+  id: string
+  sdvcClass: 'NodePropertyList'
+  data: {
+    '@type': 'NodePropertyList'
+    '@nodeId': string
+    properties: Array<string>
+  }
+}
+export type SDVCPartial = {
+  id: string
+  sdvcClass: 'StructuralPartial'
+  data: {
+    '@type': string
+    '@nodeId': string
+    [k: string]: string | number | boolean // Only scalar properties
+  }
 }
 
-export type SDLegacyVCProofV1 = {
-  layer2Hash: string
-  signedRootHash: string
-  rootHashNonce: string
-  rootHash: string
-  checksumSig: string
-  paddingNodes: string[]
-}
-
-export type SDLegacyVCV1 = BaseVCV1<SDLegacyVCSubjectV1, SDLegacyVCTypeV1, SDLegacyVCProofV1> & {
-  version: 'SDLegacyVC-1.0.0'
-}
-
-// Regular
-
-export type SDVCTypeV1 = [BaseVCTypeV1[0], 'SDVerifiableCredential', ...string[]]
-
-export type SDVCSubjectV1 = BaseVCSubjectV1 & {
-  claimNodes: VCSignedClaimNodeV1[]
-}
-
-export type SDVCProofV1 = {
-  issuerSignature: string
-  layer2Hash: string
-  checksumSignature: string
-  paddingNodes: string[]
-  rootHash: string
-  rootHashNonce: string
-}
-
-export type SDVCV1<
-  Subject extends SDVCSubjectV1 = SDVCSubjectV1,
-  Type extends SDVCTypeV1 = SDVCTypeV1,
-  Proof extends SDVCProofV1 = SDVCProofV1
-> = BaseVCV1<Subject, Type, Proof> & {
-  version: 'SDVC-1.0.0'
-}
-
-// Batch
-
-export type SDBatchVCTypeV1 = [SDVCTypeV1[0], SDVCTypeV1[1], 'SDBatchVerifiableCredential', ...string[]]
-
-export type SDBatchVCSubjectV1 = SDVCSubjectV1
-
-export type SDBatchVCProofV1 = SDVCProofV1 & {
-  batchIssuerSignature: string
-  batchLayer2Hash: string
-  contractAddress: string
-  requestNonce: string
-  subjectSignature: string
-}
-
-export type SDBatchVCV1<
-  Subject extends SDBatchVCSubjectV1 = SDBatchVCSubjectV1,
-  Type extends SDBatchVCTypeV1 = SDBatchVCTypeV1,
-  Proof extends SDBatchVCProofV1 = SDBatchVCProofV1
-> = BaseVCV1<Subject, Type, Proof> & {
-  version: 'SDBatchVC-1.0.0'
-}
+export type VCFull<T extends SimpleThing> = AtomicVCV1<SDVCFull<T>>
+export type VCStructuralFull = AtomicVCV1<SDVCStructuralFull>
+export type VCStructuralPartial = AtomicVCV1<SDVCStructuralPartial>
+export type VCNodePropertyList = AtomicVCV1<SDVCNodePropertyList>
+export type VCPartial = AtomicVCV1<SDVCPartial>
