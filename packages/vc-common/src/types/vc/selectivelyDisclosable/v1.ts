@@ -1,7 +1,7 @@
 import {SimpleThing} from '../shared/v1'
 import {AtomicVCV1, AtomicVCSubjectV1} from '../atomic/v1'
 import * as R from 'ramda'
-const uuid = require('uuidv4')
+import {uuid} from 'uuidv4'
 
 // Generic
 export type ObjectGeneric = {[k: string]: any}
