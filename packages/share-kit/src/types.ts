@@ -48,7 +48,7 @@ type BaseRequestData = {
   version: number
 }
 
-type RequestDataV1 = BaseRequestData & {
+export type RequestDataV1 = BaseRequestData & {
   version: 1
   token: string
   url: string
@@ -63,15 +63,15 @@ export type BasePayloadRequestData = {
   version: number
 }
 
-export type DetailedAttestationTypeConfigV1 = {
-  name: TAttestationTypeNames
+export type DetailedCredTypeConfigV1 = {
+  name: string
   optional?: boolean
   completed_after?: string
   completed_before?: string
   provider_whitelist?: string[]
   provider_blacklist?: string[]
-  attester_whitelist?: string[]
-  attester_blacklist?: string[]
+  issuer_whitelist?: string[]
+  issuer_blacklist?: string[]
 }
 
 export type BaseRequestPayloadDataV1 = BasePayloadRequestData & {
@@ -82,18 +82,18 @@ export type BaseRequestPayloadDataV1 = BasePayloadRequestData & {
   org_privacy_policy_url: string
 }
 
-export type AttestationRequestPayloadDataV1 = BaseRequestPayloadDataV1 & {
-  action: 'attestation'
-  types: (TAttestationTypeNames | DetailedAttestationTypeConfigV1)[]
-  attester_whitelist?: string[]
-  attester_blacklist?: string[]
+export type CredRequestPayloadDataV1 = BaseRequestPayloadDataV1 & {
+  action: 'credential'
+  types: (string | DetailedCredTypeConfigV1)[]
+  issuer_whitelist?: string[]
+  issuer_blacklist?: string[]
 }
 
 export type AuthRequestPayloadDataV1 = BaseRequestPayloadDataV1 & {
   action: 'authentication'
 }
 
-export type RequestPayloadDataV1 = AttestationRequestPayloadDataV1 | AuthRequestPayloadDataV1
+export type RequestPayloadDataV1 = CredRequestPayloadDataV1 | AuthRequestPayloadDataV1
 
 export type RequestPayloadData = RequestPayloadDataV1
 

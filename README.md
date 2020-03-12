@@ -1,6 +1,6 @@
-# Attestations ES
+# VC
 
-Attestation related kits for TS/JS
+Verifiable Credential related libraries for TS/JS
 
 ## Requesting Credentials
 
@@ -31,7 +31,7 @@ Attestation related kits for TS/JS
 Most packages should use [tsdx](https://github.com/jaredpalmer/tsdx).
 
 ```bash
-cd path/to/attestations-es/packages
+cd path/to/vc/packages
 npx tsdx create mylib
 cd mylib
 ```

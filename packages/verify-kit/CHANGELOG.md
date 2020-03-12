@@ -26,4 +26,4 @@
 
 - Initial release
 
-[attestation-common]: https://github.com/hellobloom/attestations-es/tree/master/packages/vc-common
+[attestation-common]: https://github.com/hellobloom/vc/tree/master/packages/vc-common

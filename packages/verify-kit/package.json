@@ -5,7 +5,7 @@
   "module": "dist/verify-kit.esm.js",
   "typings": "dist/index.d.ts",
   "description": "Easily verify BloomID data your users shared with your application.",
-  "repository": "https://github.com/hellobloom/attestations-es",
+  "repository": "https://github.com/hellobloom/vc",
   "author": "Bloom Team <team@bloom.co>",
   "license": "Apache-2.0",
   "files": [
