@@ -12,6 +12,7 @@ export * from './account'
 export * from './employment'
 export * from './credit'
 export * from './meta'
+export * from './sdvc'
 
 /**
  * +--------- Table of implemented attestation types -----------+

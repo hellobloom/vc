@@ -38,6 +38,15 @@ export type SDVCStructuralPartial = {
   sdvcClass: 'StructuralPartial'
   data: SDVCStructuralPartialNode | SDVCStructuralPartialEdge
 }
+export type SDVCNodePropertyList = {
+  id: string
+  sdvcClass: 'NodePropertyList'
+  data: {
+    '@type': 'NodePropertyList'
+    '@nodeId': string
+    properties: Array<string>
+  }
+}
 export type SDVCPartial = {
   id: string
   sdvcClass: 'StructuralPartial'
@@ -51,4 +60,5 @@ export type SDVCPartial = {
 export type VCFull<T extends SimpleThing> = AtomicVCV1<SDVCFull<T>>
 export type VCStructuralFull = AtomicVCV1<SDVCStructuralFull>
 export type VCStructuralPartial = AtomicVCV1<SDVCStructuralPartial>
+export type VCNodePropertyList = AtomicVCV1<SDVCNodePropertyList>
 export type VCPartial = AtomicVCV1<SDVCPartial>
