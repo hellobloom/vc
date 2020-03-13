@@ -1,21 +1,10 @@
-![Share Kit React](https://github.com/hellobloom/vc/raw/master/assets/share-kit/logo.png)
+---
+id: basic-usage
+title: Basic Usage
+hide_title: true
+---
 
-# Share Kit React
-
-React wrapper for [Share Kit](https://github.com/hellobloom/vc/tree/master/packages/share-kit#readme)
-
-- [Share Kit React](#share-kit-react)
-  - [Installation](#installation)
-  - [Usage](#usage)
-  - [More](#more)
-
-## Installation
-
-```
-npm install --save @bloomprotocol/share-kit-react
-```
-
-## Usage
+# Usage
 
 `RequestElement` will render a QR code or button based on the client's platform. By defualt it will render a button when the client is mobile or tablet and on iOS.
 
