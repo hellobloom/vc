@@ -21,9 +21,11 @@ describe('renderRequestButton', () => {
       container,
       requestData: {
         version: 1,
+        responseVersion: 1,
+        action: 'credential',
         token: 'token',
         url: 'https://receive-kit.bloom.co/api/receive',
-        payload_url: 'https://receive-kit.bloom.co/api/get-payload',
+        payloadUrl: 'https://receive-kit.bloom.co/api/get-payload',
       },
       buttonOptions: {
         callbackUrl: 'https://bloom.co/callback-url',
@@ -53,9 +55,11 @@ describe('renderRequestButton', () => {
     requestButton.update({
       requestData: {
         version: 1,
+        responseVersion: 1,
+        action: 'credential',
         token: 'token',
         url: 'https://receive-kit.bloom.co/api/receive',
-        payload_url: 'https://receive-kit.bloom.co/api/get-payload',
+        payloadUrl: 'https://receive-kit.bloom.co/api/get-payload',
       },
       buttonOptions: {
         callbackUrl: 'https://bloom.co/callback-url',
@@ -70,9 +74,11 @@ describe('renderRequestButton', () => {
     requestButton.update({
       requestData: {
         version: 1,
+        responseVersion: 1,
+        action: 'credential',
         token: 'token',
         url: 'https://receive-kit.bloom.co/api/receive',
-        payload_url: 'https://receive-kit.bloom.co/api/get-payload',
+        payloadUrl: 'https://receive-kit.bloom.co/api/get-payload',
       },
       buttonOptions: {
         callbackUrl: 'https://bloom.co/callback-url',
@@ -88,9 +94,11 @@ describe('renderRequestButton', () => {
     requestButton.update({
       requestData: {
         version: 1,
+        responseVersion: 1,
+        action: 'credential',
         token: 'token',
         url: 'https://receive-kit.bloom.co/api/receive',
-        payload_url: 'https://receive-kit.bloom.co/api/get-payload',
+        payloadUrl: 'https://receive-kit.bloom.co/api/get-payload',
       },
       buttonOptions: {
         callbackUrl: 'https://bloom.co/callback-url-2',

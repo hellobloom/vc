@@ -21,20 +21,20 @@ app.get('/api/share-kit/get-token', function(req, res) {
   const requestPayloadData: RequestPayloadData = {
     version: 1,
     // Enforce that all attestations come from a specified attester
-    attester_whitelist: ['0x123...'],
+    attesterWhitelist: ['0x123...'],
     types: [
       {
         // Enforce that this attestation came from an ID document (acuant)
         name: 'full-name',
-        provider_whitelist: ['acuant'],
+        providerWhitelist: ['acuant'],
       },
       {
         name: 'phone',
-        completed_after: dayjs()
+        completedAfter: dayjs()
           .subtract(1, 'year')
           .toISOString(),
         // Enfoce that this attestation comes from a different specified attester
-        attester_whitelist: ['0x456...'],
+        attesterWhitelist: ['0x456...'],
       },
       'email',
       {
@@ -42,10 +42,10 @@ app.get('/api/share-kit/get-token', function(req, res) {
         optional: true,
       },
     ],
-    org_logo_url: 'https://mysite.com/images/my-logo.png',
-    org_name: 'My Site',
-    org_usage_policy_url: 'https://mysite.com/legal/terms',
-    org_privacy_policy_url: 'https://mysite.com/legal/privacy',
+    orgLogoUrl: 'https://mysite.com/images/my-logo.png',
+    orgName: 'My Site',
+    orgUsagePolicyUrl: 'https://mysite.com/legal/terms',
+    orgPrivacyPolicyUrl: 'https://mysite.com/legal/privacy',
   }
 
   storeRequestPayloadDataForToken(token, requestPayloadData)
@@ -73,9 +73,11 @@ const {token} = json
 
 const requestData: RequestData = {
   version: 1,
+  responseVersion: 1,
+  action: 'credential',
   token: token,
   url: `https://mysite.com/api/share-kit/receive/${token}`,
-  payload_url: `https://mysite.com/api/share-kit/payload/${token}`,
+  payloadUrl: `https://mysite.com/api/share-kit/payload/${token}`,
 }
 const qrOptions: Partial<QROptions> = {
   size: 200,

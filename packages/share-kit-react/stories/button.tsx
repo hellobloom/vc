@@ -91,9 +91,11 @@ const allVersions: {label: string; requestData: RequestData}[] = [
     label: 'V1',
     requestData: {
       version: 1,
+      responseVersion: 1,
+      action: 'credential',
       token: 'a08714b92346a1bba4262ed575d23de3ff3e6b5480ad0e1c82c011bab0411fdf',
       url: 'https://receive-kit.bloom.co/api/receive',
-      payload_url: 'https://receive-kit.bloom.co/api/payload/a08714b92346a1bba4262ed575d23de3ff3e6b5480ad0e1c82c011bab0411fdf',
+      payloadUrl: 'https://receive-kit.bloom.co/api/payload/a08714b92346a1bba4262ed575d23de3ff3e6b5480ad0e1c82c011bab0411fdf',
     },
   },
   {

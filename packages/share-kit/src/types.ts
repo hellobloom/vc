@@ -48,12 +48,28 @@ type BaseRequestData = {
   version: number
 }
 
-export type RequestDataV1 = BaseRequestData & {
+export type BaseRequestDataV1 = BaseRequestData & {
   version: 1
+  action: string
+  responseVersion: number
   token: string
   url: string
-  payload_url: string
+  payloadUrl: string
 }
+
+export type CredRequestDataV1 = BaseRequestDataV1 & {
+  version: 1
+  responseVersion: 1
+  action: 'credential'
+}
+
+export type AuthRequestDataV1 = BaseRequestDataV1 & {
+  version: 1
+  responseVersion: 0
+  action: 'authentication'
+}
+
+export type RequestDataV1 = CredRequestDataV1 | AuthRequestDataV1
 
 export type RequestData = RequestDataV0 | RequestDataV1
 
@@ -66,32 +82,29 @@ export type BasePayloadRequestData = {
 export type DetailedCredTypeConfigV1 = {
   name: string
   optional?: boolean
-  completed_after?: string
-  completed_before?: string
-  provider_whitelist?: string[]
-  provider_blacklist?: string[]
-  issuer_whitelist?: string[]
-  issuer_blacklist?: string[]
+  completedAfter?: string
+  completedBefore?: string
+  providerWhitelist?: string[]
+  providerBlacklist?: string[]
+  issuerWhitelist?: string[]
+  issuerBlacklist?: string[]
 }
 
 export type BaseRequestPayloadDataV1 = BasePayloadRequestData & {
   version: 1
-  org_logo_url: string
-  org_name: string
-  org_usage_policy_url: string
-  org_privacy_policy_url: string
+  orgLogoUrl: string
+  orgName: string
+  orgUsagePolicyUrl: string
+  orgPrivacyPolicyUrl: string
 }
 
 export type CredRequestPayloadDataV1 = BaseRequestPayloadDataV1 & {
-  action: 'credential'
   types: (string | DetailedCredTypeConfigV1)[]
-  issuer_whitelist?: string[]
-  issuer_blacklist?: string[]
+  issuerWhitelist?: string[]
+  issuerBlacklist?: string[]
 }
 
-export type AuthRequestPayloadDataV1 = BaseRequestPayloadDataV1 & {
-  action: 'authentication'
-}
+export type AuthRequestPayloadDataV1 = BaseRequestPayloadDataV1
 
 export type RequestPayloadDataV1 = CredRequestPayloadDataV1 | AuthRequestPayloadDataV1
 

@@ -12,12 +12,14 @@ QR codes can only contain so much data so instead of providing all the data to S
 
 ## Version 1
 
-| Name        | Description                                                                                     | Type     |
-| ----------- | ----------------------------------------------------------------------------------------------- | -------- |
-| version     | The version of the request data structure                                                       | `1`      |
-| token       | Unique string to identify this data request                                                     | `string` |
-| url         | The API endpoint to POST the `ResponseData` to.<br/> See [below](#appending-to-url) for details | `string` |
-| payload_url | The url the user's app will GET [`RequestPayloadDataV1`](request-payload-data) from             | `string` |
+| Name            | Description                                                                                                                         | Type                              |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------------- | --------------------------------- |
+| version         | The version of the request data structure                                                                                           | `1`                               |
+| responseVersion | The version of the response data structure you want returned to you                                                                 | `number`                          |
+| action          | The action you want the user to take with this share request.<br/>See [RequestPayloadDataV1](request-payload-data) for more details | `'credential' | 'authentication'` |
+| token           | Unique string to identify this data request                                                                                         | `string`                          |
+| url             | The API endpoint to POST the `ResponseData` to.<br/>See [below](#appending-to-url) for details                                      | `string`                          |
+| payloadUrl      | The url the user's app will GET [`RequestPayloadDataV1`](request-payload-data) from                                                 | `string`                          |
 
 ### Appending to URL
 

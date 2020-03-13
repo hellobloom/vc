@@ -13,9 +13,11 @@ import {renderRequestElement, RequestData, QROptions} from '@bloomprotocol/share
 
 const requestData: RequestData = {
   version: 1,
+  responseVersion: 1,
+  action: 'credential'
   token: '11bf5b37-e0b8-42e0-8dcf-dc8c4aefc000',
   url: 'https://mysite.com/api/share-kit/receive',
-  payload_url: 'https://mysite.com/api/share-kit/payload/11bf5b37-e0b8-42e0-8dcf-dc8c4aefc000',
+  payloadUrl: 'https://mysite.com/api/share-kit/payload/11bf5b37-e0b8-42e0-8dcf-dc8c4aefc000',
 }
 const qrOptions: Partial<QROptions> = {
   size: 200,
