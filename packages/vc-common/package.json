@@ -28,7 +28,6 @@
     "@trust/keyto": "^1.0.0",
     "@types/crypto-js": "^3.1.43",
     "@types/eth-sig-util": "^2.1.0",
-    "@types/ramda": "^0.26.43",
     "@types/randombytes": "^2.0.0",
     "bitcoin-ts": "^1.12.0",
     "crypto-js": "^3.1.9-1",
@@ -38,11 +37,9 @@
     "ethereumjs-wallet": "^0.6.3",
     "js-sha3": "^0.8.0",
     "jsonld": "^2.0.2",
-    "ramda": "^0.27.0",
     "randombytes": "^2.1.0",
     "schema-dts": "^0.5.1",
-    "tslib": "^1.10.0",
-    "uuidv4": "^6.0.6"
+    "tslib": "^1.10.0"
   },
   "devDependencies": {
     "@bloomprotocol/eslint-config": "^1.0.0-beta.1",
@@ -57,7 +54,7 @@
     "eslint-plugin-prettier": "^3.1.2",
     "prettier": "^1.19.1",
     "tsdx": "^0.12.3",
-    "typescript": "^3.7.5"
+    "typescript": "^3.8.3"
   },
   "jest": {
     "moduleFileExtensions": [
