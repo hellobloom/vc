@@ -14,6 +14,7 @@ export const renderRequestElement = ({
   qrOptions?: Partial<QROptions>
   shouldRenderButton?: ShouldRenderButton
   buttonOptions: ButtonOptions
+  id?: string
 }): RequestElementResult => {
   let renderButton: boolean
 

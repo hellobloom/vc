@@ -1,5 +1,6 @@
 import React, {useRef, useEffect, useState} from 'react'
 import {storiesOf} from '@storybook/react'
+import {useId} from '@reach/auto-id'
 
 import {RequestData, QROptions, RequestElementResult, renderRequestElement, Action} from '../src'
 
@@ -9,12 +10,14 @@ type CompProps = {
 }
 
 const Comp: React.FC<CompProps> = props => {
+  const id = useId()
   const container = useRef<HTMLDivElement>(null)
   const requestElementResult = useRef<RequestElementResult | undefined>(undefined)
 
   const {requestData, qrOptions} = props
 
   useEffect(() => {
+    if (!id) return
     if (!container.current) return
 
     if (requestElementResult.current) {
@@ -30,6 +33,7 @@ const Comp: React.FC<CompProps> = props => {
         shouldRenderButton: false,
         qrOptions,
         buttonOptions: {callbackUrl: ''},
+        id: `element-${id}`,
       })
     }
 
@@ -37,7 +41,7 @@ const Comp: React.FC<CompProps> = props => {
       requestElementResult.current?.remove()
       requestElementResult.current = undefined
     }
-  }, [container, requestData, qrOptions])
+  }, [id, container, requestData, qrOptions])
 
   return <div ref={container} />
 }

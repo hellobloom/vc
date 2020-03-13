@@ -1,5 +1,6 @@
 import React, {useRef, useEffect, useState} from 'react'
 import {storiesOf} from '@storybook/react'
+import {useId} from '@reach/auto-id'
 
 import {RequestElementResult, renderRequestElement, ButtonOptions, RequestData, ButtonSize, Action} from '../src'
 
@@ -9,12 +10,14 @@ type CompProps = {
 }
 
 const Comp: React.FC<CompProps> = props => {
+  const id = useId()
   const container = useRef<HTMLDivElement>(null)
   const requestElementResult = useRef<RequestElementResult | undefined>(undefined)
 
   const {requestData, buttonOptions} = props
 
   useEffect(() => {
+    if (!id) return
     if (!container.current) return
 
     if (requestElementResult.current) {
@@ -28,6 +31,7 @@ const Comp: React.FC<CompProps> = props => {
         requestData,
         shouldRenderButton: true,
         buttonOptions,
+        id: `element-${id}`,
       })
     }
 
@@ -35,7 +39,7 @@ const Comp: React.FC<CompProps> = props => {
       requestElementResult.current?.remove()
       requestElementResult.current = undefined
     }
-  }, [container, requestData, buttonOptions])
+  }, [id, container, requestData, buttonOptions])
 
   return <div ref={container} style={{width: buttonOptions.size === 'lg' || buttonOptions.size === undefined ? '335px' : undefined}} />
 }

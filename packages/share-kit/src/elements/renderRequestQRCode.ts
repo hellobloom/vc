@@ -1,6 +1,8 @@
 import {drawQRCode, Options} from '@bloomprotocol/qr'
 
 import {appendQuery} from './append'
+import {generateId} from './utils'
+import {validateRequestData} from './warnings'
 import {RequestData, RequestElementResult} from '../types'
 
 // Slightly modified from: https://hackernoon.com/copying-text-to-clipboard-with-javascript-df4d4988697f
@@ -29,8 +31,12 @@ export const renderRequestQRCode = (config: {
   container: HTMLElement
   requestData: RequestData
   qrOptions?: Partial<Options>
+  id?: string
 }): RequestElementResult => {
+  const id = config.id || generateId()
+  validateRequestData(id, config.requestData)
   const canvas = document.createElement('canvas')
+  canvas.id = id
   config.container.append(canvas)
 
   config.requestData.url = appendQuery(config.requestData.url, {'share-kit-from': 'qr'})
@@ -40,6 +46,7 @@ export const renderRequestQRCode = (config: {
 
   return {
     update: updateConfig => {
+      validateRequestData(id, updateConfig.requestData)
       updateConfig.requestData.url = appendQuery(updateConfig.requestData.url, {'share-kit-from': 'qr'})
       canvas.onclick = () => copyDataToClipboard(updateConfig.requestData)
 
