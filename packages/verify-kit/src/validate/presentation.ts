@@ -1,4 +1,4 @@
-import {IVerifiablePresentation, VPV1} from '@bloomprotocol/vc-common'
+import {IVerifiablePresentation, BaseVPV1} from '@bloomprotocol/vc-common'
 
 import {validateVerifiablePresentationResponseV0, ValidateVerifiablePresentationResponseOptionsV0} from './v0'
 import {validateVerifiablePresentationResponseV1, ValidateVerifiablePresentationResponseOptionsV1} from './v1'
@@ -8,7 +8,7 @@ type Version = 'v0' | 'v1'
 
 type VersionToResponse = {
   v0: IVerifiablePresentation
-  v1: VPV1
+  v1: BaseVPV1
 }
 
 type VersionToOptions = {

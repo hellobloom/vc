@@ -1,4 +1,4 @@
-import {VPV1, AtomicVCV1} from '@bloomprotocol/vc-common'
+import {BaseVPV1, VCV1} from '@bloomprotocol/vc-common'
 
 // import {TDecodedLog, getDecodedLogValueByName, getDecodedTxEventLogs} from '../../txUtils'
 import {ValidationResponse, SharedValidateVerifiablePresentationOptions} from '../shared/types'
@@ -10,7 +10,7 @@ import {validateVerifiablePresentationV1} from './structure'
 // }
 
 // export const retreiveTxData = async (
-//   payloadData: AtomicVCVerifiedDataLegacyV1 | AtomicVCVerifiedDataOnChainV1,
+//   payloadData: AtomicVCVerifiedDataLegacyV1 | VCV1VerifiedDataOnChain,
 //   web3Provider: string,
 // ): Promise<RetrieveTxDataOutput> => {
 //   const txHash = payloadData.tx
@@ -82,7 +82,7 @@ export type ValidateVerifiablePresentationResponseOptionsV1 = SharedValidateVeri
 export const validateVerifiablePresentationResponseV1 = async (
   data: any,
   _: ValidateVerifiablePresentationResponseOptionsV1 = {},
-): Promise<ValidationResponse<VPV1<AtomicVCV1>>> => {
+): Promise<ValidationResponse<BaseVPV1<VCV1>>> => {
   const outcome = await validateVerifiablePresentationV1(data)
 
   if (outcome.kind === 'invalid_param') {

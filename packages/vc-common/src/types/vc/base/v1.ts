@@ -95,9 +95,9 @@ export type BaseVCV1<
   proof: Proof
 }
 
-export type BaseVPV1TypeV1 = ['VerifiablePresentation', ...string[]]
+export type BaseVPV1Type = ['VerifiablePresentation', ...string[]]
 
-export type BaseVPV1ProofV1 = {
+export type BaseVPV1Proof = {
   type: string
   created: string
   proofPurpose: 'authentication'
@@ -110,10 +110,10 @@ export type BaseVPV1ProofV1 = {
 // TODO: This is missing the `signature` and `packedData` fields. How should those translate over?
 export type BaseVPV1<VC extends BaseVCV1 = BaseVCV1> = {
   '@context': TContext
-  type: BaseVPV1TypeV1
+  type: BaseVPV1Type
   verifiableCredential: VC[]
   holder: string
-  proof: BaseVPV1ProofV1
+  proof: BaseVPV1Proof
 }
 
 export type BaseVP = BaseVPV1

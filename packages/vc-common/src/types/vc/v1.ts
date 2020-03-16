@@ -4,11 +4,11 @@ export type VCV1Subject<Type extends SimpleThing> = BaseVCV1Subject<Type>
 
 export type VCV1Type = BaseVCV1Type
 
-export type VCV1ProofV1 = BaseVCV1Proof
+export type VCV1Proof = BaseVCV1Proof
 
 export type VCV1<
   Subject extends VCV1Subject<SimpleThing> = VCV1Subject<SimpleThing>,
   Type extends VCV1Type = BaseVCV1Type,
-  Proof extends VCV1ProofV1 = BaseVCV1Proof,
+  Proof extends VCV1Proof = BaseVCV1Proof,
   Revocation extends BaseVCV1Revocation = BaseVCV1RevocationSimple
 > = BaseVCV1<Subject, Type, Proof, Revocation>

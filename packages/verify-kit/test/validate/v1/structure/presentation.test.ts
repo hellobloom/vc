@@ -1,5 +1,5 @@
-import {EthUtils, DIDUtils, Utils, AtomicVCV1, VPV1} from '@bloomprotocol/vc-common'
-import {buildAtomicVCSubjectV1, buildAtomicVCV1} from '@bloomprotocol/issue-kit'
+import {EthUtils, DIDUtils, Utils, VCV1, BaseVPV1} from '@bloomprotocol/vc-common'
+import {buildAtomicVCSubjectV1, buildVCV1} from '@bloomprotocol/issue-kit'
 import {EcdsaSecp256k1KeyClass2019, EcdsaSecp256k1Signature2019} from '@transmute/lds-ecdsa-secp256k1-2019'
 import {keyUtils} from '@transmute/es256k-jws-ts'
 
@@ -37,24 +37,24 @@ const buildVerifiablePresentation = async ({
   token,
   domain,
 }: {
-  atomicCredentials: AtomicVCV1[]
+  atomicCredentials: VCV1[]
   token: string
   domain: string
   holder: Holder
-}): Promise<VPV1> => {
+}): Promise<BaseVPV1> => {
   const didDocument = await DIDUtils.resolveDID(holder.did)
   const publicKey = didDocument.publicKey.find(({id}) => id.endsWith(holder.keyId))
 
   if (!publicKey) throw new Error('Cannot find primary key')
 
-  const unsignedVP: Omit<VPV1<AtomicVCV1>, 'proof'> = {
+  const unsignedVP: Omit<BaseVPV1<VCV1>, 'proof'> = {
     '@context': ['https://www.w3.org/2018/credentials/v1'],
     type: ['VerifiablePresentation'],
     verifiableCredential: atomicCredentials,
     holder: holder.did,
   }
 
-  const vp: VPV1 = await jsigs.sign(unsignedVP, {
+  const vp: BaseVPV1 = await jsigs.sign(unsignedVP, {
     suite: new EcdsaSecp256k1Signature2019({
       key: new EcdsaSecp256k1KeyClass2019({
         id: publicKey.id,
@@ -144,7 +144,7 @@ describe('Validation.validateCredentialProof', () => {
       data: {'@type': 'Thing'},
     })
 
-    const atomicVC = await buildAtomicVCV1({
+    const atomicVC = await buildVCV1({
       credentialSubject,
       type: ['CustomCredential'],
       issuer: {
@@ -175,7 +175,7 @@ describe('Validation.validateCredentialProof', () => {
       data: {'@type': 'Thing'},
     })
 
-    const atomicVC = await buildAtomicVCV1({
+    const atomicVC = await buildVCV1({
       credentialSubject,
       type: ['CustomCredential'],
       issuer: {
@@ -211,7 +211,7 @@ describe('Validation.validateCredentialProof', () => {
       data: {'@type': 'Thing'},
     })
 
-    const atomicVC = await buildAtomicVCV1({
+    const atomicVC = await buildVCV1({
       credentialSubject,
       type: ['CustomCredential'],
       issuer: {
@@ -247,7 +247,7 @@ describe('Validation.validateCredentialProof', () => {
       data: {'@type': 'Thing'},
     })
 
-    const atomicVC = await buildAtomicVCV1({
+    const atomicVC = await buildVCV1({
       credentialSubject,
       type: ['CustomCredential'],
       issuer: {
@@ -283,7 +283,7 @@ describe('Validation.validateCredentialProof', () => {
       data: {'@type': 'Thing'},
     })
 
-    const atomicVC = await buildAtomicVCV1({
+    const atomicVC = await buildVCV1({
       credentialSubject,
       type: ['CustomCredential'],
       issuer: {
@@ -319,7 +319,7 @@ describe('Validation.validateCredentialProof', () => {
       data: {'@type': 'Thing'},
     })
 
-    const atomicVC = await buildAtomicVCV1({
+    const atomicVC = await buildVCV1({
       credentialSubject,
       type: ['CustomCredential'],
       issuer: {
@@ -357,7 +357,7 @@ describe('Validation.validateVerifiableCredential', () => {
       data: {'@type': 'Thing'},
     })
 
-    const atomicVC = await buildAtomicVCV1({
+    const atomicVC = await buildVCV1({
       credentialSubject,
       type: ['CustomCredential'],
       issuer: {
@@ -388,7 +388,7 @@ describe('Validation.validateVerifiableCredential', () => {
       data: {'@type': 'Thing'},
     })
 
-    const atomicVC = await buildAtomicVCV1({
+    const atomicVC = await buildVCV1({
       credentialSubject,
       type: ['CustomCredential'],
       issuer: {
@@ -418,7 +418,7 @@ describe('Validation.validateVerifiableCredential', () => {
       data: {'@type': 'Thing'},
     })
 
-    const atomicVC = await buildAtomicVCV1({
+    const atomicVC = await buildVCV1({
       credentialSubject,
       type: ['CustomCredential'],
       issuer: {
@@ -453,7 +453,7 @@ describe('Validation.validateVerifiableCredential', () => {
       data: {'@type': 'Thing'},
     })
 
-    const atomicVC = await buildAtomicVCV1({
+    const atomicVC = await buildVCV1({
       credentialSubject,
       type: ['CustomCredential'],
       issuer: {
@@ -488,7 +488,7 @@ describe('Validation.validateVerifiableCredential', () => {
       data: {'@type': 'Thing'},
     })
 
-    const atomicVC = await buildAtomicVCV1({
+    const atomicVC = await buildVCV1({
       credentialSubject,
       type: ['CustomCredential'],
       issuer: {
@@ -523,7 +523,7 @@ describe('Validation.validateVerifiableCredential', () => {
       data: {'@type': 'Thing'},
     })
 
-    const atomicVC = await buildAtomicVCV1({
+    const atomicVC = await buildVCV1({
       credentialSubject,
       type: ['CustomCredential'],
       issuer: {
@@ -558,7 +558,7 @@ describe('Validation.validateVerifiableCredential', () => {
       data: {'@type': 'Thing'},
     })
 
-    const atomicVC = await buildAtomicVCV1({
+    const atomicVC = await buildVCV1({
       credentialSubject,
       type: ['CustomCredential'],
       issuer: {
@@ -588,7 +588,7 @@ describe('Validation.validateVerifiableCredential', () => {
       data: {'@type': 'Thing'},
     })
 
-    const atomicVC = await buildAtomicVCV1({
+    const atomicVC = await buildVCV1({
       credentialSubject,
       type: ['CustomCredential'],
       issuer: {
@@ -619,7 +619,7 @@ describe('Validation.validateVerifiableCredential', () => {
       data: {'@type': ''},
     })
 
-    const atomicVC = await buildAtomicVCV1({
+    const atomicVC = await buildVCV1({
       credentialSubject,
       type: ['CustomCredential'],
       issuer: {
@@ -650,7 +650,7 @@ describe('Validation.validateVerifiableCredential', () => {
       data: {'@type': ''},
     })
 
-    const atomicVC = await buildAtomicVCV1({
+    const atomicVC = await buildVCV1({
       credentialSubject,
       type: ['CustomCredential'],
       issuer: {
@@ -688,7 +688,7 @@ describe('Validation.validateVerifiableCredential', () => {
       data: {'@type': ''},
     })
 
-    const atomicVC = await buildAtomicVCV1({
+    const atomicVC = await buildVCV1({
       credentialSubject,
       type: ['CustomCredential'],
       issuer: {
@@ -727,7 +727,7 @@ describe('Validation.validateVerifiableCredential', () => {
       data: {'@type': ''},
     })
 
-    const atomicVC = await buildAtomicVCV1({
+    const atomicVC = await buildVCV1({
       credentialSubject,
       type: ['CustomCredential'],
       issuer: {
@@ -768,7 +768,7 @@ describe('Validation.validateVerifiablePresentationV1', () => {
       data: {'@type': 'Thing'},
     })
 
-    const atomicVC = await buildAtomicVCV1({
+    const atomicVC = await buildVCV1({
       credentialSubject,
       type: ['CustomCredential'],
       issuer: {
@@ -812,7 +812,7 @@ describe('Validation.validateVerifiablePresentationV1', () => {
       data: {'@type': 'Thing'},
     })
 
-    const atomicVC = await buildAtomicVCV1({
+    const atomicVC = await buildVCV1({
       credentialSubject,
       type: ['CustomCredential'],
       issuer: {
@@ -855,7 +855,7 @@ describe('Validation.validateVerifiablePresentationV1', () => {
       data: {'@type': 'Thing'},
     })
 
-    const atomicVC = await buildAtomicVCV1({
+    const atomicVC = await buildVCV1({
       credentialSubject,
       type: ['CustomCredential'],
       issuer: {
@@ -903,7 +903,7 @@ describe('Validation.validateVerifiablePresentationV1', () => {
       data: {'@type': 'Thing'},
     })
 
-    const atomicVC = await buildAtomicVCV1({
+    const atomicVC = await buildVCV1({
       credentialSubject,
       type: ['CustomCredential'],
       issuer: {
@@ -956,7 +956,7 @@ describe('Validation.validateVerifiablePresentationV1', () => {
       data: {'@type': 'Thing'},
     })
 
-    const atomicVC = await buildAtomicVCV1({
+    const atomicVC = await buildVCV1({
       credentialSubject,
       type: ['CustomCredential'],
       issuer: {
@@ -1004,7 +1004,7 @@ describe('Validation.validateVerifiablePresentationV1', () => {
       data: {'@type': 'Thing'},
     })
 
-    const atomicVC = await buildAtomicVCV1({
+    const atomicVC = await buildVCV1({
       credentialSubject,
       type: ['CustomCredential'],
       issuer: {

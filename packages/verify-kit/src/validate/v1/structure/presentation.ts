@@ -3,12 +3,12 @@ import {
   genAsyncValidateFn,
   Utils,
   DIDUtils,
-  VPV1,
-  VPProofV1,
-  AtomicVCV1,
-  AtomicVCSubjectV1,
-  AtomicVCProofV1,
-  BaseVCRevocationV1,
+  BaseVPV1,
+  BaseVPV1Proof,
+  VCV1,
+  VCV1Subject,
+  VCV1Proof,
+  BaseVCV1Revocation,
   ValidateFn,
 } from '@bloomprotocol/vc-common'
 import {EcdsaSecp256k1Signature2019, EcdsaSecp256k1KeyClass2019} from '@transmute/lds-ecdsa-secp256k1-2019'
@@ -17,11 +17,11 @@ import {keyUtils} from '@transmute/es256k-jws-ts'
 const jsigs = require('jsonld-signatures')
 const {AssertionProofPurpose, AuthenticationProofPurpose} = jsigs.purposes
 
-const validateCredentialSubjectData = genValidateFn<AtomicVCSubjectV1<any>['data']>({
+const validateCredentialSubjectData = genValidateFn<VCV1Subject<any>['data']>({
   '@type': Utils.isNotEmptyString,
 })
 
-export const validateCredentialSubject = genValidateFn<AtomicVCSubjectV1<any>>({
+export const validateCredentialSubject = genValidateFn<VCV1Subject<any>>({
   id: DIDUtils.isValidDIDStructure,
   data: Utils.isValid(validateCredentialSubjectData),
 })
@@ -34,11 +34,11 @@ const isValidOrArrayOf = <T>(validateFn: ValidateFn<T>) => (data: any): data is 
   }
 }
 
-export const validateCredentialRevocation = genValidateFn<BaseVCRevocationV1>({
+export const validateCredentialRevocation = genValidateFn<BaseVCV1Revocation>({
   '@context': Utils.isNotEmptyString,
 })
 
-export const validateCredentialProof = genValidateFn<AtomicVCProofV1>({
+export const validateCredentialProof = genValidateFn<VCV1Proof>({
   type: Utils.isNotEmptyString,
   created: Utils.isValidRFC3339DateTime,
   proofPurpose: (value: any) => value === 'assertionMethod',
@@ -73,7 +73,7 @@ const isCredentialProofValid = async (_: any, data: any) => {
   }
 }
 
-export const validateVerifiableCredential = genAsyncValidateFn<AtomicVCV1>({
+export const validateVerifiableCredential = genAsyncValidateFn<VCV1>({
   '@context': Utils.isArrayOfNonEmptyStrings,
   id: Utils.isUndefinedOr(Utils.isNotEmptyString),
   type: [Utils.isArrayOfNonEmptyStrings, (value: string[]) => value.includes('VerifiableCredential')],
@@ -97,7 +97,7 @@ const isValidVerifiableCredential = async (value: any, data: any) => {
   return anySubjectsMatchHolder && (await Utils.isAsyncValid(validateVerifiableCredential)(value))
 }
 
-export const validateProof = genValidateFn<VPProofV1>({
+export const validateProof = genValidateFn<BaseVPV1Proof>({
   type: Utils.isNotEmptyString,
   created: Utils.isValidRFC3339DateTime,
   proofPurpose: (value: any) => value === 'authentication',
@@ -137,7 +137,7 @@ export const isPresentationProofValid = async (_: any, data: any) => {
   }
 }
 
-export const validateVerifiablePresentationV1 = genAsyncValidateFn<VPV1<AtomicVCV1>>({
+export const validateVerifiablePresentationV1 = genAsyncValidateFn<BaseVPV1<VCV1>>({
   '@context': Utils.isArrayOfNonEmptyStrings,
   type: [Utils.isArrayOfNonEmptyStrings, (value: string[]) => value.includes('VerifiablePresentation')],
   verifiableCredential: Utils.isAsyncArrayOf(isValidVerifiableCredential),
