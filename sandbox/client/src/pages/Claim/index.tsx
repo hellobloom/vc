@@ -4,7 +4,7 @@ import {useParams, Redirect} from 'react-router-dom'
 import {isUuid} from 'uuidv4'
 import {ClaimElement} from '@bloomprotocol/claim-kit-react'
 import clsx from 'clsx'
-import {AtomicVCV1} from '@bloomprotocol/vc-common'
+import {VCV1} from '@bloomprotocol/vc-common'
 
 import {Shell} from '../../components/Shell'
 import {sitemap} from '../../sitemap'
@@ -22,7 +22,7 @@ import {JsonEditor} from '../../components/JsonEditor'
 import './index.scss'
 
 const useGetClaimedTypes = (ready: boolean) => {
-  const [claimedVC, setClaimedVC] = useState<AtomicVCV1 | null | undefined>()
+  const [claimedVC, setClaimedVC] = useState<VCV1 | null | undefined>()
 
   useEffect(() => {
     let current = true

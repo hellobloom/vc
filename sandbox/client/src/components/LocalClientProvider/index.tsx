@@ -1,6 +1,6 @@
 import React, {useContext, useEffect} from 'react'
 import createPersistedState from 'use-persisted-state'
-import {AtomicVCV1} from '@bloomprotocol/vc-common'
+import {VCV1} from '@bloomprotocol/vc-common'
 import wretch from 'wretch'
 
 import {buildVPV1, appendQuery, generateElemDID} from './utils'
@@ -27,7 +27,7 @@ type ErrorRequestResponse = {
 type RequestResponse = SuccessRequestResponse | ErrorRequestResponse
 
 type LocalClientContextProps = {
-  vcs: AtomicVCV1[]
+  vcs: VCV1[]
   didConfig?: DIDConfig
   regen: () => void
   deleteVC: (index: number) => void
@@ -45,7 +45,7 @@ const LocalClientContext = React.createContext<LocalClientContextProps>({
 
 export const LocalClientProvider: React.FC = props => {
   const [didConfig, setDidConfig] = usePrivateKeyState<DIDConfig | undefined>()
-  const [vcs, setVCs] = useSDVCsState<AtomicVCV1[]>(() => [])
+  const [vcs, setVCs] = useSDVCsState<VCV1[]>(() => [])
 
   useEffect(() => {
     if (typeof didConfig !== 'undefined') return
@@ -102,7 +102,7 @@ export const LocalClientProvider: React.FC = props => {
             }
 
             const missing: string[] = []
-            const foundVCs: AtomicVCV1[] = []
+            const foundVCs: VCV1[] = []
 
             types.forEach(type => {
               // TODO: is this the way we should be checking?
@@ -162,7 +162,7 @@ export const LocalClientProvider: React.FC = props => {
               .headers({credentials: 'same-origin', 'Content-Type': 'application/json'})
               .url(appendQuery(from, {'claim-kit-from': 'qr'}))
               .post({subject: didConfig.did})
-              .json<{vc: AtomicVCV1}>()
+              .json<{vc: VCV1}>()
 
             setVCs([...vcs, vc])
 

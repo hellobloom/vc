@@ -1,6 +1,6 @@
 import fastify from 'fastify'
 import S from 'fluent-schema'
-import {buildAtomicVCV1, buildAtomicVCSubjectV1} from '@bloomprotocol/issue-kit'
+import {buildVCV1, buildVCV1Subject} from '@bloomprotocol/issue-kit'
 import {DIDUtils} from '@bloomprotocol/vc-common'
 import dayjs from 'dayjs'
 
@@ -127,7 +127,7 @@ export const applyCredRoutes = (app: fastify.FastifyInstance) => {
       try {
         const credentialSubject = await Promise.all(
           cred.data.map(async ({datum, subject}) => {
-            return await buildAtomicVCSubjectV1({
+            return await buildVCV1Subject({
               data: JSON.parse(JSON.stringify(datum).replace('{{claimer}}', subject)),
               subject: subject || req.body.subject,
             })
@@ -140,7 +140,7 @@ export const applyCredRoutes = (app: fastify.FastifyInstance) => {
 
         const did = await DIDUtils.createElemDID({primaryKey, recoveryKey})
 
-        const vc = await buildAtomicVCV1({
+        const vc = await buildVCV1({
           credentialSubject,
           type: [cred.type],
           issuanceDate: dayjs.utc().toISOString(),

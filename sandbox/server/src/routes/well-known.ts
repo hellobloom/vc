@@ -1,7 +1,7 @@
 import fastify from 'fastify'
 import {DIDUtils} from '@bloomprotocol/vc-common'
 import dayjs from 'dayjs'
-import {buildAtomicVCV1, buildAtomicVCSubjectV1} from '@bloomprotocol/issue-kit'
+import {buildVCV1, buildVCV1Subject} from '@bloomprotocol/issue-kit'
 
 import {getEnv} from '@server/env'
 
@@ -29,14 +29,14 @@ export const applyWellKnownRoutes = (app: fastify.FastifyInstance) => {
 
     const url = env.host ? env.host : `localhost:${env.port}`
 
-    const credentialSubject = await buildAtomicVCSubjectV1({
+    const credentialSubject = await buildVCV1Subject({
       subject: did,
       data: {
         '@type': 'Thing',
         url,
       },
     })
-    const vc = await buildAtomicVCV1({
+    const vc = await buildVCV1({
       credentialSubject,
       type: 'DomainLinkageAssertion',
       issuer: {

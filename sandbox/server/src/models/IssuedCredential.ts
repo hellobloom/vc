@@ -1,5 +1,5 @@
 import {Sequelize, Model, DataTypes, UUIDV4} from 'sequelize'
-import {AtomicVCV1} from '@bloomprotocol/vc-common'
+import {VCV1} from '@bloomprotocol/vc-common'
 
 export type DataMapping = {
   datum: {'@type': string}
@@ -17,7 +17,7 @@ export class IssuedCredential extends Model {
 
   claimed!: boolean
 
-  vc?: AtomicVCV1
+  vc?: VCV1
 
   createdAt!: Date
 

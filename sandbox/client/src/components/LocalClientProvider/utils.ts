@@ -1,4 +1,4 @@
-import {DIDUtils, VPV1, AtomicVCV1} from '@bloomprotocol/vc-common'
+import {DIDUtils, VPV1, VCV1} from '@bloomprotocol/vc-common'
 import extend from 'extend'
 import {keyUtils} from '@transmute/es256k-jws-ts'
 
@@ -36,7 +36,7 @@ export const buildVPV1 = async ({
   token,
   domain,
 }: {
-  atomicVCs: AtomicVCV1[]
+  atomicVCs: VCV1[]
   token: string
   domain: string
   holder: Holder
@@ -46,14 +46,14 @@ export const buildVPV1 = async ({
 
   if (!publicKey) throw new Error('No key found for provided keyId and publicKey')
 
-  const unsignedVP: Omit<VPV1<AtomicVCV1>, 'proof'> = {
+  const unsignedVP: Omit<VPV1<VCV1>, 'proof'> = {
     '@context': ['https://www.w3.org/2018/credentials/v1'],
     type: ['VerifiablePresentation'],
     verifiableCredential: atomicVCs,
     holder: holder.did,
   }
 
-  const vp: VPV1<AtomicVCV1> = jsigs.sign(unsignedVP, {
+  const vp: VPV1<VCV1> = jsigs.sign(unsignedVP, {
     suite: new EcdsaSecp256k1Signature2019({
       key: new EcdsaSecp256k1KeyClass2019({
         id: publicKey.id,

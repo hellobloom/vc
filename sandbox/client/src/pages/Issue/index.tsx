@@ -29,14 +29,14 @@ type DataMapping = {
   subject: string
 }
 
-type AtomicVCBuilderProps = {
+type VCBuilderProps = {
   type: string
   data: DataMapping[]
   onTypeChange: (type: string) => void
   onDataChange: (data: DataMapping[]) => void
 }
 
-const AtomicVCBuilder: FC<'div', AtomicVCBuilderProps> = props => {
+const VCBuilder: FC<'div', VCBuilderProps> = props => {
   const id = useId(props.id)
 
   return (
@@ -123,12 +123,12 @@ const AtomicVCBuilder: FC<'div', AtomicVCBuilderProps> = props => {
 const buildOutputString = (data: DataMapping[], type: string) => {
   if (data.length === 1) {
     return codeBlock`
-      const credentialSubject = await buildAtomicVCSubectV1({
+      const credentialSubject = await buildVCV1Subject({
         data: ${JSON.stringify(data[0].datum)},
         subject: '${data[0].subject || '{{claimer}}'}',
       })
 
-      const atomicVC = await buildAtomicVCV1({
+      const atomicVC = await buildVCV1({
         type: '${type}'
         credentialSubject,
         issuanceDate: '...',
@@ -137,7 +137,7 @@ const buildOutputString = (data: DataMapping[], type: string) => {
       })`
   } else {
     const subjectStrings = data.map(({datum, subject}, index) => {
-      return `const credentialSubject${index} = await buildAtomicVCSubectV1({
+      return `const credentialSubject${index} = await buildVCV1Subject({
         data: ${JSON.stringify(datum)},
         subject: '${subject || '{{claimer}}'}',
       })\n`
@@ -145,7 +145,7 @@ const buildOutputString = (data: DataMapping[], type: string) => {
 
     return codeBlock`
       ${subjectStrings}
-      const atomicVC = await buildAtomicVCV1({
+      const atomicVC = await buildVCV1({
         type: '${type}'
         credentialSubject: [${data.map((_, i) => `credentialSubject${i}`)}],
         issuanceDate: '...',
@@ -196,7 +196,7 @@ export const Issue: React.FC<IssueProps> = props => {
               <CardHeaderTitle>Configuration</CardHeaderTitle>
             </CardHeader>
             <CardContent>
-              <AtomicVCBuilder type={type} data={data} onTypeChange={setType} onDataChange={setData} />
+              <VCBuilder type={type} data={data} onTypeChange={setType} onDataChange={setData} />
             </CardContent>
             <CardFooter>
               <CardFooterItem>
