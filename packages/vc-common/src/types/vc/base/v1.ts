@@ -1,5 +1,5 @@
 export type TContext = string | string[] | {} | Array<{}>
-export type VCClaimNodeDataV1 = {
+export type BaseVCV1ClaimNodeData = {
   /**
    * String representation of the attestations data.
    *
@@ -17,7 +17,7 @@ export type VCClaimNodeDataV1 = {
   version: string
 }
 
-export type VCClaimNodeTypeV1 = {
+export type BaseVCV1ClaimNodeType = {
   /** The type of attestation (phone, email, etc.) */
   type: string
   /** Optionally identifies service used to perform attestation */
@@ -26,21 +26,21 @@ export type VCClaimNodeTypeV1 = {
   nonce: string
 }
 
-export type VCClaimNodeAuxSigV1 = {
+export type BaseVCV1ClaimNodeAuxSig = {
   /** Hex string containing subject's auxiliary signature.  Signs the ordered stringified object containing { dataHash: hashAttestation(IAttestationData), typeHash: hashAttestation(IAttestationType)} */
   signedHash: string
   /** Nonce to conceal unwanted revealing of aux public key */
   nonce: string
 }
 
-export type VCClaimNodeV1 = {
-  data: VCClaimNodeDataV1
-  type: VCClaimNodeTypeV1
-  /** aux either contains a hash of VCClaimNodeAuxSigV1 or just a padding node hash */
+export type BaseVCV1ClaimNode = {
+  data: BaseVCV1ClaimNodeData
+  type: BaseVCV1ClaimNodeType
+  /** aux either contains a hash of BaseVCV1ClaimNodeAuxSig or just a padding node hash */
   aux: string
 }
 
-export type VCRevocationLinks = {
+export type BaseVCV1RevocationLinks = {
   /** Hex string to identify this attestation node in the event of partial revocation */
   local: string
   /** Hex string to identify this attestation in the event of revocation */
@@ -54,14 +54,14 @@ export type VCRevocationLinks = {
 // Do not import {Thing} from 'schema-dts' because it chokes TS
 export type SimpleThing = {'@type': string}
 
-export type BaseVCTypeV1 = ['VerifiableCredential', ...string[]]
+export type BaseVCV1Type = ['VerifiableCredential', ...string[]]
 
-export type BaseVCSubjectV1<Data extends SimpleThing> = {
+export type BaseVCV1Subject<Data extends SimpleThing> = {
   id: string
   data: Data
 }
 
-export type BaseVCProofV1 = {
+export type BaseVCV1Proof = {
   type: string
   created: string
   proofPurpose: 'assertionMethod'
@@ -69,20 +69,20 @@ export type BaseVCProofV1 = {
   jws: string
 }
 
-export type BaseVCRevocationV1 = {
+export type BaseVCV1Revocation = {
   '@context': string
 }
 
-export type BaseVCRevocationSimpleV1 = {
+export type BaseVCV1RevocationSimple = {
   '@context': string
   token: string
 }
 
 export type BaseVCV1<
-  Subject extends BaseVCSubjectV1<SimpleThing> = BaseVCSubjectV1<SimpleThing>,
-  Type extends BaseVCTypeV1 = BaseVCTypeV1,
-  Proof extends BaseVCProofV1 = BaseVCProofV1,
-  Revocation extends BaseVCRevocationV1 = BaseVCRevocationV1
+  Subject extends BaseVCV1Subject<SimpleThing> = BaseVCV1Subject<SimpleThing>,
+  Type extends BaseVCV1Type = BaseVCV1Type,
+  Proof extends BaseVCV1Proof = BaseVCV1Proof,
+  Revocation extends BaseVCV1Revocation = BaseVCV1Revocation
 > = {
   '@context': TContext
   id?: string
@@ -95,9 +95,9 @@ export type BaseVCV1<
   proof: Proof
 }
 
-export type VPTypeV1 = ['VerifiablePresentation', ...string[]]
+export type BaseVPV1TypeV1 = ['VerifiablePresentation', ...string[]]
 
-export type VPProofV1 = {
+export type BaseVPV1ProofV1 = {
   type: string
   created: string
   proofPurpose: 'authentication'
@@ -108,12 +108,12 @@ export type VPProofV1 = {
 }
 
 // TODO: This is missing the `signature` and `packedData` fields. How should those translate over?
-export type VPV1<VC extends BaseVCV1 = BaseVCV1> = {
+export type BaseVPV1<VC extends BaseVCV1 = BaseVCV1> = {
   '@context': TContext
-  type: VPTypeV1
+  type: BaseVPV1TypeV1
   verifiableCredential: VC[]
   holder: string
-  proof: VPProofV1
+  proof: BaseVPV1ProofV1
 }
 
-export type VP = VPV1
+export type BaseVP = BaseVPV1

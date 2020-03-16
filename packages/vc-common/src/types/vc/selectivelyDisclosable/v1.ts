@@ -1,5 +1,5 @@
-import {SimpleThing} from '../shared/v1'
-import {AtomicVCV1, AtomicVCSubjectV1, AtomicVCTypeV1} from '../atomic/v1'
+import {SimpleThing} from '../base/v1'
+import {VCV1, VCV1Subject, VCV1Type} from '../v1'
 
 // Generic
 
@@ -7,83 +7,85 @@ export type ObjectGeneric = {[k: string]: any}
 
 // Primitives
 
-export type NE = 'nodes' | 'edges'
+export type SelectiveStructureComponent = 'nodes' | 'edges'
 
-export type INode = {
+export type SelectiveNode = {
   '@type'?: string
   '@nodeId': string
 }
 
-export type INodeRV = Required<INode>
+export type SelectiveNodeRV = Required<SelectiveNode>
 
-export type IEdge = {
+export type SelectiveEdge = {
   '@nodeId': string
   '@property': string
   '@targetNodeId': string
 }
 
-export type INodePropertyList = {
+export type SelectiveNodePropertyList = {
   '@nodeId': string
   '@properties': Array<string>
 }
 
-export type IPartial = {
+export type SelectivePartial = {
   '@type': string
   '@nodeId': string
   [k: string]: string | number | boolean // Only scalar properties
 }
 
-export type StructuralMaster = {
-  nodes: Array<INode>
-  edges: Array<IEdge>
-  nodePropertyLists: Array<INodePropertyList>
-  partials: Array<IPartial>
+export type SelectiveStructuralMaster = {
+  nodes: Array<SelectiveNode>
+  edges: Array<SelectiveEdge>
+  nodePropertyLists: Array<SelectiveNodePropertyList>
+  partials: Array<SelectivePartial>
 }
 
 // Credential Subjects And Types
 
-export type StructuralPartialSDVCSubjectNodeV1 = {
+export type VCV1SelectiveStructuralPartialSubjectNode = {
   '@type': 'VCStructure'
-  nodes: [INode]
+  nodes: [SelectiveNode]
 }
 
-export type StructuralPartialSDVCSubjectEdgeV1 = {
+export type VCV1SelectiveStructuralPartialSubjectEdge = {
   '@type': 'VCStructure'
-  edges: [IEdge]
+  edges: [SelectiveEdge]
 }
 
-export type StructuralPartialSDVCTypeV1 = [AtomicVCTypeV1[0], 'StructuralPartialSDVC', ...string[]]
+export type VCV1SelectiveStructuralPartialType = [VCV1Type[0], 'StructuralPartialSDVC', ...string[]]
 
-export type StructuralPartialSDVCSubjectV1 = AtomicVCSubjectV1<StructuralPartialSDVCSubjectNodeV1 | StructuralPartialSDVCSubjectEdgeV1>
-
-export type FullSDVCTypeV1 = [AtomicVCTypeV1[0], 'FullSDVC', ...string[]]
-
-export type FullSDVCSubjectV1<T extends SimpleThing> = AtomicVCSubjectV1<T>
-
-export type StructuralFullSDVCTypeV1 = [AtomicVCTypeV1[0], 'StructuralFullSDVC', ...string[]]
-
-export type StructuralFullSDVCSubjectV1 = AtomicVCSubjectV1<{
-  '@type': 'VCStructure'
-  nodes: Array<INode>
-  edges: Array<IEdge>
-}>
-
-export type NodePropertyListSDVCTypeV1 = [AtomicVCTypeV1[0], 'NodePropertyListSDVC', ...string[]]
-
-export type NodePropertyListSDVCSubjectV1 = AtomicVCSubjectV1<
-  {
-    '@type': 'NodePropertyList'
-  } & INodePropertyList
+export type VCV1SelectiveStructuralPartialSubject = VCV1Subject<
+  VCV1SelectiveStructuralPartialSubjectNode | VCV1SelectiveStructuralPartialSubjectEdge
 >
 
-export type PartialSDVCTypeV1 = [AtomicVCTypeV1[0], 'PartialSDVC', ...string[]]
+export type VCV1SelectiveFullType = [VCV1Type[0], 'FullSDVC', ...string[]]
 
-export type PartialSDVCSubjectV1 = AtomicVCSubjectV1<IPartial>
+export type VCV1SelectiveFullSubject<T extends SimpleThing> = VCV1Subject<T>
+
+export type VCV1SelectiveStructuralFullType = [VCV1Type[0], 'StructuralFullSDVC', ...string[]]
+
+export type VCV1SelectiveStructuralFullSubject = VCV1Subject<{
+  '@type': 'VCStructure'
+  nodes: Array<SelectiveNode>
+  edges: Array<SelectiveEdge>
+}>
+
+export type VCV1SelectiveNodePropertyListType = [VCV1Type[0], 'NodePropertyListSDVC', ...string[]]
+
+export type VCV1SelectiveNodePropertyListSubject = VCV1Subject<
+  {
+    '@type': 'NodePropertyList'
+  } & SelectiveNodePropertyList
+>
+
+export type VCV1SelectivePartialType = [VCV1Type[0], 'PartialSDVC', ...string[]]
+
+export type VCV1SelectivePartialSubject = VCV1Subject<SelectivePartial>
 
 // VCs
 
-export type FullSDVCV1<T extends SimpleThing> = AtomicVCV1<FullSDVCSubjectV1<T>, FullSDVCTypeV1>
-export type StructuralFullSDVCV1 = AtomicVCV1<StructuralFullSDVCSubjectV1, StructuralFullSDVCTypeV1>
-export type StructuralPartialSDVCV1 = AtomicVCV1<StructuralPartialSDVCSubjectV1, StructuralPartialSDVCTypeV1>
-export type NodePropertyListSDVCV1 = AtomicVCV1<NodePropertyListSDVCSubjectV1, NodePropertyListSDVCTypeV1>
-export type PartialSDVCV1 = AtomicVCV1<PartialSDVCSubjectV1, PartialSDVCTypeV1>
+export type VCV1SelectiveFull<T extends SimpleThing> = VCV1<VCV1SelectiveFullSubject<T>, VCV1SelectiveFullType>
+export type VCV1SelectiveStructuralFull = VCV1<VCV1SelectiveStructuralFullSubject, VCV1SelectiveStructuralFullType>
+export type VCV1SelectiveStructuralPartial = VCV1<VCV1SelectiveStructuralPartialSubject, VCV1SelectiveStructuralPartialType>
+export type VCV1SelectiveNodePropertyList = VCV1<VCV1SelectiveNodePropertyListSubject, VCV1SelectiveNodePropertyListType>
+export type VCV1SelectivePartial = VCV1<VCV1SelectivePartialSubject, VCV1SelectivePartialType>

@@ -1,6 +1,6 @@
-import {TAttestationTypeNames} from '../../attestation'
-import {Stage, IMerkleProofShare} from '../../misc'
-import {ISignedClaimNode, IDataNodeLegacy} from '../shared/v0'
+import {TAttestationTypeNames} from '../attestation'
+import {Stage, IMerkleProofShare} from '../misc'
+import {ISignedClaimNode, IDataNodeLegacy} from './base/v0'
 
 export interface IAuthorization {
   /** Address of keypair granting authorization */

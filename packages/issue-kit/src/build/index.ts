@@ -1,2 +1,2 @@
 export * from './atomic'
-export * from './selectivlyDisclosable'
+export * from './selectivelyDisclosable'

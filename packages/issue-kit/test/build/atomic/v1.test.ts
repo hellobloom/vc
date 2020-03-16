@@ -2,7 +2,7 @@ import {DIDUtils} from '@bloomprotocol/vc-common'
 
 const {MnemonicKeySystem} = require('@transmute/element-lib')
 
-import {buildAtomicVCSubjectV1, buildAtomicVCV1} from '../../../src/build/atomic/v1'
+import {buildVCV1Subject, buildVCV1} from '../../../src/build/atomic/v1'
 
 const generateDID = async () => {
   const mks = new MnemonicKeySystem(MnemonicKeySystem.generateMnemonic())
@@ -18,13 +18,13 @@ const generateDID = async () => {
   }
 }
 
-describe('buildAtomicVCSubjectV1', () => {
-  it('builds an AtomicVCSubjectV1', async () => {
+describe('buildVCV1Subject', () => {
+  it('builds an VCV1Subject', async () => {
     expect.assertions(1)
 
     const {did} = await generateDID()
 
-    const subject = await buildAtomicVCSubjectV1({
+    const subject = await buildVCV1Subject({
       subject: did,
       data: {'@type': 'Thing', key: 'value'},
     })
@@ -43,29 +43,29 @@ describe('buildAtomicVCSubjectV1', () => {
   it('throws when data contains an "id" field', async () => {
     expect.assertions(1)
 
-    await expect(buildAtomicVCSubjectV1({subject: (await generateDID()).did, data: {'@type': 'Thing', id: 'value'}})).rejects.toThrow()
+    await expect(buildVCV1Subject({subject: (await generateDID()).did, data: {'@type': 'Thing', id: 'value'}})).rejects.toThrow()
   })
 
   it('throws when subject is not a valid DID', async () => {
     expect.assertions(1)
 
-    await expect(buildAtomicVCSubjectV1({subject: 'invalid subject', data: {'@type': 'Thing'}})).rejects.toThrow()
+    await expect(buildVCV1Subject({subject: 'invalid subject', data: {'@type': 'Thing'}})).rejects.toThrow()
   })
 })
 
-describe('buildAtomicVCV1', () => {
-  it('builds an AtomicVCV1', async () => {
+describe('buildVCV1', () => {
+  it('builds an VCV1', async () => {
     expect.assertions(1)
 
     const {did: subjectDID} = await generateDID()
     const issuer = await generateDID()
 
-    const credentialSubject = await buildAtomicVCSubjectV1({
+    const credentialSubject = await buildVCV1Subject({
       subject: subjectDID,
       data: {'@type': 'Thing', key: 'value'},
     })
 
-    const atomicVC = await buildAtomicVCV1({
+    const atomicVC = await buildVCV1({
       credentialSubject: credentialSubject,
       type: 'CustomCredential',
       issuer: {
@@ -109,18 +109,18 @@ describe('buildAtomicVCV1', () => {
     })
   })
 
-  it('builds an AtomicVCV1 with custom contexts', async () => {
+  it('builds an VCV1 with custom contexts', async () => {
     expect.assertions(1)
 
     const {did: subjectDID} = await generateDID()
     const issuer = await generateDID()
 
-    const credentialSubject = await buildAtomicVCSubjectV1({
+    const credentialSubject = await buildVCV1Subject({
       subject: subjectDID,
       data: {'@type': 'Thing', key: 'value'},
     })
 
-    const atomicVC = await buildAtomicVCV1({
+    const atomicVC = await buildVCV1({
       credentialSubject: credentialSubject,
       type: 'CustomCredential',
       issuer: {
@@ -165,23 +165,23 @@ describe('buildAtomicVCV1', () => {
     })
   })
 
-  it('builds an AtomicVCV1 with multiple credentials', async () => {
+  it('builds an VCV1 with multiple credentials', async () => {
     expect.assertions(1)
 
     const {did: subjectDID} = await generateDID()
     const issuer = await generateDID()
 
-    const credentialSubject1 = await buildAtomicVCSubjectV1({
+    const credentialSubject1 = await buildVCV1Subject({
       subject: subjectDID,
       data: {'@type': 'Thing', key: 'value 1'},
     })
 
-    const credentialSubject2 = await buildAtomicVCSubjectV1({
+    const credentialSubject2 = await buildVCV1Subject({
       subject: subjectDID,
       data: {'@type': 'Thing', key: 'value 2'},
     })
 
-    const atomicVC = await buildAtomicVCV1({
+    const atomicVC = await buildVCV1({
       credentialSubject: [credentialSubject1, credentialSubject2],
       type: 'CustomCredential',
       issuer: {
@@ -234,23 +234,23 @@ describe('buildAtomicVCV1', () => {
     })
   })
 
-  it('builds an AtomicVCV1 with multiple types', async () => {
+  it('builds an VCV1 with multiple types', async () => {
     expect.assertions(1)
 
     const {did: subjectDID} = await generateDID()
     const issuer = await generateDID()
 
-    const credentialSubject1 = await buildAtomicVCSubjectV1({
+    const credentialSubject1 = await buildVCV1Subject({
       subject: subjectDID,
       data: {'@type': 'Thing', key: 'value 1'},
     })
 
-    const credentialSubject2 = await buildAtomicVCSubjectV1({
+    const credentialSubject2 = await buildVCV1Subject({
       subject: subjectDID,
       data: {'@type': 'Thing', key: 'value 2'},
     })
 
-    const atomicVC = await buildAtomicVCV1({
+    const atomicVC = await buildVCV1({
       credentialSubject: [credentialSubject1, credentialSubject2],
       type: ['CustomCredential1', 'CustomCredential2'],
       issuer: {
