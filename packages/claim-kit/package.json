@@ -11,6 +11,7 @@
   "files": [
     "dist"
   ],
+  "sideEffects": false,
   "scripts": {
     "start": "tsdx watch --tsconfig ./tsconfig.build.json",
     "build": "tsdx build --tsconfig ./tsconfig.build.json",

@@ -21,6 +21,7 @@
     "prepublishOnly": "npm run test && npm run lint",
     "storybook": "start-storybook -p 9001"
   },
+  "sideEffects": false,
   "dependencies": {
     "@bloomprotocol/vc-common": "^1.1.0-beta.0",
     "@bloomprotocol/qr": "^2.0.1",
