@@ -31,9 +31,9 @@
   },
   "devDependencies": {
     "@babel/core": "^7.7.7",
-    "@bloomprotocol/eslint-config": "^1.0.0-beta.1",
-    "@bloomprotocol/eslint-config-react": "^1.0.0-beta.1",
-    "@bloomprotocol/prettier-config": "^1.0.0-beta.1",
+    "@bloomprotocol/eslint-config": "^1.0.0",
+    "@bloomprotocol/eslint-config-react": "^1.0.0",
+    "@bloomprotocol/prettier-config": "^1.0.0",
     "@storybook/react": "^5.2.8",
     "@testing-library/react": "^8.0.5",
     "@types/jest": "^24.0.15",

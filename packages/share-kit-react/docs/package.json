@@ -16,8 +16,8 @@
     "react-dom": "^16.8.4"
   },
   "devDependencies": {
-    "@bloomprotocol/eslint-config": "^1.0.0-beta.1",
-    "@bloomprotocol/prettier-config": "^1.0.0-beta.1",
+    "@bloomprotocol/eslint-config": "^1.0.0",
+    "@bloomprotocol/prettier-config": "^1.0.0",
     "@typescript-eslint/eslint-plugin": "^2.14.0",
     "@typescript-eslint/parser": "^2.14.0",
     "eslint": "^6.8.0",

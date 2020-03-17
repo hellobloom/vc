@@ -37,9 +37,9 @@
     "web3": "^1.2.4"
   },
   "devDependencies": {
-    "@bloomprotocol/eslint-config": "^1.0.0-beta.1",
+    "@bloomprotocol/eslint-config": "^1.0.0",
     "@bloomprotocol/issue-kit": "^1.0.0-beta.0",
-    "@bloomprotocol/prettier-config": "^1.0.0-beta.1",
+    "@bloomprotocol/prettier-config": "^1.0.0",
     "@types/eth-sig-util": "^2.1.0",
     "@types/jest": "^24.0.25",
     "@typescript-eslint/eslint-plugin": "^2.14.0",
