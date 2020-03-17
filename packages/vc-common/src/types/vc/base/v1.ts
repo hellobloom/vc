@@ -85,7 +85,7 @@ export type BaseVCV1<
   Revocation extends BaseVCV1Revocation = BaseVCV1Revocation
 > = {
   '@context': TContext
-  id?: string
+  id: string
   type: Type
   issuer: string
   issuanceDate: string

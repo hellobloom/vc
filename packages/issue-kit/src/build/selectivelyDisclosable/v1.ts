@@ -6,19 +6,28 @@ import {
   // StructuralPartialSDVCV1,
   // NodePropertyListSDVCV1,
   // PartialSDVCV1,
+  SimpleThing,
+  ObjectGeneric,
+  SelectiveStructureComponent,
+  SelectiveNode,
+  SelectiveEdge,
+  SelectiveNodePropertyList,
+  SelectivePartial,
+  VCV1Subject,
   VCV1SelectiveFullSubject,
   VCV1SelectiveStructuralFullSubject,
   VCV1SelectiveStructuralPartialSubject,
   VCV1SelectiveNodePropertyListSubject,
   VCV1SelectivePartialSubject,
-  SimpleThing,
-  SelectiveStructuralMaster,
-  ObjectGeneric,
-  SelectiveStructureComponent,
-  SelectiveNode,
-  SelectiveEdge,
-  VCV1Subject,
 } from '@bloomprotocol/vc-common'
+
+// Intermediate utility type for expansion of SD VC
+export type SelectiveStructuralMaster = {
+  nodes: Array<SelectiveNode>
+  edges: Array<SelectiveEdge>
+  nodePropertyLists: Array<SelectiveNodePropertyList>
+  partials: Array<SelectivePartial>
+}
 
 export const buildVCV1SelectiveFullSubject = async <Data extends SimpleThing>({
   credentialSubject,
