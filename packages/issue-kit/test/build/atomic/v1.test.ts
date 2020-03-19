@@ -2,7 +2,7 @@ import {DIDUtils} from '@bloomprotocol/vc-common'
 
 const {MnemonicKeySystem} = require('@transmute/element-lib')
 
-import {buildVCV1Subject, buildVCV1} from '../../../src/build/atomic/v1'
+import {buildVCV1Subject, buildVCV1} from '../../../src/build/v1'
 
 const generateDID = async () => {
   const mks = new MnemonicKeySystem(MnemonicKeySystem.generateMnemonic())
@@ -19,7 +19,7 @@ const generateDID = async () => {
 }
 
 describe('buildVCV1Subject', () => {
-  it('builds an VCV1Subject', async () => {
+  it('builds a VCV1Subject', async () => {
     expect.assertions(1)
 
     const {did} = await generateDID()
@@ -54,7 +54,7 @@ describe('buildVCV1Subject', () => {
 })
 
 describe('buildVCV1', () => {
-  it('builds an VCV1', async () => {
+  it('builds a VCV1', async () => {
     expect.assertions(1)
 
     const {did: subjectDID} = await generateDID()
@@ -66,6 +66,7 @@ describe('buildVCV1', () => {
     })
 
     const atomicVC = await buildVCV1({
+      id: 'acbfeba0af-b-23b-af0b1-0tbfa-asfasfasf',
       credentialSubject: credentialSubject,
       type: 'CustomCredential',
       issuer: {
@@ -77,12 +78,12 @@ describe('buildVCV1', () => {
       issuanceDate: '2016-02-01T00:00:00.000Z',
       expirationDate: '2018-02-01T00:00:00.000Z',
       revocation: {
-        '@context': 'https://example.com',
-        token: 'token',
+        id: 'token',
       },
     })
 
     expect(atomicVC).toEqual({
+      id: 'acbfeba0af-b-23b-af0b1-0tbfa-asfasfasf',
       '@context': ['https://www.w3.org/2018/credentials/v1'],
       type: ['VerifiableCredential', 'CustomCredential'],
       issuer: issuer.did,
@@ -96,8 +97,7 @@ describe('buildVCV1', () => {
         },
       },
       revocation: {
-        '@context': 'https://example.com',
-        token: 'token',
+        id: 'token',
       },
       proof: {
         type: 'EcdsaSecp256k1Signature2019',
@@ -109,7 +109,7 @@ describe('buildVCV1', () => {
     })
   })
 
-  it('builds an VCV1 with custom contexts', async () => {
+  it('builds a VCV1 with custom contexts', async () => {
     expect.assertions(1)
 
     const {did: subjectDID} = await generateDID()
@@ -121,6 +121,7 @@ describe('buildVCV1', () => {
     })
 
     const atomicVC = await buildVCV1({
+      id: 'afbcbaiocbafoiacbaofibaociabfoaibcoibaf',
       credentialSubject: credentialSubject,
       type: 'CustomCredential',
       issuer: {
@@ -132,14 +133,14 @@ describe('buildVCV1', () => {
       issuanceDate: '2016-02-01T00:00:00.000Z',
       expirationDate: '2018-02-01T00:00:00.000Z',
       revocation: {
-        '@context': 'https://example.com',
-        token: 'token',
+        id: 'token',
       },
       context: 'https://www.w3.org/2018/credentials/examples/v1',
     })
 
     expect(atomicVC).toEqual({
       '@context': ['https://www.w3.org/2018/credentials/v1', 'https://www.w3.org/2018/credentials/examples/v1'],
+      id: 'afbcbaiocbafoiacbaofibaociabfoaibcoibaf',
       type: ['VerifiableCredential', 'CustomCredential'],
       issuer: issuer.did,
       issuanceDate: '2016-02-01T00:00:00.000Z',
@@ -152,8 +153,7 @@ describe('buildVCV1', () => {
         },
       },
       revocation: {
-        '@context': 'https://example.com',
-        token: 'token',
+        id: 'token',
       },
       proof: {
         type: 'EcdsaSecp256k1Signature2019',
@@ -165,7 +165,7 @@ describe('buildVCV1', () => {
     })
   })
 
-  it('builds an VCV1 with multiple credentials', async () => {
+  it('builds a VCV1 with multiple credentials', async () => {
     expect.assertions(1)
 
     const {did: subjectDID} = await generateDID()
@@ -182,6 +182,7 @@ describe('buildVCV1', () => {
     })
 
     const atomicVC = await buildVCV1({
+      id: 'afbcbaiocbafoiacbaofibaociabfoaibcoibaf',
       credentialSubject: [credentialSubject1, credentialSubject2],
       type: 'CustomCredential',
       issuer: {
@@ -193,13 +194,13 @@ describe('buildVCV1', () => {
       issuanceDate: '2016-02-01T00:00:00.000Z',
       expirationDate: '2018-02-01T00:00:00.000Z',
       revocation: {
-        '@context': 'https://example.com',
-        token: 'token',
+        id: 'token',
       },
     })
 
     expect(atomicVC).toEqual({
       '@context': ['https://www.w3.org/2018/credentials/v1'],
+      id: 'afbcbaiocbafoiacbaofibaociabfoaibcoibaf',
       type: ['VerifiableCredential', 'CustomCredential'],
       issuer: issuer.did,
       issuanceDate: '2016-02-01T00:00:00.000Z',
@@ -221,8 +222,7 @@ describe('buildVCV1', () => {
         },
       ],
       revocation: {
-        '@context': 'https://example.com',
-        token: 'token',
+        id: 'token',
       },
       proof: {
         type: 'EcdsaSecp256k1Signature2019',
@@ -234,7 +234,7 @@ describe('buildVCV1', () => {
     })
   })
 
-  it('builds an VCV1 with multiple types', async () => {
+  it('builds a VCV1 with multiple types', async () => {
     expect.assertions(1)
 
     const {did: subjectDID} = await generateDID()
@@ -251,6 +251,7 @@ describe('buildVCV1', () => {
     })
 
     const atomicVC = await buildVCV1({
+      id: 'iasdoihasdofaisdhfoiasdhfoaisdfhaosdf',
       credentialSubject: [credentialSubject1, credentialSubject2],
       type: ['CustomCredential1', 'CustomCredential2'],
       issuer: {
@@ -262,13 +263,13 @@ describe('buildVCV1', () => {
       issuanceDate: '2016-02-01T00:00:00.000Z',
       expirationDate: '2018-02-01T00:00:00.000Z',
       revocation: {
-        '@context': 'https://example.com',
-        token: 'token',
+        id: 'token',
       },
     })
 
     expect(atomicVC).toEqual({
       '@context': ['https://www.w3.org/2018/credentials/v1'],
+      id: 'iasdoihasdofaisdhfoiasdhfoaisdfhaosdf',
       type: ['VerifiableCredential', 'CustomCredential1', 'CustomCredential2'],
       issuer: issuer.did,
       issuanceDate: '2016-02-01T00:00:00.000Z',
@@ -290,8 +291,7 @@ describe('buildVCV1', () => {
         },
       ],
       revocation: {
-        '@context': 'https://example.com',
-        token: 'token',
+        id: 'token',
       },
       proof: {
         type: 'EcdsaSecp256k1Signature2019',
