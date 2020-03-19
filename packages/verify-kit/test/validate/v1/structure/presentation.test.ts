@@ -1,5 +1,5 @@
 import {EthUtils, DIDUtils, Utils, VCV1, BaseVPV1} from '@bloomprotocol/vc-common'
-import {buildAtomicVCSubjectV1, buildVCV1} from '@bloomprotocol/issue-kit'
+import {buildVCV1Subject, buildVCV1} from '@bloomprotocol/issue-kit'
 import {EcdsaSecp256k1KeyClass2019, EcdsaSecp256k1Signature2019} from '@transmute/lds-ecdsa-secp256k1-2019'
 import {keyUtils} from '@transmute/es256k-jws-ts'
 
@@ -82,7 +82,7 @@ describe('Validation.validateCredentialSubject', () => {
 
     const {did} = await generateDID()
 
-    const credentialSubject = await buildAtomicVCSubjectV1({
+    const credentialSubject = await buildVCV1Subject({
       subject: did,
       data: {'@type': 'Thing'},
     })
@@ -95,7 +95,7 @@ describe('Validation.validateCredentialSubject', () => {
 
     const {did} = await generateDID()
 
-    const credentialSubject = await buildAtomicVCSubjectV1({
+    const credentialSubject = await buildVCV1Subject({
       subject: did,
       data: {'@type': 'Thing'},
     })
@@ -113,7 +113,7 @@ describe('Validation.validateCredentialSubject', () => {
 
     const {did} = await generateDID()
 
-    const credentialSubject = await buildAtomicVCSubjectV1({
+    const credentialSubject = await buildVCV1Subject({
       subject: did,
       data: {'@type': ''},
     })
@@ -139,7 +139,7 @@ describe('Validation.validateCredentialProof', () => {
     const {did: subjectDID} = await generateDID()
     const issuer = await generateDID()
 
-    const credentialSubject = await buildAtomicVCSubjectV1({
+    const credentialSubject = await buildVCV1Subject({
       subject: subjectDID,
       data: {'@type': 'Thing'},
     })
@@ -156,8 +156,7 @@ describe('Validation.validateCredentialProof', () => {
       issuanceDate: '2016-02-01T00:00:00.000Z',
       expirationDate: '2018-02-01T00:00:00.000Z',
       revocation: {
-        '@context': 'https://example.com',
-        token: '1234',
+        id: '1234',
       },
     })
 
@@ -170,7 +169,7 @@ describe('Validation.validateCredentialProof', () => {
     const {did: subjectDID} = await generateDID()
     const issuer = await generateDID()
 
-    const credentialSubject = await buildAtomicVCSubjectV1({
+    const credentialSubject = await buildVCV1Subject({
       subject: subjectDID,
       data: {'@type': 'Thing'},
     })
@@ -187,8 +186,7 @@ describe('Validation.validateCredentialProof', () => {
       issuanceDate: '2016-02-01T00:00:00.000Z',
       expirationDate: '2018-02-01T00:00:00.000Z',
       revocation: {
-        '@context': 'https://example.com',
-        token: '1234',
+        id: '1234',
       },
     })
 
@@ -206,7 +204,7 @@ describe('Validation.validateCredentialProof', () => {
     const {did: subjectDID} = await generateDID()
     const issuer = await generateDID()
 
-    const credentialSubject = await buildAtomicVCSubjectV1({
+    const credentialSubject = await buildVCV1Subject({
       subject: subjectDID,
       data: {'@type': 'Thing'},
     })
@@ -223,8 +221,7 @@ describe('Validation.validateCredentialProof', () => {
       issuanceDate: '2016-02-01T00:00:00.000Z',
       expirationDate: '2018-02-01T00:00:00.000Z',
       revocation: {
-        '@context': 'https://example.com',
-        token: '1234',
+        id: '1234',
       },
     })
 
@@ -242,7 +239,7 @@ describe('Validation.validateCredentialProof', () => {
     const {did: subjectDID} = await generateDID()
     const issuer = await generateDID()
 
-    const credentialSubject = await buildAtomicVCSubjectV1({
+    const credentialSubject = await buildVCV1Subject({
       subject: subjectDID,
       data: {'@type': 'Thing'},
     })
@@ -259,8 +256,7 @@ describe('Validation.validateCredentialProof', () => {
       issuanceDate: '2016-02-01T00:00:00.000Z',
       expirationDate: '2018-02-01T00:00:00.000Z',
       revocation: {
-        '@context': 'https://example.com',
-        token: '1234',
+        id: '1234',
       },
     })
 
@@ -278,7 +274,7 @@ describe('Validation.validateCredentialProof', () => {
     const {did: subjectDID} = await generateDID()
     const issuer = await generateDID()
 
-    const credentialSubject = await buildAtomicVCSubjectV1({
+    const credentialSubject = await buildVCV1Subject({
       subject: subjectDID,
       data: {'@type': 'Thing'},
     })
@@ -295,8 +291,7 @@ describe('Validation.validateCredentialProof', () => {
       issuanceDate: '2016-02-01T00:00:00.000Z',
       expirationDate: '2018-02-01T00:00:00.000Z',
       revocation: {
-        '@context': 'https://example.com',
-        token: '1234',
+        id: '1234',
       },
     })
 
@@ -314,7 +309,7 @@ describe('Validation.validateCredentialProof', () => {
     const {did: subjectDID} = await generateDID()
     const issuer = await generateDID()
 
-    const credentialSubject = await buildAtomicVCSubjectV1({
+    const credentialSubject = await buildVCV1Subject({
       subject: subjectDID,
       data: {'@type': 'Thing'},
     })
@@ -352,7 +347,7 @@ describe('Validation.validateVerifiableCredential', () => {
     const {did: subjectDID} = await generateDID()
     const issuer = await generateDID()
 
-    const credentialSubject = await buildAtomicVCSubjectV1({
+    const credentialSubject = await buildVCV1Subject({
       subject: subjectDID,
       data: {'@type': 'Thing'},
     })
@@ -383,7 +378,7 @@ describe('Validation.validateVerifiableCredential', () => {
     const {did: subjectDID} = await generateDID()
     const issuer = await generateDID()
 
-    const credentialSubject = await buildAtomicVCSubjectV1({
+    const credentialSubject = await buildVCV1Subject({
       subject: subjectDID,
       data: {'@type': 'Thing'},
     })
@@ -413,7 +408,7 @@ describe('Validation.validateVerifiableCredential', () => {
     const {did: subjectDID} = await generateDID()
     const issuer = await generateDID()
 
-    const credentialSubject = await buildAtomicVCSubjectV1({
+    const credentialSubject = await buildVCV1Subject({
       subject: subjectDID,
       data: {'@type': 'Thing'},
     })
@@ -448,7 +443,7 @@ describe('Validation.validateVerifiableCredential', () => {
     const {did: subjectDID} = await generateDID()
     const issuer = await generateDID()
 
-    const credentialSubject = await buildAtomicVCSubjectV1({
+    const credentialSubject = await buildVCV1Subject({
       subject: subjectDID,
       data: {'@type': 'Thing'},
     })
@@ -483,7 +478,7 @@ describe('Validation.validateVerifiableCredential', () => {
     const {did: subjectDID} = await generateDID()
     const issuer = await generateDID()
 
-    const credentialSubject = await buildAtomicVCSubjectV1({
+    const credentialSubject = await buildVCV1Subject({
       subject: subjectDID,
       data: {'@type': 'Thing'},
     })
@@ -518,7 +513,7 @@ describe('Validation.validateVerifiableCredential', () => {
     const {did: subjectDID} = await generateDID()
     const issuer = await generateDID()
 
-    const credentialSubject = await buildAtomicVCSubjectV1({
+    const credentialSubject = await buildVCV1Subject({
       subject: subjectDID,
       data: {'@type': 'Thing'},
     })
@@ -553,7 +548,7 @@ describe('Validation.validateVerifiableCredential', () => {
     const {did: subjectDID} = await generateDID()
     const issuer = await generateDID()
 
-    const credentialSubject = await buildAtomicVCSubjectV1({
+    const credentialSubject = await buildVCV1Subject({
       subject: subjectDID,
       data: {'@type': 'Thing'},
     })
@@ -583,7 +578,7 @@ describe('Validation.validateVerifiableCredential', () => {
     const {did: subjectDID} = await generateDID()
     const issuer = await generateDID()
 
-    const credentialSubject = await buildAtomicVCSubjectV1({
+    const credentialSubject = await buildVCV1Subject({
       subject: subjectDID,
       data: {'@type': 'Thing'},
     })
@@ -614,7 +609,7 @@ describe('Validation.validateVerifiableCredential', () => {
     const {did: subjectDID} = await generateDID()
     const issuer = await generateDID()
 
-    const credentialSubject = await buildAtomicVCSubjectV1({
+    const credentialSubject = await buildVCV1Subject({
       subject: subjectDID,
       data: {'@type': ''},
     })
@@ -645,7 +640,7 @@ describe('Validation.validateVerifiableCredential', () => {
     const {did: subjectDID} = await generateDID()
     const issuer = await generateDID()
 
-    const credentialSubject = await buildAtomicVCSubjectV1({
+    const credentialSubject = await buildVCV1Subject({
       subject: subjectDID,
       data: {'@type': ''},
     })
@@ -683,7 +678,7 @@ describe('Validation.validateVerifiableCredential', () => {
     const {did: subjectDID} = await generateDID()
     const issuer = await generateDID()
 
-    const credentialSubject = await buildAtomicVCSubjectV1({
+    const credentialSubject = await buildVCV1Subject({
       subject: subjectDID,
       data: {'@type': ''},
     })
@@ -722,7 +717,7 @@ describe('Validation.validateVerifiableCredential', () => {
     const {did: subjectDID} = await generateDID()
     const issuer = await generateDID()
 
-    const credentialSubject = await buildAtomicVCSubjectV1({
+    const credentialSubject = await buildVCV1Subject({
       subject: subjectDID,
       data: {'@type': ''},
     })
@@ -763,7 +758,7 @@ describe('Validation.validateVerifiablePresentationV1', () => {
     const subject = await generateDID()
     const issuer = await generateDID()
 
-    const credentialSubject = await buildAtomicVCSubjectV1({
+    const credentialSubject = await buildVCV1Subject({
       subject: subject.did,
       data: {'@type': 'Thing'},
     })
@@ -807,7 +802,7 @@ describe('Validation.validateVerifiablePresentationV1', () => {
     const invalidSubject = await generateDID()
     const issuer = await generateDID()
 
-    const credentialSubject = await buildAtomicVCSubjectV1({
+    const credentialSubject = await buildVCV1Subject({
       subject: subjectDID,
       data: {'@type': 'Thing'},
     })
@@ -850,7 +845,7 @@ describe('Validation.validateVerifiablePresentationV1', () => {
     const subject = await generateDID()
     const issuer = await generateDID()
 
-    const credentialSubject = await buildAtomicVCSubjectV1({
+    const credentialSubject = await buildVCV1Subject({
       subject: subject.did,
       data: {'@type': 'Thing'},
     })
@@ -898,7 +893,7 @@ describe('Validation.validateVerifiablePresentationV1', () => {
     const subject = await generateDID()
     const issuer = await generateDID()
 
-    const credentialSubject = await buildAtomicVCSubjectV1({
+    const credentialSubject = await buildVCV1Subject({
       subject: subject.did,
       data: {'@type': 'Thing'},
     })
@@ -951,7 +946,7 @@ describe('Validation.validateVerifiablePresentationV1', () => {
     const subject = await generateDID()
     const issuer = await generateDID()
 
-    const credentialSubject = await buildAtomicVCSubjectV1({
+    const credentialSubject = await buildVCV1Subject({
       subject: subject.did,
       data: {'@type': 'Thing'},
     })
@@ -999,7 +994,7 @@ describe('Validation.validateVerifiablePresentationV1', () => {
     const subject = await generateDID()
     const issuer = await generateDID()
 
-    const credentialSubject = await buildAtomicVCSubjectV1({
+    const credentialSubject = await buildVCV1Subject({
       subject: subject.did,
       data: {'@type': 'Thing'},
     })
