@@ -70,12 +70,8 @@ export type BaseVCV1Proof = {
 }
 
 export type BaseVCV1Revocation = {
-  '@context': string
-}
-
-export type BaseVCV1RevocationSimple = {
-  '@context': string
-  token: string
+  // id: 'urn:uuid:...' etc.
+  id: string
 }
 
 export type BaseVCV1<

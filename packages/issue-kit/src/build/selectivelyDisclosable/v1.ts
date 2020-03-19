@@ -1,32 +1,59 @@
 import * as R from 'ramda'
 import {uuid} from 'uuidv4'
+import {buildVCV1, Issuer} from '../v1'
 import {
-  // FullSDVCV1,
-  // StructuralFullSDVCV1,
-  // StructuralPartialSDVCV1,
-  // NodePropertyListSDVCV1,
-  // PartialSDVCV1,
+  /* Primitives and generics */
   SimpleThing,
   ObjectGeneric,
   SelectiveStructureComponent,
   SelectiveNode,
   SelectiveEdge,
   SelectiveNodePropertyList,
-  SelectivePartial,
+  SelectiveProperty,
   VCV1Subject,
+  /* Subject Types */
   VCV1SelectiveFullSubject,
   VCV1SelectiveStructuralFullSubject,
-  VCV1SelectiveStructuralPartialSubject,
+  VCV1SelectiveStructuralAtomSubject,
   VCV1SelectiveNodePropertyListSubject,
-  VCV1SelectivePartialSubject,
+  VCV1SelectivePropertySubject,
+  VCV1SelectiveMetaSubject,
+  /* Contexts */
+  VCV1SelectiveFullContext,
+  VCV1SelectiveStructuralFullContext,
+  VCV1SelectiveStructuralAtomContext,
+  VCV1SelectiveNodePropertyListContext,
+  VCV1SelectivePropertyContext,
+  VCV1SelectiveMetaContext,
+  /* Type strings */
+  VCV1SelectiveFullType,
+  VCV1SelectiveStructuralFullType,
+  VCV1SelectiveStructuralAtomType,
+  VCV1SelectiveNodePropertyListType,
+  VCV1SelectivePropertyType,
+  VCV1SelectiveMetaType,
+  // VC types
+  VCV1SelectiveFull,
+  VCV1SelectiveStructuralFull,
+  VCV1SelectiveStructuralAtom,
+  VCV1SelectiveNodePropertyList,
+  VCV1SelectiveProperty,
+  VCV1SelectiveMeta,
+  /* Global VC types */
+  BaseVCV1Revocation,
+  BaseVCV1Type,
+  VCV1,
 } from '@bloomprotocol/vc-common'
 
 // Intermediate utility type for expansion of SD VC
 export type SelectiveStructuralMaster = {
+  '@vcId': string
+  '@vcType': BaseVCV1Type
+  '@vcContext': Array<string>
   nodes: Array<SelectiveNode>
   edges: Array<SelectiveEdge>
   nodePropertyLists: Array<SelectiveNodePropertyList>
-  partials: Array<SelectivePartial>
+  partials: Array<SelectiveProperty>
 }
 
 export const buildVCV1SelectiveFullSubject = async <Data extends SimpleThing>({
@@ -35,8 +62,7 @@ export const buildVCV1SelectiveFullSubject = async <Data extends SimpleThing>({
   credentialSubject: VCV1Subject<Data>
 }): Promise<VCV1SelectiveFullSubject<Data>> => {
   const credSubjClone = R.clone(credentialSubject) // Don't mutate credSubj
-  const newCredSubjData: RecursiveNodeId<Data> = assignNodeIds(credSubjClone['data'])
-
+  const newCredSubjData = assignNodeIds(credSubjClone['data'])
   return {
     ...credSubjClone,
     data: newCredSubjData,
@@ -44,20 +70,25 @@ export const buildVCV1SelectiveFullSubject = async <Data extends SimpleThing>({
 }
 
 export type AccumulateStructureOptions = {
+  '@vcId': string
+  '@vcType': BaseVCV1Type
+  '@vcContext': Array<string>
   includeNodeTypes: boolean
 }
 
-export const buildSelectiveStructuralMasterV1 = <Data extends SimpleThing>({
-  full,
-  ...opts
-}: {full: VCV1SelectiveFullSubject<Data>} & AccumulateStructureOptions): SelectiveStructuralMaster => {
+export const buildSelectiveStructuralMasterV1 = <Data extends SimpleThing>(
+  opts: {full: VCV1SelectiveFullSubject<Data>} & AccumulateStructureOptions,
+): SelectiveStructuralMaster => {
   const accumulator: SelectiveStructuralMaster = {
+    '@vcId': opts['@vcId'],
+    '@vcType': opts['@vcType'],
+    '@vcContext': opts['@vcContext'],
     nodes: [],
     edges: [],
     nodePropertyLists: [],
     partials: [],
   }
-  accumulateStructure(accumulator, full, opts)
+  accumulateStructure(accumulator, opts.full, opts)
   return accumulator
 }
 
@@ -68,119 +99,207 @@ export const buildVCV1SelectiveStructuralFullSubject = ({
 }): VCV1SelectiveStructuralFullSubject => ({
   id: uuid(),
   data: {
-    '@type': 'VCStructure',
+    '@vcId': structuralMaster['@vcId'],
+    '@type': 'SelectiveStructuralFull',
     nodes: structuralMaster.nodes,
     edges: structuralMaster.edges,
   },
 })
 
-export const buildAllVCV1SelectiveStructuralPartialSubject = ({
-  structuralMaster,
-}: {
+export const buildAllVCV1SelectiveStructuralAtomSubject = (opts: {
   structuralMaster: SelectiveStructuralMaster
-}): VCV1SelectiveStructuralPartialSubject[] => {
-  const structuralPartials: VCV1SelectiveStructuralPartialSubject[] = []
+}): Array<VCV1SelectiveStructuralAtomSubject> => {
+  const structuralAtoms: VCV1SelectiveStructuralAtomSubject[] = []
 
   const props: Array<SelectiveStructureComponent> = ['nodes', 'edges']
   props.forEach((k: SelectiveStructureComponent) => {
-    structuralMaster[k].forEach((i: SelectiveNode | SelectiveEdge) => {
-      const structuralPartial: VCV1SelectiveStructuralPartialSubject = {
-        id: uuid(),
-        data:
-          k === 'nodes'
-            ? {
-                '@type': 'VCStructure',
-                nodes: [i] as [SelectiveNode],
-              }
-            : {
-                '@type': 'VCStructure',
-                edges: [i] as [SelectiveEdge],
-              },
+    opts.structuralMaster[k].forEach((i: SelectiveNode | SelectiveEdge) => {
+      const baseData = {
+        '@type': 'SelectiveStructure' as 'SelectiveStructure',
+        '@vcId': opts.structuralMaster['@vcId'],
       }
-      structuralPartials.push(structuralPartial)
+      const structuralAtom: VCV1SelectiveStructuralAtomSubject = {
+        id: uuid(),
+        data: Object.assign(baseData, k === 'nodes' ? {nodes: [i] as [SelectiveNode]} : {edges: [i] as [SelectiveEdge]}),
+      }
+      structuralAtoms.push(structuralAtom)
     })
   })
 
-  return structuralPartials
+  return structuralAtoms
 }
 
-export const buildAllVCV1SelectiveNodePropertyListSubject = ({
-  structuralMaster,
-}: {
+export const buildAllVCV1SelectiveNodePropertyListSubject = async (opts: {
   structuralMaster: SelectiveStructuralMaster
-}): VCV1SelectiveNodePropertyListSubject[] =>
-  structuralMaster.nodePropertyLists.map(npl => ({
+}): Promise<Array<VCV1SelectiveNodePropertyListSubject>> =>
+  opts.structuralMaster.nodePropertyLists.map(npl => ({
     id: uuid(),
     sdvcClass: 'NodePropertyList',
     data: {'@type': 'NodePropertyList', ...npl},
   }))
 
-export const buildAllVCV1SelectivePartialSubject = ({
-  structuralMaster,
-}: {
+export const buildAllVCV1SelectivePropertySubject = async (opts: {
   structuralMaster: SelectiveStructuralMaster
-}): VCV1SelectivePartialSubject[] =>
-  structuralMaster.partials.map(p => ({
+}): Promise<Array<VCV1SelectivePropertySubject>> =>
+  opts.structuralMaster.partials.map(p => ({
     id: uuid(),
     data: p,
   }))
 
-export const buildAllVCV1SelectiveSubject = async <Data extends SimpleThing>({
-  credentialSubject,
-  includeStructuralFull,
-  includeStructuralPartial,
-  includeNodePropertyList,
-  includePartial,
-}: {
+export const buildVCV1SelectiveMetaSubject = async (opts: {
+  structuralMaster: SelectiveStructuralMaster
+}): Promise<VCV1SelectiveMetaSubject> => ({
+  id: uuid(),
+  data: {
+    '@type': 'SelectiveMeta',
+    '@vcId': opts.structuralMaster['@vcId'],
+    '@vcType': opts.structuralMaster['@vcType'],
+    '@vcContext': opts.structuralMaster['@vcContext'],
+  },
+})
+
+export const buildAllVCV1SelectiveSubject = async <Data extends SimpleThing, R extends BaseVCV1Revocation>(opts: {
+  baseType: string
+  issuer: Issuer
+  expirationDate?: string
+  revocation: R
+  context: string[]
+
   credentialSubject: VCV1Subject<Data>
   includeStructuralFull?: boolean
-  includeStructuralPartial?: boolean
+  includeStructuralAtom?: boolean
   includeNodePropertyList?: boolean
   includePartial?: boolean
-}): Promise<(
-  | VCV1SelectiveFullSubject<Data>
-  | VCV1SelectiveStructuralFullSubject
-  | VCV1SelectiveStructuralPartialSubject
-  | VCV1SelectiveNodePropertyListSubject
-  | VCV1SelectivePartialSubject
-)[]> => {
-  const full = await buildVCV1SelectiveFullSubject({credentialSubject})
+}): Promise<Array<
+  VCV1<
+    | VCV1SelectiveFullSubject<Data>
+    | VCV1SelectiveStructuralFullSubject
+    | VCV1SelectiveStructuralAtomSubject
+    | VCV1SelectiveNodePropertyListSubject
+    | VCV1SelectivePropertySubject
+    | VCV1SelectiveMetaSubject
+  >
+>> => {
+  const vcs: Array<VCV1<
+    | VCV1SelectiveFullSubject<Data>
+    | VCV1SelectiveStructuralFullSubject
+    | VCV1SelectiveStructuralAtomSubject
+    | VCV1SelectiveNodePropertyListSubject
+    | VCV1SelectivePropertySubject
+    | VCV1SelectiveMetaSubject
+  >> = []
 
-  if (includeStructuralFull || includeStructuralPartial || includeNodePropertyList || includePartial) {
-    const sdvcs: (
-      | VCV1SelectiveFullSubject<Data>
-      | VCV1SelectiveStructuralFullSubject
-      | VCV1SelectiveStructuralPartialSubject
-      | VCV1SelectiveNodePropertyListSubject
-      | VCV1SelectivePartialSubject
-    )[] = [full]
+  const full = await buildVCV1SelectiveFullSubject({credentialSubject: opts.credentialSubject})
 
-    const structuralMaster = buildSelectiveStructuralMasterV1({full, includeNodeTypes: true})
+  if (opts.includeStructuralFull || opts.includeStructuralAtom || opts.includeNodePropertyList || opts.includePartial) {
+    const vcId = `urn:uuid:${uuid()}`
+    const issuanceDate = new Date().toISOString()
 
-    if (includeStructuralFull || includeStructuralPartial) {
+    vcs.push(
+      (await buildVCV1<VCV1SelectiveFullSubject<Data>, R>({
+        id: vcId,
+        credentialSubject: full as VCV1SelectiveFullSubject<Data>,
+        type: ['VerifiableCredential', 'SelectiveFullCredential', opts.baseType] as VCV1SelectiveFullType,
+        issuer: opts.issuer,
+        issuanceDate,
+        expirationDate: opts.expirationDate,
+        context: [...opts.context, VCV1SelectiveFullContext],
+      })) as VCV1SelectiveFull<Data>,
+    )
+
+    const structuralMaster = buildSelectiveStructuralMasterV1({
+      full,
+      includeNodeTypes: true,
+      '@vcId': vcId,
+      '@vcType': ['VerifiableCredential', opts.baseType],
+      '@vcContext': opts.context,
+    })
+
+    const meta = await buildVCV1SelectiveMetaSubject({structuralMaster})
+    vcs.push(
+      (await buildVCV1<VCV1SelectiveMetaSubject, R>({
+        id: vcId,
+        credentialSubject: meta as VCV1SelectiveMetaSubject,
+        type: ['VerifiableCredential', 'SelectiveMetaCredential', opts.baseType] as VCV1SelectiveMetaType,
+        issuer: opts.issuer,
+        issuanceDate,
+        expirationDate: opts.expirationDate,
+        context: [...opts.context, VCV1SelectiveMetaContext],
+      })) as VCV1SelectiveMeta,
+    )
+
+    if (opts.includeStructuralFull || opts.includeStructuralAtom) {
       const structuralFull = buildVCV1SelectiveStructuralFullSubject({structuralMaster})
-      sdvcs.push(structuralFull)
+      vcs.push(
+        (await buildVCV1<VCV1SelectiveStructuralFullSubject, R>({
+          id: vcId,
+          credentialSubject: structuralFull as VCV1SelectiveStructuralFullSubject,
+          type: ['VerifiableCredential', 'SelectiveStructuralFullCredential', opts.baseType] as VCV1SelectiveStructuralFullType,
+          issuer: opts.issuer,
+          issuanceDate,
+          expirationDate: opts.expirationDate,
+          context: [...opts.context, VCV1SelectiveStructuralFullContext],
+        })) as VCV1SelectiveStructuralFull,
+      )
 
-      if (includeStructuralPartial) {
-        const structuralPartials = buildAllVCV1SelectiveStructuralPartialSubject({structuralMaster})
-        sdvcs.concat(structuralPartials)
+      if (opts.includeStructuralAtom) {
+        const structuralAtomSubjects = await buildAllVCV1SelectiveStructuralAtomSubject({structuralMaster})
+        const structuralAtoms = await Promise.all(
+          structuralAtomSubjects.map((structuralAtom: VCV1SelectiveStructuralAtomSubject) => {
+            return buildVCV1<VCV1SelectiveStructuralAtomSubject, R>({
+              id: vcId,
+              credentialSubject: structuralAtom,
+              type: ['VerifiableCredential', 'SelectiveStructuralAtomCredential', opts.baseType] as VCV1SelectiveStructuralAtomType,
+              issuer: opts.issuer,
+              issuanceDate,
+              expirationDate: opts.expirationDate,
+              context: [...opts.context, VCV1SelectiveStructuralAtomContext],
+            }) as Promise<VCV1SelectiveStructuralAtom>
+          }),
+        )
+        vcs.concat(structuralAtoms)
       }
     }
 
-    if (includeNodePropertyList) {
-      const nodePropertyLists = buildAllVCV1SelectiveNodePropertyListSubject({structuralMaster})
-      sdvcs.concat(nodePropertyLists)
+    if (opts.includeNodePropertyList) {
+      const nodePropertyLists = await Promise.all(
+        (await buildAllVCV1SelectiveNodePropertyListSubject({structuralMaster})).map(
+          (nodePropertyList: VCV1SelectiveNodePropertyListSubject) =>
+            buildVCV1<VCV1SelectiveNodePropertyListSubject, R>({
+              id: vcId,
+              credentialSubject: nodePropertyList as VCV1SelectiveNodePropertyListSubject,
+              type: ['VerifiableCredential', 'SelectiveNodePropertyListCredential', opts.baseType] as VCV1SelectiveNodePropertyListType,
+              issuer: opts.issuer,
+              issuanceDate,
+              expirationDate: opts.expirationDate,
+              context: [...opts.context, VCV1SelectiveNodePropertyListContext],
+            }) as Promise<VCV1SelectiveNodePropertyList>,
+        ),
+      )
+      vcs.concat(nodePropertyLists)
     }
 
-    if (includePartial) {
-      const partials = buildAllVCV1SelectivePartialSubject({structuralMaster})
-      sdvcs.concat(partials)
+    if (opts.includePartial) {
+      const partials = await Promise.all(
+        (await buildAllVCV1SelectivePropertySubject({structuralMaster})).map(
+          (propertySubject: VCV1SelectivePropertySubject) =>
+            buildVCV1<VCV1SelectivePropertySubject, R>({
+              id: vcId,
+              credentialSubject: propertySubject,
+              type: ['VerifiableCredential', 'SelectivePropertyCredential', opts.baseType] as VCV1SelectivePropertyType,
+              issuer: opts.issuer,
+              issuanceDate,
+              expirationDate: opts.expirationDate,
+              context: [...opts.context, VCV1SelectivePropertyContext],
+            }) as Promise<VCV1SelectiveProperty>,
+        ),
+      )
+      vcs.concat(partials)
     }
-
-    return sdvcs
   } else {
-    return [full]
   }
+
+  return vcs
 }
 
 // TODO: Add functions for building the VCs from the built credential subjects
@@ -188,9 +307,9 @@ export const buildAllVCV1SelectiveSubject = async <Data extends SimpleThing>({
 // {
 //   full: VCV1SelectiveFullSubject
 //   stucturalFull?: StucturalVCV1SelectiveFullSubject
-//   stucturalPartials?: StucturalVCV1SelectivePartialSubject[]
+//   stucturalAtoms?: StucturalVCV1SelectivePropertySubject[]
 //   nodePropertyLists?: VCV1SelectiveNodePropertyListSubject[]
-//   partials?: VCV1SelectivePartialSubject[]
+//   partials?: VCV1SelectivePropertySubject[]
 // }
 
 // export type Compact<T> = T extends object ? {[K in keyof T]: T[K]} : T
@@ -234,7 +353,12 @@ const addNodeToAccumulator = (
   property: string,
   opts: AccumulateStructureOptions,
 ) => {
-  accumulator.edges.push({'@nodeId': sourceNode['@nodeId'], '@property': property, '@targetNodeId': item['@nodeId']})
+  accumulator.edges.push({
+    '@type': 'SelectiveEdge',
+    '@nodeId': sourceNode['@nodeId'],
+    '@property': property,
+    '@targetNodeId': item['@nodeId'],
+  })
   accumulateStructure(accumulator, item, opts)
 }
 
@@ -245,9 +369,11 @@ const addPartialToAccumulator = (
   value: string | number | boolean,
 ) => {
   accumulator.partials.push({
+    '@vcId': accumulator['@vcId'],
     '@type': node['@type'],
     '@nodeId': node['@nodeId'],
-    [key]: value,
+    property: key,
+    value,
   })
 }
 
@@ -273,10 +399,13 @@ const accumulateStructure = (accumulator: SelectiveStructuralMaster, node: Objec
     }
   })
   accumulator.nodes.push({
+    '@type': 'SelectiveNode',
     '@nodeId': node['@nodeId'],
     ...(opts.includeNodeTypes && {'@type': node['@type']}),
   })
   accumulator.nodePropertyLists.push({
+    '@vcId': accumulator['@vcId'],
+    '@type': 'SelectiveNodePropertyList',
     '@nodeId': node['@nodeId'],
     '@properties': nodeProperties,
   })

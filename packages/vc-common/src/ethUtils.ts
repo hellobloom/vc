@@ -30,6 +30,8 @@ export const hashMessage = (message: string): string => ethUtil.addHexPrefix(kec
  */
 export const generateNonce = () => hashMessage(randomBytes(20).toString())
 
+export const generateRandomHex = (n: number) => hashMessage(randomBytes(n).toString())
+
 export const getMerkleTreeFromLeaves = (leaves: string[]) => {
   const leavesSorted = leaves.sort().map(hexStr => ethUtil.toBuffer(hexStr))
   return new MerkleTree(leavesSorted, x => Buffer.from(keccak256(x), 'hex'))

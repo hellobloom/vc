@@ -1,6 +1,13 @@
 import {SimpleThing, TContext} from '../base/v1'
 import {VCV1, VCV1Subject, VCV1Type} from '../v1'
 
+export const VCV1SelectiveFullContext = 'VCV1SelectiveFullContext'
+export const VCV1SelectiveStructuralFullContext = 'VCV1SelectiveStructuralFullContext'
+export const VCV1SelectiveStructuralAtomContext = 'VCV1SelectiveStructuralAtomContext'
+export const VCV1SelectiveNodePropertyListContext = 'VCV1SelectiveNodePropertyListContext'
+export const VCV1SelectivePropertyContext = 'VCV1SelectivePropertyContext'
+export const VCV1SelectiveMetaContext = 'VCV1SelectiveMetaContext'
+
 /////////////////////////////////////////////////
 // Generic
 /////////////////////////////////////////////////
@@ -43,15 +50,18 @@ export type SelectiveNodePropertyList = {
   '@properties': Array<string>
 }
 
+// Similar to but incompatible with schema.org PropertyValue
 export type SelectiveProperty = {
-  // @type should be set to "SelectiveProperty" if the @type of the origin node is to be omitted - otherwise, string values should be assumed to be the origin node @type.
+  // @type is considered optional but must be specified as "SelectiveProperty" if the original node's '@type' is to be omitted.
   '@type': string
   // Original VC ID
   '@vcId': string
   // UUID assigned to node
   '@nodeId': string
-  // Single property of node for inclusion in partial
-  [k: string]: string | number | boolean | undefined | null // Only scalar properties
+
+  // Property and value from original node
+  property: string
+  value: string | number | boolean | null | undefined
 }
 
 export type SelectiveMeta = {
@@ -106,6 +116,21 @@ export type VCV1SelectivePropertySubject = VCV1Subject<SelectiveProperty>
 // SelectiveTypeSubject: VC for single property of node
 export type VCV1SelectiveMetaType = [VCV1Type[0], 'SelectiveMetaCredential', ...string[]]
 export type VCV1SelectiveMetaSubject = VCV1Subject<SelectiveMeta>
+
+export type VCV1SelectiveSubjectAny<T extends SimpleThing = any> =
+  | VCV1SelectiveFullSubject<T>
+  | VCV1SelectiveStructuralFullSubject
+  | VCV1SelectiveStructuralAtomSubject
+  | VCV1SelectiveNodePropertyListSubject
+  | VCV1SelectivePropertySubject
+  | VCV1SelectiveMetaSubject
+export type VCV1SelectiveTypeAny =
+  | VCV1SelectiveFullType
+  | VCV1SelectiveStructuralFullType
+  | VCV1SelectiveStructuralAtomType
+  | VCV1SelectiveNodePropertyListType
+  | VCV1SelectivePropertyType
+  | VCV1SelectiveMetaType
 
 /////////////////////////////////////////////////
 // Fully constructed VCs
