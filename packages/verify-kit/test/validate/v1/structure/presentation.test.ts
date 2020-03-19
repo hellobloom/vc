@@ -3,6 +3,8 @@ import {buildVCV1Subject, buildVCV1} from '@bloomprotocol/issue-kit'
 import {EcdsaSecp256k1KeyClass2019, EcdsaSecp256k1Signature2019} from '@transmute/lds-ecdsa-secp256k1-2019'
 import {keyUtils} from '@transmute/es256k-jws-ts'
 
+const uuid = () => 'abcdef-abcdef-abcdef-abcdef'
+
 const {MnemonicKeySystem} = require('@transmute/element-lib')
 const jsigs = require('jsonld-signatures')
 
@@ -10,7 +12,18 @@ import * as Validation from '../../../../src/validate/v1/structure'
 
 const {AuthenticationProofPurpose} = jsigs.purposes
 
-const generateDID = async () => {
+type DID = {
+  did: string
+  primaryKey: Key
+  recoveryKey: Key
+}
+
+type Key = {
+  publicKey: string
+  privateKey: string
+}
+
+const generateDID = async (): Promise<DID> => {
   const mks = new MnemonicKeySystem(MnemonicKeySystem.generateMnemonic())
   const primaryKey = await mks.getKeyForPurpose('primary', 0)
   const recoveryKey = await mks.getKeyForPurpose('recovery', 0)
@@ -23,6 +36,24 @@ const generateDID = async () => {
     recoveryKey,
   }
 }
+
+const genGenericVC = (issuer: DID, credentialSubject: any) =>
+  buildVCV1({
+    id: `urn:uuid:${uuid()}`,
+    credentialSubject,
+    type: ['CustomCredential'],
+    issuer: {
+      did: issuer.did,
+      keyId: '#primary',
+      privateKey: issuer.primaryKey.privateKey,
+      publicKey: issuer.primaryKey.publicKey,
+    },
+    issuanceDate: '2016-02-01T00:00:00.000Z',
+    expirationDate: '2018-02-01T00:00:00.000Z',
+    revocation: {
+      id: '1234',
+    },
+  })
 
 type Holder = {
   did: string
@@ -144,21 +175,7 @@ describe('Validation.validateCredentialProof', () => {
       data: {'@type': 'Thing'},
     })
 
-    const atomicVC = await buildVCV1({
-      credentialSubject,
-      type: ['CustomCredential'],
-      issuer: {
-        did: issuer.did,
-        keyId: '#primary',
-        privateKey: issuer.primaryKey.privateKey,
-        publicKey: issuer.primaryKey.publicKey,
-      },
-      issuanceDate: '2016-02-01T00:00:00.000Z',
-      expirationDate: '2018-02-01T00:00:00.000Z',
-      revocation: {
-        id: '1234',
-      },
-    })
+    const atomicVC = await genGenericVC(issuer, credentialSubject)
 
     expect(Utils.isValid(Validation.validateCredentialProof)(atomicVC.proof)).toBeTruthy()
   })
@@ -174,21 +191,7 @@ describe('Validation.validateCredentialProof', () => {
       data: {'@type': 'Thing'},
     })
 
-    const atomicVC = await buildVCV1({
-      credentialSubject,
-      type: ['CustomCredential'],
-      issuer: {
-        did: issuer.did,
-        keyId: '#primary',
-        privateKey: issuer.primaryKey.privateKey,
-        publicKey: issuer.primaryKey.publicKey,
-      },
-      issuanceDate: '2016-02-01T00:00:00.000Z',
-      expirationDate: '2018-02-01T00:00:00.000Z',
-      revocation: {
-        id: '1234',
-      },
-    })
+    const atomicVC = await genGenericVC(issuer, credentialSubject)
 
     expect(
       Utils.isValid(Validation.validateCredentialProof)({
@@ -209,21 +212,7 @@ describe('Validation.validateCredentialProof', () => {
       data: {'@type': 'Thing'},
     })
 
-    const atomicVC = await buildVCV1({
-      credentialSubject,
-      type: ['CustomCredential'],
-      issuer: {
-        did: issuer.did,
-        keyId: '#primary',
-        privateKey: issuer.primaryKey.privateKey,
-        publicKey: issuer.primaryKey.publicKey,
-      },
-      issuanceDate: '2016-02-01T00:00:00.000Z',
-      expirationDate: '2018-02-01T00:00:00.000Z',
-      revocation: {
-        id: '1234',
-      },
-    })
+    const atomicVC = await genGenericVC(issuer, credentialSubject)
 
     expect(
       Utils.isValid(Validation.validateCredentialProof)({
@@ -244,21 +233,7 @@ describe('Validation.validateCredentialProof', () => {
       data: {'@type': 'Thing'},
     })
 
-    const atomicVC = await buildVCV1({
-      credentialSubject,
-      type: ['CustomCredential'],
-      issuer: {
-        did: issuer.did,
-        keyId: '#primary',
-        privateKey: issuer.primaryKey.privateKey,
-        publicKey: issuer.primaryKey.publicKey,
-      },
-      issuanceDate: '2016-02-01T00:00:00.000Z',
-      expirationDate: '2018-02-01T00:00:00.000Z',
-      revocation: {
-        id: '1234',
-      },
-    })
+    const atomicVC = await genGenericVC(issuer, credentialSubject)
 
     expect(
       Utils.isValid(Validation.validateCredentialProof)({
@@ -279,21 +254,7 @@ describe('Validation.validateCredentialProof', () => {
       data: {'@type': 'Thing'},
     })
 
-    const atomicVC = await buildVCV1({
-      credentialSubject,
-      type: ['CustomCredential'],
-      issuer: {
-        did: issuer.did,
-        keyId: '#primary',
-        privateKey: issuer.primaryKey.privateKey,
-        publicKey: issuer.primaryKey.publicKey,
-      },
-      issuanceDate: '2016-02-01T00:00:00.000Z',
-      expirationDate: '2018-02-01T00:00:00.000Z',
-      revocation: {
-        id: '1234',
-      },
-    })
+    const atomicVC = await genGenericVC(issuer, credentialSubject)
 
     expect(
       Utils.isValid(Validation.validateCredentialProof)({
@@ -314,22 +275,7 @@ describe('Validation.validateCredentialProof', () => {
       data: {'@type': 'Thing'},
     })
 
-    const atomicVC = await buildVCV1({
-      credentialSubject,
-      type: ['CustomCredential'],
-      issuer: {
-        did: issuer.did,
-        keyId: '#primary',
-        privateKey: issuer.primaryKey.privateKey,
-        publicKey: issuer.primaryKey.publicKey,
-      },
-      issuanceDate: '2016-02-01T00:00:00.000Z',
-      expirationDate: '2018-02-01T00:00:00.000Z',
-      revocation: {
-        '@context': 'https://example.com',
-        token: '1234',
-      },
-    })
+    const atomicVC = await genGenericVC(issuer, credentialSubject)
 
     expect(
       Utils.isValid(Validation.validateCredentialProof)({
@@ -352,22 +298,7 @@ describe('Validation.validateVerifiableCredential', () => {
       data: {'@type': 'Thing'},
     })
 
-    const atomicVC = await buildVCV1({
-      credentialSubject,
-      type: ['CustomCredential'],
-      issuer: {
-        did: issuer.did,
-        keyId: '#primary',
-        privateKey: issuer.primaryKey.privateKey,
-        publicKey: issuer.primaryKey.publicKey,
-      },
-      issuanceDate: '2016-02-01T00:00:00.000Z',
-      expirationDate: '2018-02-01T00:00:00.000Z',
-      revocation: {
-        '@context': 'https://example.com',
-        token: '1234',
-      },
-    })
+    const atomicVC = await genGenericVC(issuer, credentialSubject)
 
     await expect(Utils.isAsyncValid(Validation.validateVerifiableCredential)(atomicVC)).resolves.toBeTruthy()
   })
@@ -384,6 +315,7 @@ describe('Validation.validateVerifiableCredential', () => {
     })
 
     const atomicVC = await buildVCV1({
+      id: `urn:uuid:${uuid()}`,
       credentialSubject,
       type: ['CustomCredential'],
       issuer: {
@@ -394,8 +326,7 @@ describe('Validation.validateVerifiableCredential', () => {
       },
       issuanceDate: '2016-02-01T00:00:00.000Z',
       revocation: {
-        '@context': 'https://example.com',
-        token: '1234',
+        id: '1234',
       },
     })
 
@@ -414,6 +345,7 @@ describe('Validation.validateVerifiableCredential', () => {
     })
 
     const atomicVC = await buildVCV1({
+      id: `urn:uuid:${uuid()}`,
       credentialSubject,
       type: ['CustomCredential'],
       issuer: {
@@ -424,8 +356,7 @@ describe('Validation.validateVerifiableCredential', () => {
       },
       issuanceDate: '2016-02-01T00:00:00.000Z',
       revocation: {
-        '@context': 'https://example.com',
-        token: '1234',
+        id: '1234',
       },
     })
 
@@ -449,6 +380,7 @@ describe('Validation.validateVerifiableCredential', () => {
     })
 
     const atomicVC = await buildVCV1({
+      id: `urn:uuid:${uuid()}`,
       credentialSubject,
       type: ['CustomCredential'],
       issuer: {
@@ -459,8 +391,7 @@ describe('Validation.validateVerifiableCredential', () => {
       },
       issuanceDate: '2016-02-01T00:00:00.000Z',
       revocation: {
-        '@context': 'https://example.com',
-        token: '1234',
+        id: '1234',
       },
     })
 
@@ -484,6 +415,7 @@ describe('Validation.validateVerifiableCredential', () => {
     })
 
     const atomicVC = await buildVCV1({
+      id: `urn:uuid:${uuid()}`,
       credentialSubject,
       type: ['CustomCredential'],
       issuer: {
@@ -494,8 +426,7 @@ describe('Validation.validateVerifiableCredential', () => {
       },
       issuanceDate: '2016-02-01T00:00:00.000Z',
       revocation: {
-        '@context': 'https://example.com',
-        token: '1234',
+        id: '1234',
       },
     })
 
@@ -519,6 +450,7 @@ describe('Validation.validateVerifiableCredential', () => {
     })
 
     const atomicVC = await buildVCV1({
+      id: `urn:uuid:${uuid()}`,
       credentialSubject,
       type: ['CustomCredential'],
       issuer: {
@@ -529,8 +461,7 @@ describe('Validation.validateVerifiableCredential', () => {
       },
       issuanceDate: '2016-02-01T00:00:00.000Z',
       revocation: {
-        '@context': 'https://example.com',
-        token: '1234',
+        id: '1234',
       },
     })
 
@@ -554,6 +485,7 @@ describe('Validation.validateVerifiableCredential', () => {
     })
 
     const atomicVC = await buildVCV1({
+      id: `urn:uuid:${uuid()}`,
       credentialSubject,
       type: ['CustomCredential'],
       issuer: {
@@ -564,8 +496,7 @@ describe('Validation.validateVerifiableCredential', () => {
       },
       issuanceDate: '2016-02-01',
       revocation: {
-        '@context': 'https://example.com',
-        token: '1234',
+        id: '1234',
       },
     })
 
@@ -583,22 +514,7 @@ describe('Validation.validateVerifiableCredential', () => {
       data: {'@type': 'Thing'},
     })
 
-    const atomicVC = await buildVCV1({
-      credentialSubject,
-      type: ['CustomCredential'],
-      issuer: {
-        did: issuer.did,
-        keyId: '#primary',
-        privateKey: issuer.primaryKey.privateKey,
-        publicKey: issuer.primaryKey.publicKey,
-      },
-      issuanceDate: '2016-02-01T00:00:00.000Z',
-      expirationDate: '2016-02-01',
-      revocation: {
-        '@context': 'https://example.com',
-        token: '1234',
-      },
-    })
+    const atomicVC = await genGenericVC(issuer, credentialSubject)
 
     await expect(Utils.isAsyncValid(Validation.validateVerifiableCredential)(atomicVC)).resolves.toBeFalsy()
   })
@@ -614,22 +530,7 @@ describe('Validation.validateVerifiableCredential', () => {
       data: {'@type': ''},
     })
 
-    const atomicVC = await buildVCV1({
-      credentialSubject,
-      type: ['CustomCredential'],
-      issuer: {
-        did: issuer.did,
-        keyId: '#primary',
-        privateKey: issuer.primaryKey.privateKey,
-        publicKey: issuer.primaryKey.publicKey,
-      },
-      issuanceDate: '2016-02-01T00:00:00.000Z',
-      expirationDate: '2016-02-01',
-      revocation: {
-        '@context': 'https://example.com',
-        token: '1234',
-      },
-    })
+    const atomicVC = await genGenericVC(issuer, credentialSubject)
 
     await expect(Utils.isAsyncValid(Validation.validateVerifiableCredential)(atomicVC)).resolves.toBeFalsy()
   })
@@ -645,22 +546,7 @@ describe('Validation.validateVerifiableCredential', () => {
       data: {'@type': ''},
     })
 
-    const atomicVC = await buildVCV1({
-      credentialSubject,
-      type: ['CustomCredential'],
-      issuer: {
-        did: issuer.did,
-        keyId: '#primary',
-        privateKey: issuer.primaryKey.privateKey,
-        publicKey: issuer.primaryKey.publicKey,
-      },
-      issuanceDate: '2016-02-01T00:00:00.000Z',
-      expirationDate: '2016-02-01',
-      revocation: {
-        '@context': 'https://example.com',
-        token: '1234',
-      },
-    })
+    const atomicVC = await genGenericVC(issuer, credentialSubject)
 
     await expect(
       Utils.isAsyncValid(Validation.validateVerifiableCredential)({
@@ -683,22 +569,7 @@ describe('Validation.validateVerifiableCredential', () => {
       data: {'@type': ''},
     })
 
-    const atomicVC = await buildVCV1({
-      credentialSubject,
-      type: ['CustomCredential'],
-      issuer: {
-        did: issuer.did,
-        keyId: '#primary',
-        privateKey: issuer.primaryKey.privateKey,
-        publicKey: issuer.primaryKey.publicKey,
-      },
-      issuanceDate: '2016-02-01T00:00:00.000Z',
-      expirationDate: '2016-02-01',
-      revocation: {
-        '@context': 'https://example.com',
-        token: '1234',
-      },
-    })
+    const atomicVC = await genGenericVC(issuer, credentialSubject)
 
     await expect(
       Utils.isAsyncValid(Validation.validateVerifiableCredential)({
@@ -722,22 +593,7 @@ describe('Validation.validateVerifiableCredential', () => {
       data: {'@type': ''},
     })
 
-    const atomicVC = await buildVCV1({
-      credentialSubject,
-      type: ['CustomCredential'],
-      issuer: {
-        did: issuer.did,
-        keyId: '#primary',
-        privateKey: issuer.primaryKey.privateKey,
-        publicKey: issuer.primaryKey.publicKey,
-      },
-      issuanceDate: '2016-02-01T00:00:00.000Z',
-      expirationDate: '2016-02-01',
-      revocation: {
-        '@context': 'https://example.com',
-        token: '1234',
-      },
-    })
+    const atomicVC = await genGenericVC(issuer, credentialSubject)
 
     await expect(
       Utils.isAsyncValid(Validation.validateVerifiableCredential)({
@@ -763,22 +619,7 @@ describe('Validation.validateVerifiablePresentationV1', () => {
       data: {'@type': 'Thing'},
     })
 
-    const atomicVC = await buildVCV1({
-      credentialSubject,
-      type: ['CustomCredential'],
-      issuer: {
-        did: issuer.did,
-        keyId: '#primary',
-        privateKey: issuer.primaryKey.privateKey,
-        publicKey: issuer.primaryKey.publicKey,
-      },
-      issuanceDate: '2016-02-01T00:00:00.000Z',
-      expirationDate: '2018-02-01T00:00:00.000Z',
-      revocation: {
-        '@context': 'https://example.com',
-        token: '1234',
-      },
-    })
+    const atomicVC = await genGenericVC(issuer, credentialSubject)
 
     const vp = await buildVerifiablePresentation({
       holder: {
@@ -807,22 +648,7 @@ describe('Validation.validateVerifiablePresentationV1', () => {
       data: {'@type': 'Thing'},
     })
 
-    const atomicVC = await buildVCV1({
-      credentialSubject,
-      type: ['CustomCredential'],
-      issuer: {
-        did: issuer.did,
-        keyId: '#primary',
-        privateKey: issuer.primaryKey.privateKey,
-        publicKey: issuer.primaryKey.publicKey,
-      },
-      issuanceDate: '2016-02-01T00:00:00.000Z',
-      expirationDate: '2018-02-01T00:00:00.000Z',
-      revocation: {
-        '@context': 'https://example.com',
-        token: '1234',
-      },
-    })
+    const atomicVC = await genGenericVC(issuer, credentialSubject)
 
     const vp = await buildVerifiablePresentation({
       holder: {
@@ -850,22 +676,7 @@ describe('Validation.validateVerifiablePresentationV1', () => {
       data: {'@type': 'Thing'},
     })
 
-    const atomicVC = await buildVCV1({
-      credentialSubject,
-      type: ['CustomCredential'],
-      issuer: {
-        did: issuer.did,
-        keyId: '#primary',
-        privateKey: issuer.primaryKey.privateKey,
-        publicKey: issuer.primaryKey.publicKey,
-      },
-      issuanceDate: '2016-02-01T00:00:00.000Z',
-      expirationDate: '2018-02-01T00:00:00.000Z',
-      revocation: {
-        '@context': 'https://example.com',
-        token: '1234',
-      },
-    })
+    const atomicVC = await genGenericVC(issuer, credentialSubject)
 
     const vp = await buildVerifiablePresentation({
       holder: {
@@ -898,22 +709,7 @@ describe('Validation.validateVerifiablePresentationV1', () => {
       data: {'@type': 'Thing'},
     })
 
-    const atomicVC = await buildVCV1({
-      credentialSubject,
-      type: ['CustomCredential'],
-      issuer: {
-        did: issuer.did,
-        keyId: '#primary',
-        privateKey: issuer.primaryKey.privateKey,
-        publicKey: issuer.primaryKey.publicKey,
-      },
-      issuanceDate: '2016-02-01T00:00:00.000Z',
-      expirationDate: '2018-02-01T00:00:00.000Z',
-      revocation: {
-        '@context': 'https://example.com',
-        token: '1234',
-      },
-    })
+    const atomicVC = await genGenericVC(issuer, credentialSubject)
 
     const vp = await buildVerifiablePresentation({
       holder: {
@@ -951,22 +747,7 @@ describe('Validation.validateVerifiablePresentationV1', () => {
       data: {'@type': 'Thing'},
     })
 
-    const atomicVC = await buildVCV1({
-      credentialSubject,
-      type: ['CustomCredential'],
-      issuer: {
-        did: issuer.did,
-        keyId: '#primary',
-        privateKey: issuer.primaryKey.privateKey,
-        publicKey: issuer.primaryKey.publicKey,
-      },
-      issuanceDate: '2016-02-01T00:00:00.000Z',
-      expirationDate: '2018-02-01T00:00:00.000Z',
-      revocation: {
-        '@context': 'https://example.com',
-        token: '1234',
-      },
-    })
+    const atomicVC = await genGenericVC(issuer, credentialSubject)
 
     const vp = await buildVerifiablePresentation({
       holder: {
@@ -999,22 +780,7 @@ describe('Validation.validateVerifiablePresentationV1', () => {
       data: {'@type': 'Thing'},
     })
 
-    const atomicVC = await buildVCV1({
-      credentialSubject,
-      type: ['CustomCredential'],
-      issuer: {
-        did: issuer.did,
-        keyId: '#primary',
-        privateKey: issuer.primaryKey.privateKey,
-        publicKey: issuer.primaryKey.publicKey,
-      },
-      issuanceDate: '2016-02-01T00:00:00.000Z',
-      expirationDate: '2018-02-01T00:00:00.000Z',
-      revocation: {
-        '@context': 'https://example.com',
-        token: '1234',
-      },
-    })
+    const atomicVC = await genGenericVC(issuer, credentialSubject)
 
     const vp = await buildVerifiablePresentation({
       holder: {

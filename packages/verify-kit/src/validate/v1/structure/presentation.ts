@@ -35,7 +35,7 @@ const isValidOrArrayOf = <T>(validateFn: ValidateFn<T>) => (data: any): data is 
 }
 
 export const validateCredentialRevocation = genValidateFn<BaseVCV1Revocation>({
-  '@context': Utils.isNotEmptyString,
+  id: Utils.isNotEmptyString,
 })
 
 export const validateCredentialProof = genValidateFn<VCV1Proof>({
