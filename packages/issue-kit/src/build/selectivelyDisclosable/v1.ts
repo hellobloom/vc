@@ -89,7 +89,7 @@ export const buildSelectiveStructuralMasterV1 = <Data extends SimpleThing>(
     nodePropertyLists: [],
     partials: [],
   }
-  accumulateStructure(accumulator, opts.full, {...opts, depth: opts.depth + 1})
+  accumulateStructure(accumulator, opts.full, opts)
   return accumulator
 }
 
@@ -361,7 +361,7 @@ const addNodeToAccumulator = (
     '@property': property,
     '@targetNodeId': item['@nodeId'],
   })
-  accumulateStructure(accumulator, item, opts)
+  accumulateStructure(accumulator, item, {...opts, depth: opts.depth + 1})
 }
 
 const addPartialToAccumulator = (
