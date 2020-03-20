@@ -95,7 +95,7 @@ export type VCV1SelectiveStructuralFullSubjectData = {
 
 // Full node, identical to primitive BaseVC with added constraint that every object contained within the CredentialSubject has a @nodeId property specified
 export type VCV1SelectiveFullType = [VCV1Type[0], 'SelectiveFullCredential', ...string[]]
-export type VCV1SelectiveFullSubject<T extends SimpleThing> = VCV1Subject<T>
+export type VCV1SelectiveFullSubject<T extends SimpleThing> = VCV1Subject<T & {'@vcId': string}>
 
 // SelectiveStructuralFull: Metadata of all nodes and edges
 export type VCV1SelectiveStructuralFullType = [VCV1Type[0], 'SelectiveStructuralFullCredential', ...string[]]
