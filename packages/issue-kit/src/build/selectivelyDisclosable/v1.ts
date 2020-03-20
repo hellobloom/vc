@@ -73,6 +73,7 @@ export type AccumulateStructureOptions = {
   '@vcId': string
   '@vcType': BaseVCV1Type
   '@vcContext': Array<string>
+  depth: number
   includeNodeTypes: boolean
 }
 
@@ -88,7 +89,7 @@ export const buildSelectiveStructuralMasterV1 = <Data extends SimpleThing>(
     nodePropertyLists: [],
     partials: [],
   }
-  accumulateStructure(accumulator, opts.full, opts)
+  accumulateStructure(accumulator, opts.full, {...opts, depth: opts.depth + 1})
   return accumulator
 }
 
@@ -213,6 +214,7 @@ export const buildAllVCV1SelectiveSubject = async <Data extends SimpleThing, R e
       '@vcId': vcId,
       '@vcType': ['VerifiableCredential', opts.baseType],
       '@vcContext': opts.context,
+      depth: 0,
     })
 
     const meta = await buildVCV1SelectiveMetaSubject({structuralMaster})
@@ -401,6 +403,8 @@ const accumulateStructure = (accumulator: SelectiveStructuralMaster, node: Objec
   accumulator.nodes.push({
     '@type': 'SelectiveNode',
     '@nodeId': node['@nodeId'],
+    '@nodeIsRoot': opts.depth === 0,
+    '@nodeDepth': opts.depth,
     ...(opts.includeNodeTypes && {'@type': node['@type']}),
   })
   accumulator.nodePropertyLists.push({

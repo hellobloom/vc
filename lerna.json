@@ -1,4 +1,6 @@
 {
   "packages": ["packages/*", "sandbox/*"],
-  "version": "independent"
+  "version": "independent",
+  "npmClient":"./bin/npm",
+  "npmClientArgs": ["--verbose"]
 }

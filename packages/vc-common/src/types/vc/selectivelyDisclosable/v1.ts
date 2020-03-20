@@ -21,9 +21,9 @@ export type SelectiveStructureComponent = 'nodes' | 'edges'
 export type SelectiveNode = {
   '@type': 'SelectiveNode'
   // Originates that node is the root node of the object graph.  Technically optional but strongly recommended for prescribed schema compliance & object reconstruction
-  '@nodeIsRoot'?: boolean
+  '@nodeIsRoot': boolean
   // Depth of node, technically optional but strongly recommended for prescribed schema compliance & object reconstruction
-  '@nodeDepth'?: boolean
+  '@nodeDepth'?: number
   // UUID assigned to node
   '@nodeId': string
 }
