@@ -56,16 +56,18 @@ export type SelectiveStructuralMaster = {
   partials: Array<SelectiveProperty>
 }
 
-export const buildVCV1SelectiveFullSubject = async <Data extends SimpleThing>({
-  credentialSubject,
-}: {
-  credentialSubject: VCV1Subject<Data>
+export const buildVCV1SelectiveFullSubject = async <Data extends SimpleThing>(opts: {
+  credentialSubject: VCV1Subject<Data>,
+  vcId: string
 }): Promise<VCV1SelectiveFullSubject<Data>> => {
-  const credSubjClone = R.clone(credentialSubject) // Don't mutate credSubj
+  const credSubjClone = R.clone(opts.credentialSubject) // Don't mutate credSubj
   const newCredSubjData = assignNodeIds(credSubjClone['data'])
   return {
     ...credSubjClone,
-    data: newCredSubjData,
+    data: {
+      ...newCredSubjData,
+      '@vcId': opts.vcId,
+    }
   }
 }
 
@@ -89,7 +91,7 @@ export const buildSelectiveStructuralMasterV1 = <Data extends SimpleThing>(
     nodePropertyLists: [],
     partials: [],
   }
-  accumulateStructure(accumulator, opts.full, opts)
+  accumulateStructure(accumulator, opts.full.data, opts)
   return accumulator
 }
 
@@ -170,7 +172,7 @@ export const buildAllVCV1SelectiveSubject = async <Data extends SimpleThing, R e
   includeStructuralFull?: boolean
   includeStructuralAtom?: boolean
   includeNodePropertyList?: boolean
-  includePartial?: boolean
+  includeProperties?: boolean
 }): Promise<Array<
   VCV1<
     | VCV1SelectiveFullSubject<Data>
@@ -190,10 +192,10 @@ export const buildAllVCV1SelectiveSubject = async <Data extends SimpleThing, R e
     | VCV1SelectiveMetaSubject
   >> = []
 
-  const full = await buildVCV1SelectiveFullSubject({credentialSubject: opts.credentialSubject})
+  const vcId = `urn:uuid:${uuid()}`
+  const full = await buildVCV1SelectiveFullSubject({credentialSubject: opts.credentialSubject, vcId})
 
-  if (opts.includeStructuralFull || opts.includeStructuralAtom || opts.includeNodePropertyList || opts.includePartial) {
-    const vcId = `urn:uuid:${uuid()}`
+  if (opts.includeStructuralFull || opts.includeStructuralAtom || opts.includeNodePropertyList || opts.includeProperties) {
     const issuanceDate = new Date().toISOString()
 
     vcs.push(
@@ -281,7 +283,7 @@ export const buildAllVCV1SelectiveSubject = async <Data extends SimpleThing, R e
       vcs.concat(nodePropertyLists)
     }
 
-    if (opts.includePartial) {
+    if (opts.includeProperties) {
       const partials = await Promise.all(
         (await buildAllVCV1SelectivePropertySubject({structuralMaster})).map(
           (propertySubject: VCV1SelectivePropertySubject) =>
@@ -364,7 +366,7 @@ const addNodeToAccumulator = (
   accumulateStructure(accumulator, item, {...opts, depth: opts.depth + 1})
 }
 
-const addPartialToAccumulator = (
+const addPropertiesToAccumulator = (
   accumulator: SelectiveStructuralMaster,
   node: ObjectGeneric,
   key: string,
@@ -391,13 +393,13 @@ const accumulateStructure = (accumulator: SelectiveStructuralMaster, node: Objec
         } else if (typeof item === 'object') {
           addNodeToAccumulator(accumulator, node, item, key, opts)
         } else {
-          addPartialToAccumulator(accumulator, node, key, item)
+          addPropertiesToAccumulator(accumulator, node, key, item)
         }
       })
     } else if (typeof value === 'object') {
       addNodeToAccumulator(accumulator, node, value, key, opts)
     } else {
-      addPartialToAccumulator(accumulator, node, key, value)
+      addPropertiesToAccumulator(accumulator, node, key, value)
     }
   })
   accumulator.nodes.push({
