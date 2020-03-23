@@ -26,18 +26,24 @@ export type SelectiveNode = {
   '@nodeDepth'?: number
   // UUID assigned to node
   '@nodeId': string
+  // UUID assigned to node
+  '@nodeType': string
 }
 
 export type SelectiveNodeR = Required<SelectiveNode>
 
 export type SelectiveEdge = {
   '@type': 'SelectiveEdge'
-  // Origin node ID
+  // Origin node @nodeId
   '@nodeId': string
+  // Origin node @type, aliased to prevent conflict with '@type': 'SelectiveEdge'
+  '@nodeType': string
   // Property on origin node hosting relationship
   '@property': string
-  // Target/child node ID
+  // Target/child node @nodeId
   '@targetNodeId': string
+  // Target/child node @type
+  '@targetNodeType': string
 }
 
 export type SelectiveNodePropertyList = {
@@ -46,18 +52,21 @@ export type SelectiveNodePropertyList = {
   '@vcId': string
   // ID of node
   '@nodeId': string
+  // ID of node
+  '@nodeType': string
   // Properties/keys of node
   '@properties': Array<string>
 }
 
 // Similar to but incompatible with schema.org PropertyValue
 export type SelectiveProperty = {
-  // @type is considered optional but must be specified as "SelectiveProperty" if the original node's '@type' is to be omitted.
-  '@type': string
+  '@type': 'SelectiveProperty'
   // Original VC ID
   '@vcId': string
-  // UUID assigned to node
+  // @nodeId assigned to node
   '@nodeId': string
+  // @type assigned to node
+  '@nodeType'?: string
 
   // Property and value from original node
   property: string

@@ -360,8 +360,10 @@ const addNodeToAccumulator = (
   accumulator.edges.push({
     '@type': 'SelectiveEdge',
     '@nodeId': sourceNode['@nodeId'],
+    '@nodeType': sourceNode['@type'],
     '@property': property,
     '@targetNodeId': item['@nodeId'],
+    '@targetNodeType': item['@nodeType'],
   })
   accumulateStructure(accumulator, item, {...opts, depth: opts.depth + 1})
 }
@@ -373,8 +375,9 @@ const addPropertiesToAccumulator = (
   value: string | number | boolean,
 ) => {
   accumulator.partials.push({
+    '@type': 'SelectiveProperty',
     '@vcId': accumulator['@vcId'],
-    '@type': node['@type'],
+    '@nodeType': node['@type'],
     '@nodeId': node['@nodeId'],
     property: key,
     value,
@@ -405,6 +408,7 @@ const accumulateStructure = (accumulator: SelectiveStructuralMaster, node: Objec
   accumulator.nodes.push({
     '@type': 'SelectiveNode',
     '@nodeId': node['@nodeId'],
+    '@nodeType': node['@type'],
     '@nodeIsRoot': opts.depth === 0,
     '@nodeDepth': opts.depth,
     ...(opts.includeNodeTypes && {'@type': node['@type']}),
@@ -413,6 +417,7 @@ const accumulateStructure = (accumulator: SelectiveStructuralMaster, node: Objec
     '@vcId': accumulator['@vcId'],
     '@type': 'SelectiveNodePropertyList',
     '@nodeId': node['@nodeId'],
+    '@nodeType': node['@type'],
     '@properties': nodeProperties,
   })
 }
