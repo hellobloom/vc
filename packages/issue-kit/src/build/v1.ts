@@ -1,4 +1,4 @@
-import {EthUtils, DIDUtils, VCV1, VCV1Subject, VCV1Type, BaseVCV1Revocation, SimpleThing} from '@bloomprotocol/vc-common'
+import {EthUtils, DIDUtils, VCV1, VCV1Subject, VCV1Type, BaseVCV1Revocation, SimpleThing, TContext} from '@bloomprotocol/vc-common'
 import {EcdsaSecp256k1Signature2019, EcdsaSecp256k1KeyClass2019} from '@transmute/lds-ecdsa-secp256k1-2019'
 import {keyUtils} from '@transmute/es256k-jws-ts'
 
@@ -44,7 +44,7 @@ export const buildVCV1 = async <S extends VCV1Subject<{'@type': string}>, R exte
   issuanceDate: string
   expirationDate?: string
   revocation?: R
-  context?: string | string[]
+  context?: TContext
 }): Promise<VCV1> => {
   const issuerDidDoc = await DIDUtils.resolveDID(opts.issuer.did)
 

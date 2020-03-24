@@ -73,8 +73,19 @@ const isCredentialProofValid = async (_: any, data: any) => {
   }
 }
 
+const isValidContext = (value: any) => {
+  const normalizedValue = Array.isArray(value) ? value : [value]
+
+  return normalizedValue.every(context => {
+    if (typeof context === 'string') return true
+    if (typeof context === 'object') return true
+
+    return false
+  })
+}
+
 export const validateVerifiableCredential = genAsyncValidateFn<VCV1>({
-  '@context': Utils.isArrayOfNonEmptyStrings,
+  '@context': isValidContext,
   id: Utils.isUndefinedOr(Utils.isNotEmptyString),
   type: [Utils.isArrayOfNonEmptyStrings, (value: string[]) => value.includes('VerifiableCredential')],
   issuer: DIDUtils.isValidDIDStructure,
@@ -138,7 +149,7 @@ export const isPresentationProofValid = async (_: any, data: any) => {
 }
 
 export const validateVerifiablePresentationV1 = genAsyncValidateFn<BaseVPV1<VCV1>>({
-  '@context': Utils.isArrayOfNonEmptyStrings,
+  '@context': isValidContext,
   type: [Utils.isArrayOfNonEmptyStrings, (value: string[]) => value.includes('VerifiablePresentation')],
   verifiableCredential: Utils.isAsyncArrayOf(isValidVerifiableCredential),
   holder: [DIDUtils.isValidDIDStructure],

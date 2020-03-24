@@ -1,4 +1,18 @@
-export type TContext = string | string[] | {} | Array<{}>
+type ContextObjDetailedItem = {
+  [key: string]: undefined | string
+  '@id': string
+  '@type': string
+}
+
+type ContextObj = {
+  [key: string]: undefined | number | string | ContextObjDetailedItem
+  '@version'?: number
+  '@base'?: string
+  '@vocab'?: string
+}
+
+export type TContext = string | string[] | ContextObj | ContextObj[]
+
 export type BaseVCV1ClaimNodeData = {
   /**
    * String representation of the attestations data.
