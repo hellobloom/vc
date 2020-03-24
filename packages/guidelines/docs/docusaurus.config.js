@@ -2,7 +2,7 @@ module.exports = {
   title: 'Implementation Guildelines | Bloom Documentation',
   tagline: 'The tagline of my site',
   url: 'https://bloom.co',
-  baseUrl: '/documentation/implementation-guidelines/',
+  baseUrl: '/documentation/',
   favicon: 'img/favicon.png',
   organizationName: 'hellobloom',
   projectName: 'vc',

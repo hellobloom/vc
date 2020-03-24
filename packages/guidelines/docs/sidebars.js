@@ -2,19 +2,19 @@ module.exports = {
   docs: [
     {
       type: 'doc',
-      id: 'getting-started',
+      id: 'implementation-guidelines/getting-started',
     },
     {
       type: 'doc',
-      id: 'did-client',
+      id: 'implementation-guidelines/did-client',
     },
     {
       type: 'doc',
-      id: 'vc-sharing',
+      id: 'implementation-guidelines/vc-sharing',
     },
     {
       type: 'doc',
-      id: 'vc-storage',
+      id: 'implementation-guidelines/vc-storage',
     },
   ],
 }

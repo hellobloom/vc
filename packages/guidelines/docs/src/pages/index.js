@@ -12,6 +12,9 @@ const Home = () => {
         </div>
       </header>
       <main>
+        <a className={classnames('button button--outline button--secondary button--lg')} href="/documentation/implementation-guidelines">
+          Implementation Guidelines
+        </a>
         <a className={classnames('button button--outline button--secondary button--lg')} href="/documentation/vc-data">
           VC Data
         </a>
