@@ -1,0 +1,15 @@
+#!/bin/bash
+
+CWD=`pwd`
+TARGET="$CWD/documentation/"
+rm -rf ./documentation
+mkdir -p "$TARGET/"
+for i in ./packages/*/docs; do
+  CURRENT=`echo "$i" | sed 's/.\/packages\/\([A-Za-z_-]*\)\/docs/\1/'`
+  cd "$i";
+  npm install
+  npm run build
+  cd "$CWD"
+  cp -rv "$i/build" "$TARGET/$CURRENT"
+done
+

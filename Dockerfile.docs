@@ -1,0 +1,2 @@
+FROM nginx
+COPY documentation /usr/share/nginx/html
