@@ -15,7 +15,7 @@ credentialSubject type of standard `Person` specifying their name(s).
 | Attribute | Type | Required | Notes |
 | ---       | ---   | ---       | --- |
 | @type |  'Person' | true |  |
-| name |  MaybeArray<string> | true |  |
+| name |  MaybeArray&lt;string&gt; | true |  |
 
 ### VCSNameOrganization
 
@@ -25,7 +25,7 @@ credentialSubject type of standard `Organization` specifying their name(s).
 | Attribute | Type | Required | Notes |
 | ---       | ---   | ---       | --- |
 | @type |  'Organization' | true |  |
-| name |  MaybeArray<string> | true |  |
+| name |  MaybeArray&lt;string&gt; | true |  |
 
 ### VCNamePerson
 

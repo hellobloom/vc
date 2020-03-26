@@ -12,7 +12,7 @@ credentialSubject type mapping email(s) to a `Person`.
 | Attribute | Type | Required | Notes |
 | ---       | ---   | ---       | --- |
 | @type |  'Person' | true |  |
-| email |  MaybeArray<string> | true |  |
+| email |  MaybeArray&lt;string&gt; | true |  |
 
 ### VCSEmailOrganization
 
@@ -21,7 +21,7 @@ credentialSubject type mapping email(s) to an `Organization`.
 | Attribute | Type | Required | Notes |
 | ---       | ---   | ---       | --- |
 | @type |  'Organization' | true |  |
-| email |  MaybeArray<string> | true |  |
+| email |  MaybeArray&lt;string&gt; | true |  |
 
 ### VCEmailPerson
 

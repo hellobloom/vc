@@ -63,8 +63,8 @@ Extension of Role with extensions pertaining to correlating an `IDDocument` to a
 | @type |  'IDDocumentRole' | true |  |
 | authenticationResult |  string | false |  |
 | selfieImage |  string | false |  |
-| faceMatch |  MaybeArray<FaceMatch> | false |  |
-| hasIDDocument |  MaybeArray<IDDocument> | true |  |
+| faceMatch |  MaybeArray&lt;FaceMatch&gt; | false |  |
+| hasIDDocument |  MaybeArray&lt;IDDocument&gt; | true |  |
 
 ### FaceMatch
 
@@ -89,10 +89,10 @@ credentialSubject of standard `Person` type with extension specifying ownership 
 | birthDate |  TDate | false |  |
 | familyName |  string | false |  |
 | givenName |  string | false |  |
-| gender |  MaybeArray<GenderType or string> | false |  |
-| name |  MaybeArray<string> | false |  |
-| nationality |  MaybeArray<Country> | false |  |
-| hasIDDocument |  MaybeArray<IDDocumentRole> | true |  |
+| gender |  MaybeArray&lt;GenderType or string&gt; | false |  |
+| name |  MaybeArray&lt;string&gt; | false |  |
+| nationality |  MaybeArray&lt;Country&gt; | false |  |
+| hasIDDocument |  MaybeArray&lt;IDDocumentRole&gt; | true |  |
 
 ### VCIDDocPerson
 

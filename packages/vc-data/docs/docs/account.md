@@ -77,7 +77,7 @@ A group of transactions for a bank account, useful for analysis of income/expend
 | valueTotal |  MonetaryAmountR | false |  |
 | valueMean |  MonetaryAmountR | false |  |
 | valueMedian |  MonetaryAmountR | false |  |
-| transactions |  MaybeArray<BankAccountTransaction> | false |  |
+| transactions |  MaybeArray&lt;BankAccountTransaction&gt; | false |  |
 
 
 ### OrganizationAccount
@@ -89,7 +89,7 @@ Extensions/suggestions regarding the base schema.org `Organization` type for the
 | @type |  'Organization' | true |  |
 | name |  string | false |  |
 | identifier |  string or number | false |  |
-| serviceTypes |  Array<string> | false |  |
+| serviceTypes |  Array&lt;string&gt; | false |  |
 | nationality |  GovernmentOrg | false |  |
 | sameAs |  string  | false |  Website |
 
@@ -106,13 +106,13 @@ Custom type for encapsulating the concept of an account - ostensibly a relation 
 | endDate |  string | false |  |
 | accountType |  string | false |  |
 | accountTypeConfidence |  number | false |  |
-| accountStatements |  Array<AccountStatement> | false |  |
-| accountPayments |  Array<AccountPayment> | false |  |
+| accountStatements |  Array&lt;AccountStatement&gt; | false |  |
+| accountPayments |  Array&lt;AccountPayment&gt; | false |  |
 | value |  MonetaryAmountR | false |  |
 | bankAccountCategory |  string | false |  |
-| hasIncome |  MaybeArray<BankAccountTransactionGroup> | false |  |
-| hasExpense |  MaybeArray<BankAccountTransactionGroup> | false |  |
-| hasTransactions |  MaybeArray<BankAccountTransaction> | false |  |
+| hasIncome |  MaybeArray&lt;BankAccountTransactionGroup&gt; | false |  |
+| hasExpense |  MaybeArray&lt;BankAccountTransactionGroup&gt; | false |  |
+| hasTransactions |  MaybeArray&lt;BankAccountTransaction&gt; | false |  |
 
 ### VCSAccountPerson
 
@@ -121,7 +121,7 @@ credentialSubject type relating a `Person` to an `Account`.
 | Attribute | Type | Required | Notes |
 | ---       | ---   | ---       | --- |
 | @type |  'Person' | true |  |
-| hasAccount |  MaybeArray<Account> | true |  |
+| hasAccount |  MaybeArray&lt;Account&gt; | true |  |
 
 ### VCSAccountOrganization
 
@@ -130,7 +130,7 @@ credentialSubject type relating an `Organization` to an `Account`.
 | Attribute | Type | Required | Notes |
 | ---       | ---   | ---       | --- |
 | @type |  'Organization' | true |  |
-| hasAccount |  MaybeArray<Account> | true |  |
+| hasAccount |  MaybeArray&lt;Account&gt; | true |  |
 
 ### VCAccountPerson
 

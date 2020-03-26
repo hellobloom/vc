@@ -35,11 +35,11 @@ Indicates
 | @type |  'AMLSearch' | true |  |
 | hitLocation |  string or GovernmentOrg | false | Location/jurisdiction of hit |
 | hitNumber |  number | false | Number of hits |
-| lists |  Array<BaseAttList> | false | Lists searched against  |
-| recordId | MaybeArray<string> | false | Matching record ID(s) |
+| lists |  Array&lt;BaseAttList&gt; | false | Lists searched against  |
+| recordId | MaybeArray&lt;string&gt; | false | Matching record ID(s) |
 | identifier |  string | false | Identifier for the specific search |
 | score |  string or number | false | Match score (out of 100) |
-| hits |  Array<BaseAttHit> | false |  |
+| hits |  Array&lt;BaseAttHit&gt; | false |  |
 | flagType |  string | false | Type of flag raised on hit |
 | comment |  string | false |  |
 

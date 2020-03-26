@@ -54,7 +54,7 @@ Tradeline (credit-influencing account or related)
 | accountIsOpen |  boolean | false |  |
 | payStatus |  string | false |  |
 | verificationIndicator |  string | false |  |
-| remark |  MaybeArray<TradelineRemark> | false |  |
+| remark |  MaybeArray&lt;TradelineRemark&gt; | false |  |
 | monthsReviewed |  string | false |  |
 | monthlyPayment |  string | false |  |
 | late90Count |  string | false |  |
@@ -68,7 +68,7 @@ Tradeline (credit-influencing account or related)
 | paymentFrequency |  string | false |  |
 | termType |  string | false |  |
 | worstPayStatus |  string | false |  |
-| payStatuses |  Array<TradelinePayStatus> | false |  |
+| payStatuses |  Array&lt;TradelinePayStatus&gt; | false |  |
 | creditLimit |  string | false |  |
 | creditor |  string or Organization | false |  |
 | position |  string | false |  |
@@ -89,7 +89,7 @@ An entire credit score.
 | historyStartDate |  string | false |  |
 | paymentHistoryPercentage |  number | false |  |
 | statement |  string | false |  |
-| tradelines |  Array<Tradeline> | false |  |
+| tradelines |  Array&lt;Tradeline&gt; | false |  |
 | creditDataSuppressed |  string | false |  |
 | totalAccounts |  string | false |  |
 | totalClosedAccounts |  string | false |  |
@@ -132,7 +132,7 @@ Standard `Person` schema.org type, with extensions relating them to a CreditScor
 | birthDate |  string | false |  |
 | name |  string | false |  |
 | employeeOf |  EmployeeRoleOrganization | false |  |
-| hasCreditScore |  MaybeArray<CreditScore> | true |  |
+| hasCreditScore |  MaybeArray&lt;CreditScore&gt; | true |  |
 
 ### VCCreditScorePerson
 Type expanding VCSCreditScorePerson credentialSubject into a VC.

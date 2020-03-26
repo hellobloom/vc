@@ -15,7 +15,7 @@ credentialSubject type of standard `Person` specifying their gender(s).
 | Attribute | Type | Required | Notes |
 | ---       | ---   | ---       | --- |
 | @type |  'Person' | true |  |
-| gender |  MaybeArray<GenderType or string> | true |  |
+| gender |  MaybeArray&lt;GenderType or string&gt; | true |  |
 
 ### VCGenderPerson
 

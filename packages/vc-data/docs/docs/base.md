@@ -40,14 +40,14 @@ The OrganizationE type describes a few recommended attributes, restricts some of
 | ---       | ---   | ---       | --- |
 | @type | 'Organization' | Yes | Base type description, required |
 | name | string | No | |
-| address | MaybeArray<PostalAddress> | No | | 
+| address | MaybeArray&lt;PostalAddress&gt; | No | | 
 | legalName | string | No | 
 | dissolutionDate | string | No | |
-| hasCredential | MaybeArray<CredentialU> | No | Any credentials assignable to an organization - incompatible extension of the schema.org "hasCredential", which restricts the original credential to [EducationalOccupationalCredential](EducationalOccupationalCredential). |
+| hasCredential | MaybeArray&lt;CredentialU&gt; | No | Any credentials assignable to an organization - incompatible extension of the schema.org "hasCredential", which restricts the original credential to [EducationalOccupationalCredential](EducationalOccupationalCredential). |
 | telephone | string | No | |
 | faxNumber | string | No | |
 | email | string | No | |
-| website | MaybeArray<WebSite> | No | More definitive replacement for "subjectOf" attribute. |
+| website | MaybeArray&lt;WebSite&gt; | No | More definitive replacement for "subjectOf" attribute. |
 
 
 ## CredentialU
@@ -66,7 +66,7 @@ Meant for describing the incorporation of a business.  Uses the base Credential 
 | additionalType | string | No |  |
 | dateCreated | string | No | Date of issue/creation |
 | datePublished | string | No | Date of publication |
-| recognizedBy | MaybeArray<GovernmentOrg> | No | The recognizing authority, such as a government entity |
+| recognizedBy | MaybeArray&lt;GovernmentOrg&gt; | No | The recognizing authority, such as a government entity |
 
 
 ## OrganizationalCredential

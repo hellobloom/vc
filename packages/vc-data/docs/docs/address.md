@@ -12,7 +12,7 @@ Standard `Person` type with restriction forcing `PostalAddress` instead of `Text
 | Attribute | Type | Required | Notes |
 | ---       | ---   | ---       | --- |
 | @type |  'Person' | true |  |
-| address |  MaybeArray<PostalAddress> | true |  |
+| address |  MaybeArray&lt;PostalAddress&gt; | true |  |
 
 ### VCSAddressOrganization
 
@@ -21,7 +21,7 @@ Standard `Organization` type with restriction forcing `PostalAddress` instead of
 | Attribute | Type | Required | Notes |
 | ---       | ---   | ---       | --- |
 | @type |  'Organization' | true |  |
-| address |  MaybeArray<PostalAddress> | true |  |
+| address |  MaybeArray&lt;PostalAddress&gt; | true |  |
 
 ### VCAddressPerson
 

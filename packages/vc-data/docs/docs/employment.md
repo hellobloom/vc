@@ -22,7 +22,7 @@ credentialSubject type relating a `Person` to one or more `EmployeeRolePerson`s.
 | Attribute | Type | Required | Notes |
 | ---       | ---   | ---       | --- |
 | @type |  'Person' | true |  |
-| employeeOf |  MaybeArray<EmployeeRoleOrganization> | true |  |
+| employeeOf |  MaybeArray&lt;EmployeeRoleOrganization&gt; | true |  |
 
 ### VCSEmploymentOrganization
 
@@ -31,7 +31,7 @@ credentialSubject type relating an `Organization` to one or more `EmployeeRolePe
 | Attribute | Type | Required | Notes |
 | ---       | ---   | ---       | --- |
 | @type |  'Organization' | true |  |
-| employee |  MaybeArray<EmployeeRolePerson> | true |  |
+| employee |  MaybeArray&lt;EmployeeRolePerson&gt; | true |  |
 
 ### VCEmploymentPerson
 
