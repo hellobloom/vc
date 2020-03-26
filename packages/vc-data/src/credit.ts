@@ -1,4 +1,4 @@
-import {AtomicVCV1} from '@bloomprotocol/vc-common'
+import {VCV1} from '@bloomprotocol/vc-common'
 import {Subject, MaybeArray, MonetaryAmountR, EmployeeRoleOrganization} from './base'
 import {Person, Organization} from 'schema-dts'
 
@@ -41,29 +41,29 @@ export type Tradeline = {
   verificationIndicator?: string
   remark?: MaybeArray<TradelineRemark>
 
-  monthsReviewed: string
-  monthlyPayment: string
-  late90Count: string
-  late60Count: string
-  late30Count: string
-  dateLatePayment: string
-  termMonths: string
-  collateral: string
-  amountPastDue: MonetaryAmountR
-  worstPastStatusCount: string
+  monthsReviewed?: string
+  monthlyPayment?: string
+  late90Count?: string
+  late60Count?: string
+  late30Count?: string
+  dateLatePayment?: string
+  termMonths?: string
+  collateral?: string
+  amountPastDue?: MonetaryAmountR
+  worstPastStatusCount?: string
   paymentFrequency?: string
   termType?: string
   worstPayStatus?: string
-  payStatuses: Array<TradelinePayStatus>
+  payStatuses?: Array<TradelinePayStatus>
   creditLimit?: string
 
-  creditor: string | Organization
-  position: string
+  creditor?: string | Organization
+  position?: string
 }
 export type CreditScore = {
   '@type': 'CreditScore'
-  score: number
-  scoreType: string
+  score?: number
+  scoreType?: string
   populationRank?: number
   provider?: string
   lastUpdatedDate?: string
@@ -74,37 +74,37 @@ export type CreditScore = {
   tradelines?: Array<Tradeline>
 
   // Snapshot data
-  creditDataSuppressed: string
-  totalAccounts: string
-  totalClosedAccounts: string
-  delinquentAccounts: string
-  derogatoryAccounts: string
-  openAccounts: string
-  totalBalances: string
-  totalMonthlyPayments: string
-  numberOfInquiries: string
-  totalPublicRecords: string
-  recentInquiries: string
-  balanceOpenRevolvingAccounts: string
-  totalOpenRevolvingAccounts: string
-  balanceOpenInstallmentAccounts: string
-  totalOpenInstallmentAccounts: string
-  balanceOpenMortgageAccounts: string
-  totalOpenMortgageAccounts: string
-  balanceOpenCollectionAccounts: string
-  totalOpenCollectionAccounts: string
-  balanceOpenOtherAccounts: string
-  totalOpenOtherAccounts: string
-  availableCredit: string
-  utilization: string
-  onTimePaymentPercentage: string
-  latePaymentPercentage: string
-  recentTradelinesOpened: string
-  dateOfOldestTrade: string
-  ageOfCredit: string
-  paymentHistory: string
-  securityFreeze: string
-  fraudAlert: string
+  creditDataSuppressed?: string
+  totalAccounts?: string
+  totalClosedAccounts?: string
+  delinquentAccounts?: string
+  derogatoryAccounts?: string
+  openAccounts?: string
+  totalBalances?: string
+  totalMonthlyPayments?: string
+  numberOfInquiries?: string
+  totalPublicRecords?: string
+  recentInquiries?: string
+  balanceOpenRevolvingAccounts?: string
+  totalOpenRevolvingAccounts?: string
+  balanceOpenInstallmentAccounts?: string
+  totalOpenInstallmentAccounts?: string
+  balanceOpenMortgageAccounts?: string
+  totalOpenMortgageAccounts?: string
+  balanceOpenCollectionAccounts?: string
+  totalOpenCollectionAccounts?: string
+  balanceOpenOtherAccounts?: string
+  totalOpenOtherAccounts?: string
+  availableCredit?: string
+  utilization?: string
+  onTimePaymentPercentage?: string
+  latePaymentPercentage?: string
+  recentTradelinesOpened?: string
+  dateOfOldestTrade?: string
+  ageOfCredit?: string
+  paymentHistory?: string
+  securityFreeze?: string
+  fraudAlert?: string
 }
 export type VCSCreditScorePerson = Subject<Person> & {
   '@type': 'Person'
@@ -113,4 +113,4 @@ export type VCSCreditScorePerson = Subject<Person> & {
   employeeOf?: EmployeeRoleOrganization
   hasCreditScore: MaybeArray<CreditScore>
 }
-export type VCCreditScorePerson = AtomicVCV1<VCSCreditScorePerson>
+export type VCCreditScorePerson = VCV1<VCSCreditScorePerson>

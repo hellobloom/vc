@@ -1,6 +1,6 @@
-import {AtomicVCV1} from '@bloomprotocol/vc-common'
+import {VCV1} from '@bloomprotocol/vc-common'
 import {Subject, MaybeArray, GovernmentOrg} from './base'
-import {Person, Country, GenderType, Date as TDate} from 'schema-dts'
+import {Person, Country, CreativeWork, Role, GenderType, Date as TDate} from 'schema-dts'
 
 export type TDocumentClass =
   | 'unknown'
@@ -20,6 +20,37 @@ export type TDocumentClass =
   | 'voter_identification'
   | 'military'
 
+export type IDDocument = CreativeWork & {
+  '@type': 'IDDocument'
+  issuer: GovernmentOrg
+  documentType?: string
+  issueDate?: TDate
+  issueType?: string
+  expirationDate?: TDate
+  classificationMethod?: 'automatic' | 'manual'
+  idClass: TDocumentClass
+  idClassName?: string
+  countryCode?: string
+  frontImage?: string
+  backImage?: string
+  generic?: boolean
+  keesingCode?: string
+}
+
+export type IDDocumentRole = Role & {
+  '@type': 'IDDocumentRole'
+  authenticationResult?: string
+  selfieImage?: string
+  faceMatch?: MaybeArray<FaceMatch>
+  hasIDDocument: MaybeArray<IDDocument>
+}
+export type FaceMatch = {
+  '@type': 'IDDocumentFaceMatch'
+  isMatch?: boolean
+  score?: number
+  identifier?: number
+}
+
 export type VCSIDDocPerson = Subject<Person> & {
   '@type': 'Person'
   age?: number
@@ -29,32 +60,6 @@ export type VCSIDDocPerson = Subject<Person> & {
   gender?: MaybeArray<GenderType | string>
   name?: MaybeArray<string>
   nationality?: MaybeArray<Country>
-  hasIDDocument: MaybeArray<{
-    '@type': 'IDDocumentRole'
-    authenticationResult?: string
-    selfieImage?: string
-    faceMatch?: MaybeArray<{
-      '@type': 'IDDocumentFaceMatch'
-      isMatch?: boolean
-      score?: number
-      identifier?: number
-    }>
-    hasIDDocument: MaybeArray<{
-      '@type': 'IDDocument'
-      issuer: GovernmentOrg & {identifier?: 'string'}
-      documentType?: string
-      issueDate?: TDate
-      issueType?: string
-      expirationDate?: TDate
-      classificationMethod?: 'automatic' | 'manual'
-      idClass: TDocumentClass
-      idClassName?: string
-      countryCode?: string
-      frontImage?: string
-      backImage?: string
-      generic?: boolean
-      keesingCode?: string
-    }>
-  }>
+  hasIDDocument: MaybeArray<IDDocumentRole>
 }
-export type VCIDDocPerson = AtomicVCV1<VCSIDDocPerson>
+export type VCIDDocPerson = VCV1<VCSIDDocPerson>

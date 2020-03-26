@@ -1,5 +1,5 @@
-import {AtomicVCV1} from '@bloomprotocol/vc-common'
-import {Subject} from './base'
+import {VCV1} from '@bloomprotocol/vc-common'
+import {MaybeArray, Subject, GovernmentOrg} from './base'
 import {Person, Organization} from 'schema-dts'
 
 export type BaseAttList = {
@@ -8,27 +8,27 @@ export type BaseAttList = {
 }
 export type BaseAttHit = {
   id?: string
-  hitName?: string
+  name?: string
 }
-export type TAMLSearch = {
+export type AMLSearch = {
   '@type': 'AMLSearch'
-  hitLocation?: string
+  hitLocation?: string | GovernmentOrg
   hitNumber?: number
   lists?: Array<BaseAttList>
-  recordId?: string
-  searchReferenceId?: string
-  score?: string
+  recordId?: MaybeArray<string>
+  identifier?: string
+  score?: string | number
   hits?: Array<BaseAttHit>
   flagType?: string
   comment?: string
 }
 export type VCSAMLPerson = Subject<Person> & {
   '@type': 'Person'
-  hasAMLSearch: TAMLSearch
+  hasAMLSearch: AMLSearch
 }
 export type VCSAMLOrganization = Subject<Organization> & {
   '@type': 'Organization'
-  hasAMLSearch: TAMLSearch
+  hasAMLSearch: AMLSearch
 }
-export type VCAMLPerson = AtomicVCV1<VCSAMLPerson>
-export type VCAMLOrganization = AtomicVCV1<VCSAMLOrganization>
+export type VCAMLPerson = VCV1<VCSAMLPerson>
+export type VCAMLOrganization = VCV1<VCSAMLOrganization>

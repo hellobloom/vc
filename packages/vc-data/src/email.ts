@@ -1,14 +1,14 @@
-import {AtomicVCV1} from '@bloomprotocol/vc-common'
-import {Subject} from './base'
+import {VCV1} from '@bloomprotocol/vc-common'
+import {Subject, MaybeArray} from './base'
 import {Person, Organization} from 'schema-dts'
 
 export type VCSEmailPerson = Subject<Person> & {
   '@type': 'Person'
-  email: string
+  email: MaybeArray<string>
 }
 export type VCSEmailOrganization = Subject<Organization> & {
-  '@type': 'Person'
-  email: string
+  '@type': 'Organization'
+  email: MaybeArray<string>
 }
-export type VCEmailPerson = AtomicVCV1<VCSEmailPerson>
-export type VCEmailOrganization = AtomicVCV1<VCSEmailOrganization>
+export type VCEmailPerson = VCV1<VCSEmailPerson>
+export type VCEmailOrganization = VCV1<VCSEmailOrganization>

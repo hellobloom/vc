@@ -1,17 +1,18 @@
 ---
 id: getting-started
 title: Getting Started
-hide_title: true
+hide_title: false
 ---
 
 ![VC Data](link to image)
 
 # VC Data
 
-The specification for Verifiable Credential data, referred to as `credentialSubject` in the VC data model. Learn the building blocks of VC data and how to generate and interpret VC schemas.
+This repository contains the suggested specification for Verifiable Credential data, referred to as `credentialSubject` in the VC data model.  In general, these schemas are based on [schema.org](https://schema.org) base types such as [Person](https://schema.org/Person) and [Organization](https://schema.org/Organization), with custom extensions for concepts not described by schema.org.  
 
 ## Installation
 
 ```
 npm install --save @bloomprotocol/{{PACKAGE_NAME}}
 ```
+
