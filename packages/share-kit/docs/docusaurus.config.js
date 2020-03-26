@@ -12,6 +12,8 @@ module.exports = {
       logo: {
         alt: 'Bloom',
         src: 'img/logo.svg',
+        href: 'https://bloom.co/documentation/',
+        target: '_self',
       },
       links: [
         {
