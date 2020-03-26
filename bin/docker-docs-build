@@ -1,0 +1,7 @@
+#!/bin/bash
+
+
+source .env.docker
+
+docker build . -f Dockerfile.docs -t hellobloom/bloom_docs_server:$(git rev-parse HEAD)
+

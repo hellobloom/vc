@@ -1,2 +1,3 @@
 FROM nginx
-COPY documentation /usr/share/nginx/html
+COPY documentation /usr/share/nginx/html/documentation
+COPY documentation/guidelines/index.html /usr/share/nginx/html/index.html

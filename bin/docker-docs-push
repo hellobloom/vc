@@ -1,0 +1,3 @@
+#!/bin/bash
+
+docker push hellobloom/bloom_docs_server:$(git rev-parse HEAD)
