@@ -1,7 +1,7 @@
 module.exports = {
   title: 'Share Kit React | Bloom Documentation',
   tagline: 'The tagline of my site',
-  url: 'https://bloom.co',
+  url: bloom,
   baseUrl: '/documentation/share-kit-react/',
   favicon: 'img/favicon.png',
   organizationName: 'hellobloom',
@@ -27,15 +27,31 @@ module.exports = {
       style: 'dark',
       links: [
         {
-          title: 'Docs',
+          title: 'Company',
           items: [
             {
-              label: 'Style Guide',
-              to: 'docs/doc1',
+              label: 'About Us',
+              to: `${bloom}/about`,
             },
             {
-              label: 'Second Doc',
-              to: 'docs/doc2',
+              label: 'Blog',
+              to: `${bloom}/blog`,
+            },
+            {
+              label: 'White Paper',
+              to: `${bloom}/whitepaper.pdf`,
+            },
+            {
+              label: 'Careers',
+              to: `${bloom}/careers`,
+            },
+            {
+              label: 'Contact Us',
+              to: 'mailto:support@bloom.co',
+            },
+            {
+              label: 'Smart Token',
+              to: `${bloom}/token`,
             },
           ],
         },
@@ -43,34 +59,58 @@ module.exports = {
           title: 'Community',
           items: [
             {
-              label: 'Stack Overflow',
-              href: 'https://stackoverflow.com/questions/tagged/docusaurus',
+              label: 'Telegram',
+              href: 'https://t.me/bloomprotocol',
+            },
+            {
+              label: 'Twitter',
+              href: 'https://twitter.com/bloom',
+            },
+            {
+              label: 'Facebook',
+              href: 'https://www.facebook.com/bloomtoken',
+            },
+            {
+              label: 'Reddit',
+              href: 'https://www.reddit.com/r/BloomToken',
+            },
+            {
+              label: 'YouTube',
+              href: 'https://www.youtube.com/c/bloomprotocol',
             },
             {
               label: 'Discord',
-              href: 'https://discordapp.com/invite/docusaurus',
+              href: 'https://discord.gg/Dgk2shG',
             },
           ],
         },
         {
-          title: 'Social',
+          title: 'Legal',
           items: [
             {
-              label: 'Blog',
-              to: 'blog',
+              label: 'Privacy Policy',
+              to: `${bloom}/legal/privacy`,
             },
             {
-              label: 'GitHub',
-              href: 'https://github.com/facebook/docusaurus',
+              label: 'Terms of Service',
+              to: `${bloom}/legal/terms`,
             },
             {
-              label: 'Twitter',
-              href: 'https://twitter.com/docusaurus',
+              label: 'Cookie Policy',
+              to: `${bloom}/legal/cookies`,
+            },
+            {
+              label: 'Affiliate Disclosures',
+              to: `${bloom}/legal/affiliate-disclosures`,
             },
           ],
         },
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} My Project, Inc. Built with Docusaurus.`,
+      logo: {
+        src: 'img/logowithtext.svg',
+        alt: 'Bloom',
+      },
+      copyright: `Copyright © Bloom Protocol, Built with Docusaurus.`,
     },
   },
   presets: [
