@@ -1,6 +1,6 @@
 ---
 id: iddocument
-title: Iddocument VCs
+title: ID Document VCs
 hide_title: false
 ---
 

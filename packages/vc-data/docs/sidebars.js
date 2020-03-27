@@ -6,6 +6,10 @@ module.exports = {
     },
     {
       type: 'doc',
+      id: 'base',
+    },
+    {
+      type: 'doc',
       id: 'account',
     },
     {
