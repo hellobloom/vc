@@ -38,16 +38,16 @@ The OrganizationE type describes a few recommended attributes, restricts some of
 
 | Attribute | Type | Required | Notes |
 | ---       | ---   | ---       | --- |
-| @type | 'Organization' | Yes | Base type description, required |
-| name | string | No | |
-| address | MaybeArray&lt;PostalAddress&gt; | No | | 
-| legalName | string | No | 
-| dissolutionDate | string | No | |
-| hasCredential | MaybeArray&lt;CredentialU&gt; | No | Any credentials assignable to an organization - incompatible extension of the schema.org "hasCredential", which restricts the original credential to [EducationalOccupationalCredential](EducationalOccupationalCredential). |
-| telephone | string | No | |
-| faxNumber | string | No | |
-| email | string | No | |
-| website | MaybeArray&lt;WebSite&gt; | No | More definitive replacement for "subjectOf" attribute. |
+| @type | 'Organization' | yes | Base type description, required |
+| name | string | no | |
+| address | MaybeArray&lt;PostalAddress&gt; | no | | 
+| legalName | string | no | 
+| dissolutionDate | string | no | |
+| hasCredential | MaybeArray&lt;CredentialU&gt; | no | Any credentials assignable to an organization - incompatible extension of the schema.org "hasCredential", which restricts the original credential to [EducationalOccupationalCredential](EducationalOccupationalCredential). |
+| telephone | string | no | |
+| faxNumber | string | no | |
+| email | string | no | |
+| website | MaybeArray&lt;WebSite&gt; | no | More definitive replacement for "subjectOf" attribute. |
 
 
 ## CredentialU
@@ -61,12 +61,12 @@ Meant for describing the incorporation of a business.  Uses the base Credential 
 
 | Attribute | Type | Required | Notes |
 | ---       | ---   | ---       | --- |
-| @type | 'Credential' | Yes | Base type description, required |
-| credentialCategory | 'organizational' | No | Type of the credential |
-| additionalType | string | No |  |
-| dateCreated | string | No | Date of issue/creation |
-| datePublished | string | No | Date of publication |
-| recognizedBy | MaybeArray&lt;GovernmentOrg&gt; | No | The recognizing authority, such as a government entity |
+| @type | 'Credential' | yes | Base type description, required |
+| credentialCategory | 'organizational' | no | Type of the credential |
+| additionalType | string | no |  |
+| dateCreated | string | no | Date of issue/creation |
+| datePublished | string | no | Date of publication |
+| recognizedBy | MaybeArray&lt;GovernmentOrg&gt; | no | The recognizing authority, such as a government entity |
 
 
 ## OrganizationalCredential
@@ -75,10 +75,9 @@ Extends `Credential` for credentials issued to Organizations, generally by gover
 
 | Attribute | Type | Required | Notes |
 | ---       | ---   | ---       | --- |
-| 
-| credentialCategory | string | Yes | 'incorporation', 'foreign-registration', 'bankruptcy', etc. |
-| organizationType | string or DefinedTerm | No | Organization type (e.g., "s-corp", "llc", "non-profit"), potentially a DefinedTerm via the recognizing authority |
-| goodStanding | boolean | No | Company is in "good standing" with the recognizing authority |
-| active | boolean | // Company has "active" status within recognizing authority's jurisdiction |
-| identifier | PropertyValue, string or number | No (but recommended) | E.g., taxId, can be a URI for specific schemes such as organizational tax IDs, or equivalent PropertyValue.  Otherwise is determined to be a non-ambiguous identifier with the recognizing authority, possibly including a URI. |
+| credentialCategory | string | yes | 'incorporation', 'foreign-registration', 'bankruptcy', etc. |
+| organizationType | string or DefinedTerm | no | Organization type (e.g., "s-corp", "llc", "non-profit"), potentially a DefinedTerm via the recognizing authority |
+| goodStanding | boolean | no | Company is in "good standing" with the recognizing authority |
+| active | boolean | no |  Company has "active" status within recognizing authority's jurisdiction |
+| identifier | PropertyValue, string or number | no (but recommended) | E.g., taxId, can be a URI for specific schemes such as organizational tax IDs, or equivalent PropertyValue.  Otherwise is determined to be a non-ambiguous identifier with the recognizing authority, possibly including a URI. |
 | primaryJurisdiction | boolean | no | In the case of incorporation, registration, or others, may be used to indicate the recognizing authority is not the primary jurisdiction in which the organization is recognized. | 
