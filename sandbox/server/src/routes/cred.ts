@@ -142,12 +142,16 @@ export const applyCredRoutes = (app: fastify.FastifyInstance) => {
 
         const vc = await buildVCV1({
           credentialSubject,
+          id: `urn:uuid:${req.params.id}`,
           type: [cred.type],
           issuanceDate: dayjs.utc().toISOString(),
           expirationDate: dayjs
             .utc()
             .add(2, 'month')
             .toISOString(),
+          holder: {
+            id: req.body.subject,
+          },
           issuer: {
             did,
             keyId: '#primary',
@@ -155,8 +159,7 @@ export const applyCredRoutes = (app: fastify.FastifyInstance) => {
             publicKey: primaryKey.publicKey,
           },
           revocation: {
-            '@context': 'placeholder',
-            token: '1234',
+            id: '1234',
           },
         })
 

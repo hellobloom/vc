@@ -2,6 +2,7 @@ import fastify from 'fastify'
 import {DIDUtils} from '@bloomprotocol/vc-common'
 import dayjs from 'dayjs'
 import {buildVCV1, buildVCV1Subject} from '@bloomprotocol/issue-kit'
+import {uuid} from 'uuidv4'
 
 import {getEnv} from '@server/env'
 
@@ -38,7 +39,11 @@ export const applyWellKnownRoutes = (app: fastify.FastifyInstance) => {
     })
     const vc = await buildVCV1({
       credentialSubject,
+      id: `urn:uuid:${uuid}`,
       type: 'DomainLinkageAssertion',
+      holder: {
+        id: did,
+      },
       issuer: {
         did: did,
         keyId: '#primary',
@@ -47,8 +52,7 @@ export const applyWellKnownRoutes = (app: fastify.FastifyInstance) => {
       },
       issuanceDate: dayjs.utc().toISOString(),
       revocation: {
-        '@context': 'placeholder',
-        token: '1234',
+        id: '1234',
       },
     })
 
