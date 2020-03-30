@@ -50,7 +50,9 @@ export const buildVPV1 = async ({
     '@context': ['https://www.w3.org/2018/credentials/v1'],
     type: ['VerifiablePresentation'],
     verifiableCredential: atomicVCs,
-    holder: holder.did,
+    holder: {
+      id: holder.did,
+    },
   }
 
   const vp: BaseVPV1<VCV1> = jsigs.sign(unsignedVP, {

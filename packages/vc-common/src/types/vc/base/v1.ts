@@ -123,12 +123,16 @@ export type BaseVPV1Proof = {
   jws: string
 }
 
+export type BaseVPV1Holder = {
+  id: string
+}
+
 // TODO: This is missing the `signature` and `packedData` fields. How should those translate over?
 export type BaseVPV1<VC extends BaseVCV1 = BaseVCV1> = {
   '@context': TContext
   type: BaseVPV1Type
   verifiableCredential: VC[]
-  holder: string
+  holder: BaseVPV1Holder
   proof: BaseVPV1Proof
 }
 

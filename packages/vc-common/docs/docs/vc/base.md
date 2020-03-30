@@ -7,10 +7,12 @@ hide_title: true
 # Base Verifiable Credential
 
 :::important Important
-These types are just a building block and shouldn't be used directly.
+These types are just building blocks and shouldn't be used directly.
 
-You probably want to use [`VC`](index) instead.
+You probably want to use the [main implmentation](main) or the [selective disclosure implementation](selective) instead.
 :::
+
+These are based on and compliant with the [VC Data Model](https://www.w3.org/TR/vc-data-model/).
 
 ## BaseVCV1
 
@@ -24,8 +26,8 @@ The `BaseVCV1` is the un-opinionated builidng block for creating specific types 
 | issuer            | The DID of the issuer                                                   | `string`                                                  | y         |
 | issuanceDate      | The timestamp of VC issuance                                            | `string`                                                  | y         |
 | expirationDate    | When the VC should be considered invalid                                | `string`                                                  | n         |
-| credentialSubject | The claims of the VC                                                    | [`BaseVCV1Subject | BaseVCV1Subject[]`](#BaseVCV1Subject) | y         |
-| holder            | The holder of the VC                                                    | [`BaseVCV1Holder`](#BaseVCV1Holder)                       | y         |
+| credentialSubject | The claim(s) of the VC                                                  | [`BaseVCV1Subject | BaseVCV1Subject[]`](#BaseVCV1Subject) | y         |
+| holder            | Information about the holder of the VC                                  | [`BaseVCV1Holder`](#BaseVCV1Holder)                       | y         |
 | revocation        | Information about how to check if the VC has been revoked by the issuer | [`BaseVCV1Revocation`](#BaseVCV1Revocation)               | n         |
 | proof             | The JSON-LD signature of the VC                                         | [`BaseVCV1Proof`](#BaseVCV1Proof)                         | n         |
 

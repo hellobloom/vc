@@ -85,7 +85,7 @@ const buildVerifiablePresentation = async ({
     '@context': ['https://www.w3.org/2018/credentials/v1'],
     type: ['VerifiablePresentation'],
     verifiableCredential: atomicCredentials,
-    holder: holder.did,
+    holder: {id: holder.did},
   }
 
   const vp: BaseVPV1 = await jsigs.sign(unsignedVP, {
@@ -290,6 +290,10 @@ describe('Validation.validateCredentialProof', () => {
 })
 
 describe('Validation.validateVerifiableCredential', () => {
+  beforeAll(() => {
+    jest.setTimeout(10000)
+  })
+
   it('passes', async () => {
     expect.assertions(1)
 
@@ -535,7 +539,25 @@ describe('Validation.validateVerifiableCredential', () => {
       data: {'@type': 'Thing'},
     })
 
-    const atomicVC = await genGenericVC(issuer, credentialSubject)
+    const atomicVC = await buildVCV1({
+      id: `urn:uuid:${uuid()}`,
+      credentialSubject,
+      type: ['CustomCredential'],
+      holder: {
+        id: subjectDID,
+      },
+      issuer: {
+        did: issuer.did,
+        keyId: '#primary',
+        privateKey: issuer.primaryKey.privateKey,
+        publicKey: issuer.primaryKey.publicKey,
+      },
+      issuanceDate: '2016-02-01T00:00:00.000Z',
+      expirationDate: '2016-02-01',
+      revocation: {
+        id: '1234',
+      },
+    })
 
     await expect(Utils.isAsyncValid(Validation.validateVerifiableCredential)(atomicVC)).resolves.toBeFalsy()
   })
@@ -564,10 +586,28 @@ describe('Validation.validateVerifiableCredential', () => {
 
     const credentialSubject = await buildVCV1Subject({
       subject: subjectDID,
-      data: {'@type': ''},
+      data: {'@type': 'Thing'},
     })
 
-    const atomicVC = await genGenericVC(issuer, credentialSubject)
+    const atomicVC = await buildVCV1({
+      id: `urn:uuid:${uuid()}`,
+      credentialSubject,
+      type: ['CustomCredential'],
+      holder: {
+        id: credentialSubject.id!,
+      },
+      issuer: {
+        did: issuer.did,
+        keyId: '#primary',
+        privateKey: issuer.primaryKey.privateKey,
+        publicKey: issuer.primaryKey.publicKey,
+      },
+      issuanceDate: '2016-02-01T00:00:00.000Z',
+      expirationDate: '2018-02-01T00:00:00.000Z',
+      revocation: {
+        id: '',
+      },
+    })
 
     await expect(
       Utils.isAsyncValid(Validation.validateVerifiableCredential)({
@@ -587,7 +627,7 @@ describe('Validation.validateVerifiableCredential', () => {
 
     const credentialSubject = await buildVCV1Subject({
       subject: subjectDID,
-      data: {'@type': ''},
+      data: {'@type': 'Thing'},
     })
 
     const atomicVC = await genGenericVC(issuer, credentialSubject)
@@ -611,7 +651,7 @@ describe('Validation.validateVerifiableCredential', () => {
 
     const credentialSubject = await buildVCV1Subject({
       subject: subjectDID,
-      data: {'@type': ''},
+      data: {'@type': 'Thing'},
     })
 
     const atomicVC = await genGenericVC(issuer, credentialSubject)
@@ -629,6 +669,10 @@ describe('Validation.validateVerifiableCredential', () => {
 })
 
 describe('Validation.validateVerifiablePresentationV1', () => {
+  beforeAll(() => {
+    jest.setTimeout(20000)
+  })
+
   it('passes', async () => {
     expect.assertions(1)
 
@@ -653,6 +697,12 @@ describe('Validation.validateVerifiablePresentationV1', () => {
       token: EthUtils.generateNonce(),
       domain: 'https://bloom.co/receiveData',
     })
+
+    const res = await Validation.validateVerifiablePresentationV1(vp)
+
+    if (res.kind === 'invalid_param') {
+      console.log({message: res.message})
+    }
 
     await expect(Utils.isAsyncValid(Validation.validateVerifiablePresentationV1)(vp)).resolves.toBeTruthy()
   })

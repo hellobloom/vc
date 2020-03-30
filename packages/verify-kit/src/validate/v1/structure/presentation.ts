@@ -117,7 +117,7 @@ export const validateProof = genValidateFn<BaseVPV1Proof>({
 
 export const isPresentationProofValid = async (_: any, data: any) => {
   try {
-    const didDocument = await DIDUtils.resolveDID(data.holder)
+    const didDocument = await DIDUtils.resolveDID(data.holder.id)
     const publicKey = didDocument.publicKey.find(({id}) => id.endsWith('#primary'))
 
     if (!publicKey) return false
@@ -126,7 +126,7 @@ export const isPresentationProofValid = async (_: any, data: any) => {
       suite: new EcdsaSecp256k1Signature2019({
         key: new EcdsaSecp256k1KeyClass2019({
           id: publicKey.id,
-          controller: data.holder,
+          controller: data.holder.id,
           publicKeyJwk: await keyUtils.publicJWKFromPublicKeyHex(publicKey.publicKeyHex!),
         }),
       }),
@@ -150,7 +150,7 @@ export const validateVerifiablePresentationV1 = genAsyncValidateFn<BaseVPV1<VCV1
   type: [Utils.isArrayOfNonEmptyStrings, (value: string[]) => value.includes('VerifiablePresentation')],
   verifiableCredential: [
     Utils.isAsyncArrayOf(Utils.isAsyncValid(validateVerifiableCredential)),
-    (cred: any, data: any) => cred.holder === data.holder,
+    Utils.isArrayOf((cred: any, data: any) => cred.holder.id === data.holder.id),
   ],
   holder: Utils.isValid(validateHolder),
   proof: [Utils.isValid(validateProof), isPresentationProofValid],

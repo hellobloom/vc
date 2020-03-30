@@ -83,8 +83,6 @@ export const buildVCV1 = async <S extends VCV1Subject<{'@type': string}>, R exte
     revocation: opts.revocation || genRevocation(),
   }
 
-  console.log('buildVCV1', {publicKey})
-
   const credential: VCV1 = await jsigs.sign(unsignedCred, {
     suite: new EcdsaSecp256k1Signature2019({
       key: new EcdsaSecp256k1KeyClass2019({

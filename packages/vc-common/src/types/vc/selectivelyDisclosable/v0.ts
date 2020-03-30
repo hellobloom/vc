@@ -1,4 +1,4 @@
-import {ISignedClaimNode, IDataNodeLegacy} from '../shared/v0'
+import {ISignedClaimNode, IDataNodeLegacy} from '../base/v0'
 
 export interface IBloomMerkleTreeComponentsLegacy {
   layer2Hash: string // Hash merkle root and nonce

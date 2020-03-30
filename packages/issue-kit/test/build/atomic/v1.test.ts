@@ -90,6 +90,9 @@ describe('buildVCV1', () => {
       '@context': ['https://www.w3.org/2018/credentials/v1'],
       type: ['VerifiableCredential', 'CustomCredential'],
       issuer: issuer.did,
+      holder: {
+        id: subjectDID,
+      },
       issuanceDate: '2016-02-01T00:00:00.000Z',
       expirationDate: '2018-02-01T00:00:00.000Z',
       credentialSubject: {
@@ -149,6 +152,9 @@ describe('buildVCV1', () => {
       id: 'afbcbaiocbafoiacbaofibaociabfoaibcoibaf',
       type: ['VerifiableCredential', 'CustomCredential'],
       issuer: issuer.did,
+      holder: {
+        id: subjectDID,
+      },
       issuanceDate: '2016-02-01T00:00:00.000Z',
       expirationDate: '2018-02-01T00:00:00.000Z',
       credentialSubject: {
@@ -212,6 +218,9 @@ describe('buildVCV1', () => {
       id: 'afbcbaiocbafoiacbaofibaociabfoaibcoibaf',
       type: ['VerifiableCredential', 'CustomCredential'],
       issuer: issuer.did,
+      holder: {
+        id: subjectDID,
+      },
       issuanceDate: '2016-02-01T00:00:00.000Z',
       expirationDate: '2018-02-01T00:00:00.000Z',
       credentialSubject: [
@@ -284,6 +293,9 @@ describe('buildVCV1', () => {
       id: 'iasdoihasdofaisdhfoiasdhfoaisdfhaosdf',
       type: ['VerifiableCredential', 'CustomCredential1', 'CustomCredential2'],
       issuer: issuer.did,
+      holder: {
+        id: subjectDID,
+      },
       issuanceDate: '2016-02-01T00:00:00.000Z',
       expirationDate: '2018-02-01T00:00:00.000Z',
       credentialSubject: [
