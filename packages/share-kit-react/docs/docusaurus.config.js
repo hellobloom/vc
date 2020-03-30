@@ -1,3 +1,5 @@
+const bloom = 'https://bloom.co'
+
 module.exports = {
   title: 'Share Kit React | Bloom Documentation',
   tagline: 'The tagline of my site',

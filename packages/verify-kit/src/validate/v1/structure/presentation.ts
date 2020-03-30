@@ -10,6 +10,7 @@ import {
   VCV1Proof,
   BaseVCV1Revocation,
   ValidateFn,
+  VCV1Holder,
 } from '@bloomprotocol/vc-common'
 import {EcdsaSecp256k1Signature2019, EcdsaSecp256k1KeyClass2019} from '@transmute/lds-ecdsa-secp256k1-2019'
 import {keyUtils} from '@transmute/es256k-jws-ts'
@@ -22,7 +23,7 @@ const validateCredentialSubjectData = genValidateFn<VCV1Subject<any>['data']>({
 })
 
 export const validateCredentialSubject = genValidateFn<VCV1Subject<any>>({
-  id: DIDUtils.isValidDIDStructure,
+  id: Utils.isUndefinedOr(DIDUtils.isValidDIDStructure),
   data: Utils.isValid(validateCredentialSubjectData),
 })
 
@@ -33,6 +34,10 @@ const isValidOrArrayOf = <T>(validateFn: ValidateFn<T>) => (data: any): data is 
     return Utils.isValid(validateFn)(data)
   }
 }
+
+const validateHolder = genValidateFn<VCV1Holder>({
+  id: DIDUtils.isValidDIDStructure,
+})
 
 export const validateCredentialRevocation = genValidateFn<BaseVCV1Revocation>({
   id: Utils.isNotEmptyString,
@@ -88,6 +93,7 @@ export const validateVerifiableCredential = genAsyncValidateFn<VCV1>({
   '@context': isValidContext,
   id: Utils.isUndefinedOr(Utils.isNotEmptyString),
   type: [Utils.isArrayOfNonEmptyStrings, (value: string[]) => value.includes('VerifiableCredential')],
+  holder: Utils.isValid(validateHolder),
   issuer: DIDUtils.isValidDIDStructure,
   issuanceDate: Utils.isValidRFC3339DateTime,
   expirationDate: Utils.isUndefinedOr(Utils.isValidRFC3339DateTime),
@@ -98,15 +104,6 @@ export const validateVerifiableCredential = genAsyncValidateFn<VCV1>({
   revocation: Utils.isValid(validateCredentialRevocation),
   proof: [Utils.isValid(validateCredentialProof), isCredentialProofValid],
 })
-
-const isValidVerifiableCredential = async (value: any, data: any) => {
-  // TODO: Does the holder check even make sense?
-  const anySubjectsMatchHolder = (Array.isArray(value.credentialSubject) ? value.credentialSubject : [value.credentialSubject]).some(
-    ({id}: {id: string}) => id === data.holder,
-  )
-
-  return anySubjectsMatchHolder && (await Utils.isAsyncValid(validateVerifiableCredential)(value))
-}
 
 export const validateProof = genValidateFn<BaseVPV1Proof>({
   type: Utils.isNotEmptyString,
@@ -151,7 +148,10 @@ export const isPresentationProofValid = async (_: any, data: any) => {
 export const validateVerifiablePresentationV1 = genAsyncValidateFn<BaseVPV1<VCV1>>({
   '@context': isValidContext,
   type: [Utils.isArrayOfNonEmptyStrings, (value: string[]) => value.includes('VerifiablePresentation')],
-  verifiableCredential: Utils.isAsyncArrayOf(isValidVerifiableCredential),
-  holder: [DIDUtils.isValidDIDStructure],
+  verifiableCredential: [
+    Utils.isAsyncArrayOf(Utils.isAsyncValid(validateVerifiableCredential)),
+    (cred: any, data: any) => cred.holder === data.holder,
+  ],
+  holder: Utils.isValid(validateHolder),
   proof: [Utils.isValid(validateProof), isPresentationProofValid],
 })

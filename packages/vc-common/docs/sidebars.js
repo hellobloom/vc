@@ -5,12 +5,15 @@ module.exports = {
       id: 'getting-started',
     },
     {
-      type: 'doc',
-      id: 'vc-base-spec',
-    },
-    {
-      type: 'doc',
-      id: 'sdvc',
+      type: 'category',
+      label: 'Types',
+      items: [
+        {
+          type: 'category',
+          label: 'VC',
+          items: ['vc/base', 'vc/main'],
+        },
+      ],
     },
   ],
 }

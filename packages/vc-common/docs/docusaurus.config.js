@@ -1,3 +1,5 @@
+const bloom = 'https://bloom.co'
+
 module.exports = {
   title: 'VC Common | Bloom Documentation',
   tagline: 'The tagline of my site',

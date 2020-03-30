@@ -1,4 +1,4 @@
-import {EthUtils, DIDUtils, Utils, VCV1, BaseVPV1} from '@bloomprotocol/vc-common'
+import {EthUtils, DIDUtils, Utils, VCV1, BaseVPV1, VCV1Subject} from '@bloomprotocol/vc-common'
 import {buildVCV1Subject, buildVCV1} from '@bloomprotocol/issue-kit'
 import {EcdsaSecp256k1KeyClass2019, EcdsaSecp256k1Signature2019} from '@transmute/lds-ecdsa-secp256k1-2019'
 import {keyUtils} from '@transmute/es256k-jws-ts'
@@ -37,11 +37,14 @@ const generateDID = async (): Promise<DID> => {
   }
 }
 
-const genGenericVC = (issuer: DID, credentialSubject: any) =>
+const genGenericVC = (issuer: DID, credentialSubject: VCV1Subject<any>) =>
   buildVCV1({
     id: `urn:uuid:${uuid()}`,
     credentialSubject,
     type: ['CustomCredential'],
+    holder: {
+      id: credentialSubject.id!,
+    },
     issuer: {
       did: issuer.did,
       keyId: '#primary',
@@ -155,11 +158,11 @@ describe('Validation.validateCredentialSubject', () => {
 
 describe('Validation.validateCredentialRevocation', () => {
   it('passes', () => {
-    expect(Utils.isValid(Validation.validateCredentialRevocation)({'@context': 'https://example.com'})).toBeTruthy()
+    expect(Utils.isValid(Validation.validateCredentialRevocation)({id: 'https://example.com'})).toBeTruthy()
   })
 
   it('fails with empty context', () => {
-    expect(Utils.isValid(Validation.validateCredentialRevocation)({'@context': ''})).toBeFalsy()
+    expect(Utils.isValid(Validation.validateCredentialRevocation)({id: ''})).toBeFalsy()
   })
 })
 
@@ -318,6 +321,9 @@ describe('Validation.validateVerifiableCredential', () => {
       id: `urn:uuid:${uuid()}`,
       credentialSubject,
       type: ['CustomCredential'],
+      holder: {
+        id: subjectDID,
+      },
       issuer: {
         did: issuer.did,
         keyId: '#primary',
@@ -348,6 +354,9 @@ describe('Validation.validateVerifiableCredential', () => {
       id: `urn:uuid:${uuid()}`,
       credentialSubject,
       type: ['CustomCredential'],
+      holder: {
+        id: subjectDID,
+      },
       issuer: {
         did: issuer.did,
         keyId: '#primary',
@@ -383,6 +392,9 @@ describe('Validation.validateVerifiableCredential', () => {
       id: `urn:uuid:${uuid()}`,
       credentialSubject,
       type: ['CustomCredential'],
+      holder: {
+        id: subjectDID,
+      },
       issuer: {
         did: issuer.did,
         keyId: '#primary',
@@ -418,6 +430,9 @@ describe('Validation.validateVerifiableCredential', () => {
       id: `urn:uuid:${uuid()}`,
       credentialSubject,
       type: ['CustomCredential'],
+      holder: {
+        id: subjectDID,
+      },
       issuer: {
         did: issuer.did,
         keyId: '#primary',
@@ -453,6 +468,9 @@ describe('Validation.validateVerifiableCredential', () => {
       id: `urn:uuid:${uuid()}`,
       credentialSubject,
       type: ['CustomCredential'],
+      holder: {
+        id: subjectDID,
+      },
       issuer: {
         did: issuer.did,
         keyId: '#primary',
@@ -488,6 +506,9 @@ describe('Validation.validateVerifiableCredential', () => {
       id: `urn:uuid:${uuid()}`,
       credentialSubject,
       type: ['CustomCredential'],
+      holder: {
+        id: subjectDID,
+      },
       issuer: {
         did: issuer.did,
         keyId: '#primary',

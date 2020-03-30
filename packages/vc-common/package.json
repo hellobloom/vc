@@ -4,7 +4,7 @@
   "main": "dist/index.js",
   "module": "dist/vc-common.esm.js",
   "typings": "dist/index.d.ts",
-  "description": "Shared types and utility functions for attestation related kits",
+  "description": "Shared types and utility functions for credential related libraries",
   "repository": "https://github.com/hellobloom/vc",
   "author": "Bloom Team <team@bloom.co>",
   "license": "Apache-2.0",

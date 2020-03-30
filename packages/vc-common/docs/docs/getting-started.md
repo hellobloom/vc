@@ -8,10 +8,10 @@ hide_title: true
 
 # VC Common
 
-The specification for Bloom's implementation of the Verifiable Credential Data Model (todo link). Learn how Verifiable Credentials are structured, and how they enable seletive disclosure.
+Shared types and utility functions for credential related libraries. Including our implemention of the [Verifiable Credential Data Modal](https://www.w3.org/TR/vc-data-model/).
 
 ## Installation
 
 ```
-npm install --save @bloomprotocol/{{PACKAGE_NAME}}
+npm install --save @bloomprotocol/vc-common
 ```

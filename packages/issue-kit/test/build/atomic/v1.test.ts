@@ -69,6 +69,9 @@ describe('buildVCV1', () => {
       id: 'acbfeba0af-b-23b-af0b1-0tbfa-asfasfasf',
       credentialSubject: credentialSubject,
       type: 'CustomCredential',
+      holder: {
+        id: subjectDID,
+      },
       issuer: {
         did: issuer.did,
         keyId: '#primary',
@@ -124,6 +127,9 @@ describe('buildVCV1', () => {
       id: 'afbcbaiocbafoiacbaofibaociabfoaibcoibaf',
       credentialSubject: credentialSubject,
       type: 'CustomCredential',
+      holder: {
+        id: subjectDID,
+      },
       issuer: {
         did: issuer.did,
         keyId: '#primary',
@@ -185,6 +191,9 @@ describe('buildVCV1', () => {
       id: 'afbcbaiocbafoiacbaofibaociabfoaibcoibaf',
       credentialSubject: [credentialSubject1, credentialSubject2],
       type: 'CustomCredential',
+      holder: {
+        id: subjectDID,
+      },
       issuer: {
         did: issuer.did,
         keyId: '#primary',
@@ -254,6 +263,9 @@ describe('buildVCV1', () => {
       id: 'iasdoihasdofaisdhfoiasdhfoaisdfhaosdf',
       credentialSubject: [credentialSubject1, credentialSubject2],
       type: ['CustomCredential1', 'CustomCredential2'],
+      holder: {
+        id: subjectDID,
+      },
       issuer: {
         did: issuer.did,
         keyId: '#primary',

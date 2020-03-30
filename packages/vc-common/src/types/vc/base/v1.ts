@@ -11,7 +11,7 @@ type ContextObj = {
   '@vocab'?: string
 }
 
-export type TContext = string | string[] | ContextObj | ContextObj[]
+export type TContext = string | ContextObj | (string | ContextObj)[]
 
 export type BaseVCV1ClaimNodeData = {
   /**
@@ -71,8 +71,12 @@ export type SimpleThing = {'@type': string}
 export type BaseVCV1Type = ['VerifiableCredential', ...string[]]
 
 export type BaseVCV1Subject<Data extends SimpleThing> = {
-  id: string
+  id?: string
   data: Data
+}
+
+export type BaseVCV1Holder = {
+  id: string
 }
 
 export type BaseVCV1Proof = {
@@ -92,12 +96,14 @@ export type BaseVCV1<
   Subject extends BaseVCV1Subject<SimpleThing> = BaseVCV1Subject<SimpleThing>,
   Type extends BaseVCV1Type = BaseVCV1Type,
   Proof extends BaseVCV1Proof = BaseVCV1Proof,
-  Revocation extends BaseVCV1Revocation = BaseVCV1Revocation
+  Revocation extends BaseVCV1Revocation = BaseVCV1Revocation,
+  Holder extends BaseVCV1Holder = BaseVCV1Holder
 > = {
   '@context': TContext
   id: string
   type: Type
   issuer: string
+  holder: Holder
   issuanceDate: string
   expirationDate?: string
   credentialSubject: Subject | Subject[]
