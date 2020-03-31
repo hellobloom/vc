@@ -14,7 +14,7 @@ export type MedicalClinicE = MedicalClinic & {
   website?: string // Website
 }
 export type MedicalTestCredential = Credential & {
-  '@type': 'Medical'
+  '@type': 'MedicalTestCredential' | string
   testClass?: string // E.g., 'antibody'
   testType?: string
   testManufacturer?: Organization | string
@@ -25,13 +25,19 @@ export type MedicalTestCredential = Credential & {
   clinic?: MedicalClinic
 }
 
-export type MedicalAntibodyCredential = MedicalTestCredential & {
+export type MedicalAntibodyTestCredential = MedicalTestCredential & {
+  '@type': 'MedicalAntibodyTestCredential' | string
   antibodyPathogen?: string
   antibodyPathogenVariant?: string
   antibodyMgPerMl?: number
 }
-export type VCSMedicalPerson = Subject<Person> & {
+export type VCSMedicalAntibodyTestPerson = Subject<Person> & {
   '@type': 'Person'
-  hasMedicalCredential: MaybeArray<MedicalAntibodyCredential>
+  hasMedicalAntibodyTestCredential: MaybeArray<MedicalAntibodyTestCredential>
 }
-export type VCMedicalPerson = VCV1<VCSMedicalPerson>
+export type VCSMedicalTestPerson = Subject<Person> & {
+  '@type': 'Person'
+  hasMedicalTestCredential: MaybeArray<MedicalAntibodyTestCredential>
+}
+export type VCMedicalAntibodyTestPerson = VCV1<VCSMedicalAntibodyTestPerson>
+export type VCMedicalTestPerson = VCV1<VCSMedicalTestPerson>
