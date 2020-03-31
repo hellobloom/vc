@@ -1,6 +1,6 @@
 import {VCV1} from '@bloomprotocol/vc-common'
 import {Subject, MaybeArray, GovernmentOrg} from './base'
-import {Person, Organization, MedicalClinic} from 'schema-dts'
+import {Person, Organization, MedicalClinic, QuantitativeValue} from 'schema-dts'
 
 //////////////////////////////////////////////////////////////
 // Medical test VCs
@@ -29,7 +29,7 @@ export type MedicalAntibodyTestCredential = MedicalTestCredential & {
   '@type': 'MedicalAntibodyTestCredential'
   antibodyPathogen?: string
   antibodyPathogenVariant?: string
-  antibodyMgPerMl?: number
+  antibodyConcentration?: QuantitativeValue
 }
 export type VCSMedicalAntibodyTestPerson = Subject<Person> & {
   '@type': 'Person'
