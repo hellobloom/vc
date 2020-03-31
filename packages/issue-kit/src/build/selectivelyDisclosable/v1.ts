@@ -43,6 +43,7 @@ import {
   BaseVCV1Revocation,
   BaseVCV1Type,
   VCV1,
+  VCV1Holder,
 } from '@bloomprotocol/vc-common'
 
 // Intermediate utility type for expansion of SD VC
@@ -57,7 +58,7 @@ export type SelectiveStructuralMaster = {
 }
 
 export const buildVCV1SelectiveFullSubject = async <Data extends SimpleThing>(opts: {
-  credentialSubject: VCV1Subject<Data>,
+  credentialSubject: VCV1Subject<Data>
   vcId: string
 }): Promise<VCV1SelectiveFullSubject<Data>> => {
   const credSubjClone = R.clone(opts.credentialSubject) // Don't mutate credSubj
@@ -67,7 +68,7 @@ export const buildVCV1SelectiveFullSubject = async <Data extends SimpleThing>(op
     data: {
       ...newCredSubjData,
       '@vcId': opts.vcId,
-    }
+    },
   }
 }
 
@@ -164,10 +165,10 @@ export const buildVCV1SelectiveMetaSubject = async (opts: {
 export const buildAllVCV1SelectiveSubject = async <Data extends SimpleThing, R extends BaseVCV1Revocation>(opts: {
   baseType: string
   issuer: Issuer
+  holder: VCV1Holder
   expirationDate?: string
   revocation: R
   context: string[]
-
   credentialSubject: VCV1Subject<Data>
   includeStructuralFull?: boolean
   includeStructuralAtom?: boolean
@@ -204,6 +205,7 @@ export const buildAllVCV1SelectiveSubject = async <Data extends SimpleThing, R e
         credentialSubject: full as VCV1SelectiveFullSubject<Data>,
         type: ['VerifiableCredential', 'SelectiveFullCredential', opts.baseType] as VCV1SelectiveFullType,
         issuer: opts.issuer,
+        holder: opts.holder,
         issuanceDate,
         expirationDate: opts.expirationDate,
         context: [...opts.context, VCV1SelectiveFullContext],
@@ -226,6 +228,7 @@ export const buildAllVCV1SelectiveSubject = async <Data extends SimpleThing, R e
         credentialSubject: meta as VCV1SelectiveMetaSubject,
         type: ['VerifiableCredential', 'SelectiveMetaCredential', opts.baseType] as VCV1SelectiveMetaType,
         issuer: opts.issuer,
+        holder: opts.holder,
         issuanceDate,
         expirationDate: opts.expirationDate,
         context: [...opts.context, VCV1SelectiveMetaContext],
@@ -240,6 +243,7 @@ export const buildAllVCV1SelectiveSubject = async <Data extends SimpleThing, R e
           credentialSubject: structuralFull as VCV1SelectiveStructuralFullSubject,
           type: ['VerifiableCredential', 'SelectiveStructuralFullCredential', opts.baseType] as VCV1SelectiveStructuralFullType,
           issuer: opts.issuer,
+          holder: opts.holder,
           issuanceDate,
           expirationDate: opts.expirationDate,
           context: [...opts.context, VCV1SelectiveStructuralFullContext],
@@ -255,6 +259,7 @@ export const buildAllVCV1SelectiveSubject = async <Data extends SimpleThing, R e
               credentialSubject: structuralAtom,
               type: ['VerifiableCredential', 'SelectiveStructuralAtomCredential', opts.baseType] as VCV1SelectiveStructuralAtomType,
               issuer: opts.issuer,
+              holder: opts.holder,
               issuanceDate,
               expirationDate: opts.expirationDate,
               context: [...opts.context, VCV1SelectiveStructuralAtomContext],
@@ -274,6 +279,7 @@ export const buildAllVCV1SelectiveSubject = async <Data extends SimpleThing, R e
               credentialSubject: nodePropertyList as VCV1SelectiveNodePropertyListSubject,
               type: ['VerifiableCredential', 'SelectiveNodePropertyListCredential', opts.baseType] as VCV1SelectiveNodePropertyListType,
               issuer: opts.issuer,
+              holder: opts.holder,
               issuanceDate,
               expirationDate: opts.expirationDate,
               context: [...opts.context, VCV1SelectiveNodePropertyListContext],
@@ -292,6 +298,7 @@ export const buildAllVCV1SelectiveSubject = async <Data extends SimpleThing, R e
               credentialSubject: propertySubject,
               type: ['VerifiableCredential', 'SelectivePropertyCredential', opts.baseType] as VCV1SelectivePropertyType,
               issuer: opts.issuer,
+              holder: opts.holder,
               issuanceDate,
               expirationDate: opts.expirationDate,
               context: [...opts.context, VCV1SelectivePropertyContext],

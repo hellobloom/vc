@@ -1,7 +1,10 @@
 #!/bin/bash
 
 
-source .env.docker
+if [[ `git status --porcelain` ]]; then
+  echo "There are uncommitted changes, please commit them and try again."
+else
+  source .env.docker
 
-docker build . -f Dockerfile.docs -t hellobloom/bloom_docs_server:$(git rev-parse HEAD)
-
+  docker build . -f Dockerfile.docs -t hellobloom/bloom_docs_server:$(git rev-parse HEAD)
+fi

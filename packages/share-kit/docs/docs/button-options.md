@@ -6,7 +6,9 @@ hide_title: true
 
 # ButtonOptions
 
-_NOTE:_ This is only used with the rendered button and not the QR code.
+:::note Note
+This is only used with the rendered button and not the QR code.
+:::
 
 Rendering options for the rendered button.
 

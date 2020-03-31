@@ -1,4 +1,14 @@
-import {EthUtils, DIDUtils, VCV1, VCV1Subject, VCV1Type, BaseVCV1Revocation, SimpleThing, TContext} from '@bloomprotocol/vc-common'
+import {
+  EthUtils,
+  DIDUtils,
+  VCV1,
+  VCV1Subject,
+  VCV1Type,
+  BaseVCV1Revocation,
+  SimpleThing,
+  TContext,
+  VCV1Holder,
+} from '@bloomprotocol/vc-common'
 import {EcdsaSecp256k1Signature2019, EcdsaSecp256k1KeyClass2019} from '@transmute/lds-ecdsa-secp256k1-2019'
 import {keyUtils} from '@transmute/es256k-jws-ts'
 
@@ -10,10 +20,12 @@ export const buildVCV1Subject = async <Data extends SimpleThing>({
   subject,
 }: {
   data: Data
-  subject: string
+  subject?: string
 }): Promise<VCV1Subject<Data>> => {
-  // Here to validate the subject's DID
-  await DIDUtils.resolveDID(subject)
+  if (subject) {
+    // Here to validate the subject's DID
+    await DIDUtils.resolveDID(subject)
+  }
 
   if (data.hasOwnProperty('id')) throw Error("Data must not contain an 'id' property, that is assigned to the subject's DID")
 
@@ -39,6 +51,7 @@ export const genRevocation = (): BaseVCV1Revocation => {
 export const buildVCV1 = async <S extends VCV1Subject<{'@type': string}>, R extends BaseVCV1Revocation>(opts: {
   id: string
   credentialSubject: S | S[]
+  holder: VCV1Holder
   type: string | string[]
   issuer: Issuer
   issuanceDate: string
@@ -63,13 +76,12 @@ export const buildVCV1 = async <S extends VCV1Subject<{'@type': string}>, R exte
     id: opts.id,
     type,
     issuer: opts.issuer.did,
+    holder: opts.holder,
     issuanceDate: opts.issuanceDate,
     expirationDate: opts.expirationDate,
     credentialSubject: opts.credentialSubject,
     revocation: opts.revocation || genRevocation(),
   }
-
-  console.log('buildVCV1', {publicKey})
 
   const credential: VCV1 = await jsigs.sign(unsignedCred, {
     suite: new EcdsaSecp256k1Signature2019({
