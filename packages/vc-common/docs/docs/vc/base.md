@@ -20,16 +20,16 @@ The `BaseVCV1` is the un-opinionated builidng block for creating specific types 
 
 | Name              | Description                                                             | Type                                                      | Required? |
 | ----------------- | ----------------------------------------------------------------------- | --------------------------------------------------------- | --------- |
-| @context          | The context(s) to resolve the rest of the VC against                    | [`TContext`](#TContext)                                   | y         |
+| @context          | The context(s) to resolve the rest of the VC against                    | [`TContext`](#tcontext)                                   | y         |
 | id                | The identifier of the VC, must be a URI.                                | `string`                                                  | y         |
-| type              | The type of VC it is, must contain "VerifiableCredential"               | `string | string[]`                                       | y         |
+| type              | The type of VC it is, must contain "VerifiableCredential"               | [`BaseVCV1Type`](#basevcv1type)                           | y         |
 | issuer            | The DID of the issuer                                                   | `string`                                                  | y         |
 | issuanceDate      | The timestamp of VC issuance                                            | `string`                                                  | y         |
 | expirationDate    | When the VC should be considered invalid                                | `string`                                                  | n         |
-| credentialSubject | The claim(s) of the VC                                                  | [`BaseVCV1Subject | BaseVCV1Subject[]`](#BaseVCV1Subject) | y         |
-| holder            | Information about the holder of the VC                                  | [`BaseVCV1Holder`](#BaseVCV1Holder)                       | y         |
-| revocation        | Information about how to check if the VC has been revoked by the issuer | [`BaseVCV1Revocation`](#BaseVCV1Revocation)               | n         |
-| proof             | The JSON-LD signature of the VC                                         | [`BaseVCV1Proof`](#BaseVCV1Proof)                         | n         |
+| credentialSubject | The claim(s) of the VC                                                  | [`BaseVCV1Subject | BaseVCV1Subject[]`](#basevcv1subject) | y         |
+| holder            | Information about the holder of the VC                                  | [`BaseVCV1Holder`](#basevcv1holder)                       | y         |
+| revocation        | Information about how to check if the VC has been revoked by the issuer | [`BaseVCV1Revocation`](#basevcv1revocation)               | n         |
+| proof             | The JSON-LD signature of the VC                                         | [`BaseVCV1Proof`](#basevcv1proof)                         | n         |
 
 ### TContext
 
