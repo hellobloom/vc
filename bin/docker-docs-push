@@ -1,3 +1,7 @@
 #!/bin/bash
 
-docker push hellobloom/bloom_docs_server:$(git rev-parse HEAD)
+if [[ `git status --porcelain` ]]; then
+  echo "There are uncommitted changes, please commit them and try again."
+else
+  docker push hellobloom/bloom_docs_server:$(git rev-parse HEAD)
+fi
