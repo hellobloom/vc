@@ -1,0 +1,51 @@
+---
+id: verifying
+title: Verifying
+hide_title: true
+---
+
+import useBaseUrl from '@docusaurus/useBaseUrl'
+
+# Verifying
+
+These steps will show you how to use the verifier side of the sandbox.
+
+## Create A Request
+
+First you create a request for VCs, this includes:
+
+- Choosing the types of VCs you want to be shared with you
+- Setting the endpoint you want VCs shared to
+- URLs to your privacy and terms policies
+- And other display data like your name and logo
+
+The last three are taken care of for you in the VC Sandbox.
+
+Steps:
+
+1. Go to [sandbox.bloom.co/request](https://sandbox.bloom.co/request)
+2. Fill out the types you want shared
+   <img src={useBaseUrl('img/sandbox/verifying/select-types.png')} alt="Select credential types" />
+3. Select the reponse version you want back, this should be set to V1 if you plan to share from the local client
+   <img src={useBaseUrl('img/sandbox/verifying/select-response.png')} alt="Select respone version" />
+4. Click "Request", this will [create a request](https://github.com/hellobloom/vc/blob/vc-network-update/dev/sandbox/server/src/routes/share.ts#L21) accessible through with the link at the top of the page
+
+## Sharing Credentials
+
+After creating a request you can now share your credentials, in this part you are acting as an end user who is interacting with your app. This is as simple as scanning a QR code or clicking a button.
+
+Steps:
+
+1. Navigate to the link sent in response to the request creation
+2. Click the button that says "Share From Local DID" if using the local client, otherwise use the Bloom app to scan the QR code
+   <img src={useBaseUrl('img/sandbox/verifying/share.png')} alt="Share options" />
+3. If you have the requested credentials stored you will see a success message, otherwise you will see a list of credentials you do not have stored
+   <img src={useBaseUrl('img/sandbox/verifying/share-success.png')} alt="Successful credential share" />
+
+## Verifying Credentials
+
+:::important Important
+The endpoint that recieves the VCs needs to be a public endpoint since users will be sharing directly from their mobile app.
+:::
+
+Once a user successfully shares VCs in response to your request you need to verify them. Verification checks the structure of the shared VCs as well as the validity of the signatures. This takes place behind the scenes [on the server](https://github.com/hellobloom/vc/blob/vc-network-update/dev/sandbox/server/src/routes/share.ts#L137), so if sharing is successful in the step above the verification was successful.
