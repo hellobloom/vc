@@ -37,7 +37,8 @@ export type VCSMedicalAntibodyTestPerson = Subject<Person> & {
 }
 export type VCSMedicalTestPerson = Subject<Person> & {
   '@type': 'Person'
-  hasMedicalTestCredential: MaybeArray<MedicalAntibodyTestCredential>
+  hasMedicalTestCredential: MaybeArray<MedicalTestCredential>
 }
+
 export type VCMedicalAntibodyTestPerson = VCV1<VCSMedicalAntibodyTestPerson>
 export type VCMedicalTestPerson = VCV1<VCSMedicalTestPerson>
