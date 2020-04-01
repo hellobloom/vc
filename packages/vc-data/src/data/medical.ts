@@ -27,8 +27,8 @@ export type MedicalTestCredential = Credential & {
 
 export type MedicalAntibodyTestCredential = MedicalTestCredential & {
   '@type': 'MedicalAntibodyTestCredential'
-  antibodyPathogen?: string
-  antibodyPathogenVariant?: string
+  pathogen?: string
+  pathogenVariant?: string
   antibodyConcentration?: QuantitativeValue
   antibodyPresent?: boolean
 }
