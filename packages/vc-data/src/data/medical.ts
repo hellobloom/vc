@@ -30,6 +30,7 @@ export type MedicalAntibodyTestCredential = MedicalTestCredential & {
   antibodyPathogen?: string
   antibodyPathogenVariant?: string
   antibodyConcentration?: QuantitativeValue
+  antibodyPresent?: boolean
 }
 export type VCSMedicalPersonBase = Person & {
   identifier: string // Some kind of stable identifier, e.g., social security or national ID number
