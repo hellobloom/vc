@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 if [[ `git status --porcelain` ]]; then
   echo "There are uncommitted changes, please commit them and try again."
