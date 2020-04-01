@@ -34,8 +34,8 @@ export type MedicalAntibodyTestCredential = MedicalTestCredential & {
 export type VCSMedicalPersonBase = Person & {
   identifier: string // Some kind of stable identifier, e.g., social security or national ID number
   birthDate: string // ISO 8601
-  honorifixPrefix?: string
-  honorifixSuffix?: string
+  honorificPrefix?: string
+  honorificSuffix?: string
 } & (
     | {
         name: string
