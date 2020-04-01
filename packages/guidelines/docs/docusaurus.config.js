@@ -1,7 +1,7 @@
 const bloom = 'https://bloom.co'
 
 module.exports = {
-  title: 'Implementation Guildelines | Bloom Documentation',
+  title: 'Bloom Documentation',
   tagline: 'The tagline of my site',
   url: bloom,
   baseUrl: '/documentation/',

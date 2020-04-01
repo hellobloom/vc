@@ -94,7 +94,7 @@ const docGroups: DocGroups = {
 
 const Home = () => {
   return (
-    <Layout title={`Documentation | Bloom`} description="Documentation for all things Bloom!">
+    <Layout description="Bloom's documentation will guide you on how to build an app on Bloom.">
       <header className="hero hero--primary">
         <div className="container">
           <h1 className="hero__title">Bloom Docs</h1>

@@ -1,6 +1,7 @@
 ---
 id: did-client
-title: DID Client
+title: DID Client | Implementation Guidelines
+sidebar_label: DID Client
 hide_title: true
 ---
 
@@ -12,14 +13,13 @@ Bloom complies to the emerging DID, or Decentralized Identifier, specification. 
 
 The DID client has the following capabilities:
 
-* Key Generation
-* DID Registration
-* Message Signing
+- Key Generation
+- DID Registration
+- Message Signing
 
 ### Key Generation
 
 TODO RNG, etc...
-
 
 ### DID Registration
 
@@ -27,7 +27,6 @@ Depending on the DID method, a DID must be anchored for it to be resolved by ano
 For now, application logic is handling DID anchoring for Bloom DID:Elem
 TODO - what does client have to do here?
 At some point DID client will also have to be able to register, revoke, rotate other keys.
-
 
 ### Message Signing
 

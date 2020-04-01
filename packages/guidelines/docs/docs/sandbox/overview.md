@@ -1,6 +1,7 @@
 ---
 id: overview
-title: Overview
+title: Overview | Sandbox
+sidebar_label: Overview
 hide_title: true
 ---
 
