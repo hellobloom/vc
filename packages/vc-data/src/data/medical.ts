@@ -31,17 +31,11 @@ export type MedicalAntibodyTestCredential = MedicalTestCredential & {
   antibodyPathogenVariant?: string
   antibodyConcentration?: QuantitativeValue
 }
-export type VCSMedicalAntibodyTestPerson = Subject<Person> & {
-  '@type': 'Person'
-  hasMedicalAntibodyTestCredential: MaybeArray<MedicalAntibodyTestCredential>
-}
-export type VCSMedicalTestPerson = Subject<Person> & {
-  '@type': 'Person'
+export type VCSMedicalPersonBase = Subject<Person> & {
   identifier: string // Some kind of stable identifier, e.g., social security or national ID number
   birthDate: string // ISO 8601
   honorifixPrefix?: string
   honorifixSuffix?: string
-  hasMedicalTestCredential: MaybeArray<MedicalTestCredential>
 } & (
     | {
         name: string
@@ -52,6 +46,12 @@ export type VCSMedicalTestPerson = Subject<Person> & {
         additionalName?: string
       }
   )
+export type VCSMedicalAntibodyTestPerson = VCSMedicalPersonBase & {
+  hasMedicalAntibodyTestCredential: MaybeArray<MedicalAntibodyTestCredential>
+}
+export type VCSMedicalTestPerson = VCSMedicalPersonBase & {
+  hasMedicalTestCredential: MaybeArray<MedicalTestCredential>
+}
 
 export type VCMedicalAntibodyTestPerson = VCV1<VCSMedicalAntibodyTestPerson>
 export type VCMedicalTestPerson = VCV1<VCSMedicalTestPerson>
