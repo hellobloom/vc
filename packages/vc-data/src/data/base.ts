@@ -46,8 +46,8 @@ export type EmployeeRoleOrganization = {
   employeeOf: OrganizationE
 }
 
-export type OrganizationE = Subject<Organization> & {
-  '@type': 'Organization'
+export type OrganizationE = Organization & {
+  '@type': 'OrganizationE'
   name?: string
   address?: MaybeArray<PostalAddress>
   legalName?: string

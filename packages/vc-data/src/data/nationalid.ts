@@ -18,15 +18,17 @@ export type NationalityRole = Role & {
   identifier: NatPropertyValue
 }
 
-export type VCSNatIDNumPerson = Subject<Person> & {
-  '@type': 'Person'
-  nationality: NationalityRole
-}
+export type VCSNatIDNumPerson = Subject<
+  Person & {
+    nationality: NationalityRole
+  }
+>
 
-export type VCSNatIDNumOrganization = Subject<Organization> & {
-  '@type': 'Organization'
-  nationality: NationalityRole
-}
+export type VCSNatIDNumOrganization = Subject<
+  Organization & {
+    nationality: NationalityRole
+  }
+>
 
 export type VCNatIDNumPerson = VCV1<VCSNatIDNumPerson>
 export type VCNatIDNumOrganization = VCV1<VCSNatIDNumOrganization>

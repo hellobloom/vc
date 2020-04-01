@@ -51,15 +51,17 @@ export type FaceMatch = {
   identifier?: number
 }
 
-export type VCSIDDocPerson = Subject<Person> & {
-  '@type': 'Person'
-  age?: number
-  birthDate?: TDate
-  familyName?: string
-  givenName?: string
-  gender?: MaybeArray<GenderType | string>
-  name?: MaybeArray<string>
-  nationality?: MaybeArray<Country>
-  hasIDDocument: MaybeArray<IDDocumentRole>
-}
+export type VCSIDDocPerson = Subject<
+  Person & {
+    '@type': 'Person'
+    age?: number
+    birthDate?: TDate
+    familyName?: string
+    givenName?: string
+    gender?: MaybeArray<GenderType | string>
+    name?: MaybeArray<string>
+    nationality?: MaybeArray<Country>
+    hasIDDocument: MaybeArray<IDDocumentRole>
+  }
+>
 export type VCIDDocPerson = VCV1<VCSIDDocPerson>

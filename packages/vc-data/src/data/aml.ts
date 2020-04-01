@@ -22,13 +22,17 @@ export type AMLSearch = {
   flagType?: string
   comment?: string
 }
-export type VCSAMLPerson = Subject<Person> & {
-  '@type': 'Person'
-  hasAMLSearch: AMLSearch
-}
-export type VCSAMLOrganization = Subject<Organization> & {
-  '@type': 'Organization'
-  hasAMLSearch: AMLSearch
-}
+export type VCSAMLPerson = Subject<
+  Person & {
+    '@type': 'Person'
+    hasAMLSearch: AMLSearch
+  }
+>
+export type VCSAMLOrganization = Subject<
+  Organization & {
+    '@type': 'Organization'
+    hasAMLSearch: AMLSearch
+  }
+>
 export type VCAMLPerson = VCV1<VCSAMLPerson>
 export type VCAMLOrganization = VCV1<VCSAMLOrganization>

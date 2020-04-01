@@ -73,13 +73,17 @@ export type Account = {
   hasExpense?: MaybeArray<BankAccountTransactionGroup>
   hasTransactions?: MaybeArray<BankAccountTransaction>
 }
-export type VCSAccountPerson = Subject<Person> & {
-  '@type': 'Person'
-  hasAccount: MaybeArray<Account>
-}
-export type VCSAccountOrganization = Subject<Organization> & {
-  '@type': 'Organization'
-  hasAccount: MaybeArray<Account>
-}
+export type VCSAccountPerson = Subject<
+  Person & {
+    '@type': 'Person'
+    hasAccount: MaybeArray<Account>
+  }
+>
+export type VCSAccountOrganization = Subject<
+  Organization & {
+    '@type': 'Organization'
+    hasAccount: MaybeArray<Account>
+  }
+>
 export type VCAccountPerson = VCV1<VCSAccountPerson>
 export type VCAccountOrganization = VCV1<VCSAccountOrganization>

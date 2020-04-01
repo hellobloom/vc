@@ -106,11 +106,13 @@ export type CreditScore = {
   securityFreeze?: string
   fraudAlert?: string
 }
-export type VCSCreditScorePerson = Subject<Person> & {
-  '@type': 'Person'
-  birthDate?: string
-  name?: string
-  employeeOf?: EmployeeRoleOrganization
-  hasCreditScore: MaybeArray<CreditScore>
-}
+export type VCSCreditScorePerson = Subject<
+  Person & {
+    '@type': 'Person'
+    birthDate?: string
+    name?: string
+    employeeOf?: EmployeeRoleOrganization
+    hasCreditScore: MaybeArray<CreditScore>
+  }
+>
 export type VCCreditScorePerson = VCV1<VCSCreditScorePerson>
