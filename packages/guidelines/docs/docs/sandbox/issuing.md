@@ -6,8 +6,47 @@ hide_title: true
 
 # Issuing
 
-## Make VC Data
+These steps will show you how to use the issuer side of the sandbox.
 
-## Create A VC
+## Issue A VC
+
+Before you issue a VC you need to create the data that will go inside it.
+
+### Steps
+
+1. Go to [sandbox.bloom.co/issue](https://sandbox.bloom.co/issue)
+2. Name the credential type ("CustomCredential","EmailCredential", etc.)
+   <img src={useBaseUrl('img/sandbox/issuing/enter-type.png')} alt="Enter VC type" />
+3. Enter the data you want to issue, it must be valid data defined by the [VC Data](https://github.com/hellobloom/vc/tree/vc-network-update/dev/packages/vc-data/src/data) library
+   <img src={useBaseUrl('img/sandbox/issuing/add-data.png')} alt="Add data" />
+
+```js
+// Sample email VC Data
+{
+  '@type': 'Person'
+  email: 'testing@gmail.com'
+}
+```
+
+3. Click the button that says "Issue VC"
 
 ## Claim A VC
+
+After creating a VC to issue you can claim it, here you are acting as an end user that is being offered a credential. This is as simple as scanning a QR code or clicking a button.
+
+### Steps
+
+1. Navigate to the link sent in response to the VC creation
+2. Click the button that says "Claim With Local DID" if using the local client, otherwise use the Bloom app to scan the QR code
+   <img src={useBaseUrl('img/sandbox/issuing/claim.png')} alt="Claim options" />
+3. You will now have the VC stored in your wallet!
+   <img src={useBaseUrl('img/sandbox/issuing/claim-success.png')} alt="Successful credential claim" />
+
+### Tech Details
+
+Let's see what happens when you claim a VC
+
+1. The user's client [sends their DID](https://github.com/hellobloom/vc/blob/vc-network-update/dev/sandbox/client/src/components/LocalClientProvider/index.tsx#L161) to the given URL in the QR code
+2. The issuer takes the user's DID and [finishes building](https://github.com/hellobloom/vc/blob/vc-network-update/dev/sandbox/server/src/routes/cred.ts#L143) the VC including signing it
+3. The issuer [sends the signed VC](https://github.com/hellobloom/vc/blob/vc-network-update/dev/sandbox/server/src/routes/cred.ts#L178) back to the user's client
+4. (_Coming Soon_) The user's client verifies the VC and stores it to be shared at a later date
