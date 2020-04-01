@@ -1,4 +1,5 @@
 import React from 'react'
+import classnames from 'classnames'
 import Layout from '@theme/Layout'
 
 import './index.scss'
@@ -7,6 +8,7 @@ type DocCardProps = {
   name: string
   link: string
   description: React.ReactNode
+  comingSoon?: boolean
 }
 
 const DocCard: React.FC<DocCardProps> = props => {
@@ -19,8 +21,8 @@ const DocCard: React.FC<DocCardProps> = props => {
         <p>{props.description}</p>
       </div>
       <div className="card__footer">
-        <a href={props.link} className="button button--secondary button--block">
-          Read More
+        <a href={props.link} className={classnames('button button--secondary button--block', {disabled: props.comingSoon})}>
+          {props.comingSoon ? 'Coming Soon!' : 'Read More'}
         </a>
       </div>
     </div>
@@ -45,6 +47,7 @@ const docGroups: DocGroups = {
         name: 'Claim Kit',
         description: 'Easily allow users to claim verifiable credentials.',
         link: '/documentation/claim-kit',
+        comingSoon: true,
       },
     ],
   },
@@ -54,11 +57,13 @@ const docGroups: DocGroups = {
         name: 'Verify Kit',
         description: 'Validate shared verifiable presentations shared by users, powered by JSON-LD proofs.',
         link: '/documentation/verify-kit',
+        comingSoon: true,
       },
       {
         name: 'Issue Kit',
         description: 'Issue signed verifiable credentials that users can claim and reuse at later times.',
         link: '/documentation/issue-kit',
+        comingSoon: true,
       },
     ],
   },
