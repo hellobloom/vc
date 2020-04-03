@@ -24,7 +24,8 @@
   },
   "dependencies": {
     "@bloomprotocol/claim-kit": "^1.0.0-beta.0",
-    "react-forward-props": "^1.1.2"
+    "react-forward-props": "^1.1.2",
+    "tslib": "^1.11.1"
   },
   "peerDependencies": {
     "react": "^15.0.0 || ^16.0.0"
@@ -53,9 +54,8 @@
     "prettier": "^1.19.1",
     "react": "^16.12.0",
     "react-dom": "^16.12.0",
-    "tsdx": "^0.12.1",
-    "tslib": "^1.10.0",
-    "typescript": "^3.7.5",
+    "tsdx": "^0.13.1",
+    "typescript": "^3.8.3",
     "webpack": "^4.41.5"
   },
   "jest": {
