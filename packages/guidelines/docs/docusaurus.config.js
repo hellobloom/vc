@@ -49,7 +49,7 @@ module.exports = {
             },
             {
               label: 'Contact Us',
-              to: 'mailto:support@bloom.co',
+              href: 'mailto:support@bloom.co',
             },
             {
               label: 'Smart Token',
