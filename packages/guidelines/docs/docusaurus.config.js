@@ -115,6 +115,8 @@ module.exports = {
       copyright: `Copyright © Bloom Protocol, Built with Docusaurus.`,
     },
   },
+  themes: ['@docusaurus/theme-live-codeblock'],
+  plugins: ['docusaurus-plugin-sass'],
   presets: [
     [
       '@docusaurus/preset-classic',
@@ -129,5 +131,4 @@ module.exports = {
       },
     ],
   ],
-  plugins: ['docusaurus-plugin-sass'],
 }
