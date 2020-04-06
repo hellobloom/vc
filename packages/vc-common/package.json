@@ -40,7 +40,7 @@
     "jsonld": "^2.0.2",
     "randombytes": "^2.1.0",
     "schema-dts": "^0.5.1",
-    "tslib": "^1.10.0"
+    "tslib": "^1.11.1"
   },
   "devDependencies": {
     "@bloomprotocol/eslint-config": "^1.0.0",
@@ -54,7 +54,7 @@
     "eslint-config-prettier": "^6.9.0",
     "eslint-plugin-prettier": "^3.1.2",
     "prettier": "^1.19.1",
-    "tsdx": "^0.12.3",
+    "tsdx": "^0.13.1",
     "typescript": "^3.8.3"
   },
   "jest": {

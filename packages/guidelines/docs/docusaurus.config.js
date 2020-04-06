@@ -1,7 +1,7 @@
 const bloom = 'https://bloom.co'
 
 module.exports = {
-  title: 'Implementation Guildelines | Bloom Documentation',
+  title: 'Bloom Documentation',
   tagline: 'The tagline of my site',
   url: bloom,
   baseUrl: '/documentation/',
@@ -49,7 +49,7 @@ module.exports = {
             },
             {
               label: 'Contact Us',
-              to: 'mailto:support@bloom.co',
+              href: 'mailto:support@bloom.co',
             },
             {
               label: 'Smart Token',
@@ -115,6 +115,8 @@ module.exports = {
       copyright: `Copyright © Bloom Protocol, Built with Docusaurus.`,
     },
   },
+  themes: ['@docusaurus/theme-live-codeblock'],
+  plugins: ['docusaurus-plugin-sass'],
   presets: [
     [
       '@docusaurus/preset-classic',
@@ -124,7 +126,7 @@ module.exports = {
           sidebarPath: require.resolve('./sidebars.js'),
         },
         theme: {
-          customCss: require.resolve('./src/css/custom.css'),
+          customCss: require.resolve('./src/css/custom.scss'),
         },
       },
     ],

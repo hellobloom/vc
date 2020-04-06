@@ -1,6 +1,7 @@
 ---
 id: verifying
-title: Verifying
+title: Verifying | Sandbox
+sidebar_label: Verifying
 hide_title: true
 ---
 
@@ -21,7 +22,7 @@ First you create a request for VCs, this includes:
 
 The last three are taken care of for you in the VC Sandbox.
 
-Steps:
+### Steps
 
 1. Go to [sandbox.bloom.co/request](https://sandbox.bloom.co/request)
 2. Fill out the types you want shared
@@ -42,10 +43,34 @@ Steps:
 3. If you have the requested credentials stored you will see a success message, otherwise you will see a list of credentials you do not have stored
    <img src={useBaseUrl('img/sandbox/verifying/share-success.png')} alt="Successful credential share" />
 
+### Tech Details
+
+Let's talk about what's going on during a share of VCs.
+
+1. The user's client [queries stored](https://github.com/hellobloom/vc/blob/vc-network-update/dev/sandbox/client/src/components/LocalClientProvider/index.tsx#L107) VCs based on the request
+2. If the query is successful it [packages the VCs](https://github.com/hellobloom/vc/blob/vc-network-update/dev/sandbox/client/src/components/LocalClientProvider/index.tsx#L127) in a Verifiable Presentation
+3. [Signs the VP](https://github.com/hellobloom/vc/blob/vc-network-update/dev/sandbox/client/src/components/LocalClientProvider/utils.ts#L58) with `jsonld-signatures`
+4. [Sends the signed VP](https://github.com/hellobloom/vc/blob/vc-network-update/dev/sandbox/client/src/components/LocalClientProvider/index.tsx#L139) to the data requester
+
 ## Verifying Credentials
 
 :::important Important
 The endpoint that recieves the VCs needs to be a public endpoint since users will be sharing directly from their mobile app.
 :::
 
-Once a user successfully shares VCs in response to your request you need to verify them. Verification checks the structure of the shared VCs as well as the validity of the signatures. This takes place behind the scenes [on the server](https://github.com/hellobloom/vc/blob/vc-network-update/dev/sandbox/server/src/routes/share.ts#L137), so if sharing is successful in the step above the verification was successful.
+### Steps
+
+1. API endpoint recieves the shared VCs wrapped in a VP
+2. Pass the VP to `validateVerifiablePresentationResponse` from Verify Kit
+3. Check the outcome of the validation
+4. Update client with result
+
+### Tech Details
+
+Let's dive into what's happening during validation of a shared VP
+
+1. First the structure of the JSON is checked to make sure all the keys are present and of the correct types
+2. Once that is out of the way the signatures are validated.
+   i. The signature of the VP is checked against the holder's key and the VCs are checked against each respective issuer's key
+3. (_COMING SOON_) VCs are checked for any revocation
+4. The result of the validation is returned

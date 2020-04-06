@@ -1,6 +1,7 @@
 ---
 id: vc-storage
-title: Verifiable Credential Storage
+title: Verifiable Credential Storage | Implementation Guidelines
+sidebar_label: Verifiable Credential Storage
 hide_title: true
 ---
 
@@ -12,19 +13,17 @@ Bloom has developed an Encrypted Data Vault for storing user data. The vault use
 
 The client has the following capabilities related to VC storage:
 
-* Encryption of VC data
-* Authentication methods to register and access vault
-* Local indexing system to understand what data is stored in vault
+- Encryption of VC data
+- Authentication methods to register and access vault
+- Local indexing system to understand what data is stored in vault
 
 ### Encryption
 
 The Bloom client reference implementation uses local AES encryption to encrypt VC data before storing in vault. Any metadata is also encrypted and stored in the vauld encrypted indices column for easy querying.
 
-
 ### Vault methods
 
 The client implements api abstractions for authentication and data manipulation.
-
 
 ### Indexing
 

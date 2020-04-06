@@ -1,6 +1,7 @@
 ---
 id: vc-sharing
-title: Verifiable Credential Sharing
+title: Verifiable Credential Sharing | Implementation Guidelines
+sidebar_label: Verifiable Credential Sharing
 hide_title: true
 ---
 
@@ -12,9 +13,9 @@ Bloom complies with the Verifiable Credential data model for structuring user da
 
 The client has the following capabilities related to VC sharing:
 
-* Interpret Share Kit Request
-* Obtain user consent for sharing data
-* Form and sign Verifiable Presentation
+- Interpret Share Kit Request
+- Obtain user consent for sharing data
+- Form and sign Verifiable Presentation
 
 ### Share Kit Request
 
@@ -22,13 +23,11 @@ Link to Share Kit
 Break down how client should handle this request.
 Another part of client is responsible for indexing available VCs and seeing if user can fulfill request. Black box to this part of the client.
 
-
 ### User Consent
 
 The Bloom client reference implementation collects user consent as showing in the image below. Todo add image.
 
 The user is presented with the requester of the data, the privacy policy and terms of service, the data to be shared, and a 'slide to share' prompt.
-
 
 ### Verifiable Presentation
 

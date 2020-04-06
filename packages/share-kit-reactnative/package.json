@@ -34,7 +34,7 @@
     "extend": "^3.0.2",
     "react-native-linear-gradient": "^2.5.6",
     "react-native-svg": "^9.6.1",
-    "tslib": "^1.10.0",
+    "tslib": "^1.11.1",
     "url": "^0.11.0"
   },
   "peerDependencies": {
@@ -57,8 +57,8 @@
     "react-native": "0.60.4",
     "react-native-typescript-transformer": "^1.2.12",
     "rimraf": "^2.6.2",
-    "tsdx": "^0.12.1",
-    "typescript": "^3.7.5"
+    "tsdx": "^0.13.1",
+    "typescript": "^3.8.3"
   },
   "publishConfig": {
     "access": "public"

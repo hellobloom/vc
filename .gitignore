@@ -5,4 +5,5 @@ lerna-debug.log
 
 /packages/*/dist/
 .env
+.env.docker
 documentation

@@ -49,7 +49,7 @@ module.exports = {
             },
             {
               label: 'Contact Us',
-              to: 'mailto:support@bloom.co',
+              href: 'mailto:support@bloom.co',
             },
             {
               label: 'Smart Token',
@@ -115,6 +115,7 @@ module.exports = {
       copyright: `Copyright © Bloom Protocol, Built with Docusaurus.`,
     },
   },
+  themes: ['@docusaurus/theme-live-codeblock'],
   presets: [
     [
       '@docusaurus/preset-classic',

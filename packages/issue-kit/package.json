@@ -41,6 +41,7 @@
     "ramda": "^0.27.0",
     "randombytes": "^2.1.0",
     "schema-dts": "^0.5.1",
+    "tslib": "^1.11.1",
     "uuidv4": "^6.0.0"
   },
   "devDependencies": {
@@ -54,9 +55,8 @@
     "eslint-config-prettier": "^6.9.0",
     "eslint-plugin-prettier": "^3.1.2",
     "prettier": "^1.19.1",
-    "tsdx": "^0.12.3",
-    "tslib": "^1.10.0",
-    "typescript": "^3.7.5"
+    "tsdx": "^0.13.1",
+    "typescript": "^3.8.3"
   },
   "jest": {
     "moduleFileExtensions": [

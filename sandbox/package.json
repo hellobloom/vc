@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "scripts": {
     "dev": "node ./bin/dev.js",
+    "dev:no-ngrok": "./bin/dev-no-ngrok",
     "reset-dev": "./bin/reset-dev"
   },
   "dependencies": {
