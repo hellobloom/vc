@@ -50,7 +50,6 @@ export type BankAccountTransactionGroup = {
 }
 
 export type OrganizationAccount = Organization & {
-  '@type': 'Organization'
   name?: string
   identifier?: string | number
   serviceTypes?: Array<string>
@@ -75,13 +74,11 @@ export type Account = {
 }
 export type VCSAccountPerson = Subject<
   Person & {
-    '@type': 'Person'
     hasAccount: MaybeArray<Account>
   }
 >
 export type VCSAccountOrganization = Subject<
   Organization & {
-    '@type': 'Organization'
     hasAccount: MaybeArray<Account>
   }
 >

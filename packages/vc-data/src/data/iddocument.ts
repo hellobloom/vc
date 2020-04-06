@@ -53,7 +53,6 @@ export type FaceMatch = {
 
 export type VCSIDDocPerson = Subject<
   Person & {
-    '@type': 'Person'
     age?: number
     birthDate?: TDate
     familyName?: string

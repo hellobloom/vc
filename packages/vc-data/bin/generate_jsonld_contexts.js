@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env tsc
 
 const _ = require('lodash')
 const util = require('util')
@@ -6,8 +6,9 @@ const exec = require('child_process').exec
 const ts = require('typescript')
 const execp = util.promisify(exec)
 
-const types = {}
 const imports = {}
+const tsTypes = {}
+const types = {}
 
 execp(`find ./src/data -not -name index.ts -exec cat {} \\;`, {shell: '/bin/bash'}).then(x => {
   // console.log(x.stdout)
@@ -28,7 +29,7 @@ n = x => {
   }
 }
 
-// node.forEachChild(x => {})
+node.forEachChild(x => xns.push(x))
 
 const importNodes = xns.filter(x => k(x) === 'ImportDeclaration')
 
@@ -45,7 +46,7 @@ Object.keys(imports).forEach(k => {
   imports[k] = _.uniq(imports[k])
 })
 
-// Categorize the nodes
+// Categorize the type nodes
 node.forEachChild(x => {
   const kind = k(x)
   const name = n(x)
@@ -53,10 +54,10 @@ node.forEachChild(x => {
 
   switch (kind) {
     case 'InterfaceDeclaration':
-      types[name] = x
+      tsTypes[name] = x
       break
     case 'TypeAliasDeclaration':
-      types[name] = x
+      tsTypes[name] = x
       break
     case 'EndOfFileToken':
       break
@@ -65,9 +66,23 @@ node.forEachChild(x => {
   }
 })
 
+// Invert the type nodes to use @type instead of the Typescript name
+Object.keys(tsTypes).forEach(k => {
+  let x = tsTypes[k]
+
+  // Does it have a '@type'?  If so, that's the canonical name
+  let
+})
+
+const resolveOriginalTypeName
+
 Object.keys(types).forEach(k => {
   let x = types[k]
   contextJsons[k] = createContext(x, {isInterface: k(x)})
+  // Types are defined either as an explicit @type member...
+
+  // or as a union type expressed with a node containing a @type member
+  resolveOriginalTypeName(x)
 })
 
 const createContext = (node, opts) => {

@@ -108,7 +108,6 @@ export type CreditScore = {
 }
 export type VCSCreditScorePerson = Subject<
   Person & {
-    '@type': 'Person'
     birthDate?: string
     name?: string
     employeeOf?: EmployeeRoleOrganization

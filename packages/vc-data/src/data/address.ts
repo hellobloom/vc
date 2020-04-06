@@ -4,13 +4,11 @@ import {Person, Organization, PostalAddress} from 'schema-dts'
 
 export type VCSAddressPerson = Subject<
   Person & {
-    '@type': 'Person'
     address: MaybeArray<PostalAddress>
   }
 >
 export type VCSAddressOrganization = Subject<
   Organization & {
-    '@type': 'Organization'
     address: MaybeArray<PostalAddress>
   }
 >

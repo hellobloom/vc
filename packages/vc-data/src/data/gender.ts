@@ -4,7 +4,6 @@ import {Person, GenderType} from 'schema-dts'
 
 export type VCSGenderPerson = Subject<
   Person & {
-    '@type': 'Person'
     gender: MaybeArray<GenderType | string>
   }
 >

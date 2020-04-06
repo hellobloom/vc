@@ -47,7 +47,6 @@ export type EmployeeRoleOrganization = {
 }
 
 export type OrganizationE = Organization & {
-  '@type': 'OrganizationE'
   name?: string
   address?: MaybeArray<PostalAddress>
   legalName?: string
@@ -62,7 +61,7 @@ export type OrganizationE = Organization & {
 export type CredentialU = OrganizationalCredential | Credential
 
 export type Credential = {
-  '@type': 'Credential' | string
+  '@type': 'Credential'
   credentialCategory?: string
   additionalType?: string
   dateCreated?: string
@@ -72,7 +71,7 @@ export type Credential = {
   recognizedBy?: MaybeArray<GovernmentOrg>
 }
 
-export interface OrganizationalCredential extends Credential {
+export type OrganizationalCredential = Credential & {
   credentialCategory: string // 'incorporation', 'foreign-registration'
   organizationType?: string | DefinedTerm
   goodStanding?: boolean // Company is in "good standing" with the recognizing authority

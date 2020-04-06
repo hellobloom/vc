@@ -24,13 +24,11 @@ export type AMLSearch = {
 }
 export type VCSAMLPerson = Subject<
   Person & {
-    '@type': 'Person'
     hasAMLSearch: AMLSearch
   }
 >
 export type VCSAMLOrganization = Subject<
   Organization & {
-    '@type': 'Organization'
     hasAMLSearch: AMLSearch
   }
 >

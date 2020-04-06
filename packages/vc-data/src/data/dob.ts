@@ -4,7 +4,6 @@ import {Person} from 'schema-dts'
 
 export type VCSDOBPerson = Subject<
   Person & {
-    '@type': 'Person'
     birthDate: string
   }
 >
