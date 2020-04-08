@@ -1,6 +1,6 @@
 import {VCV1} from '@bloomprotocol/vc-common'
 import {Subject, MaybeArray, GovernmentOrg} from './base'
-import {Person, Organization, MedicalClinic, QuantitativeValue} from 'schema-dts'
+import {Person, Organization, MedicalClinic, QuantitativeValue, Drug} from 'schema-dts'
 
 //////////////////////////////////////////////////////////////
 // Medical test VCs
@@ -39,6 +39,17 @@ export type MedicalPathogenLoadCredential = MedicalTestCredential & {
   pathogenConcentration?: QuantitativeValue
   pathogenPresent?: boolean
 }
+export type MedicalVaccinationCredential = MedicalTestCredential & {
+  '@type': 'MedicalVaccinationTestCredential'
+  pathogen?: string
+  pathogenVariant?: string
+  vaccine: Vaccine
+}
+
+export type Vaccine = Drug & {
+  drugClass: 'vaccine'
+}
+
 export type VCSMedicalPersonBase = Person & {
   identifier: string // Some kind of stable identifier, e.g., social security or national ID number
   birthDate: string // ISO 8601
@@ -64,6 +75,11 @@ export type VCSMedicalPathogenLoadPerson = Subject<
     hasMedicalPathogenLoadCredential: MaybeArray<MedicalPathogenLoadCredential>
   }
 >
+export type VCSMedicalVaccinationPerson = Subject<
+  VCSMedicalPersonBase & {
+    hasMedicalVaccinationCredential: MaybeArray<MedicalVaccinationCredential>
+  }
+>
 export type VCSMedicalTestPerson = Subject<
   VCSMedicalPersonBase & {
     hasMedicalTestCredential: MaybeArray<MedicalTestCredential>
@@ -71,4 +87,6 @@ export type VCSMedicalTestPerson = Subject<
 >
 
 export type VCMedicalAntibodyTestPerson = VCV1<VCSMedicalAntibodyTestPerson>
+export type VCMedicalPathogenLoadPerson = VCV1<VCSMedicalPathogenLoadPerson>
+export type VCMedicalVaccinationPerson = VCV1<VCSMedicalVaccinationPerson>
 export type VCMedicalTestPerson = VCV1<VCSMedicalTestPerson>
