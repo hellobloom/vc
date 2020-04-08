@@ -1,5 +1,5 @@
 import {VCV1} from '@bloomprotocol/vc-common'
-import {Subject, MaybeArray, GovernmentOrg} from './base'
+import {Subject, MaybeArray, Credential, GovernmentOrg} from './base'
 import {Person, Organization, MedicalClinic, QuantitativeValue, Drug} from 'schema-dts'
 
 //////////////////////////////////////////////////////////////
