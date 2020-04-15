@@ -1,6 +1,6 @@
 import {VCV1} from '@bloomprotocol/vc-common'
 import {Subject, MaybeArray, Credential, GovernmentOrg} from './base'
-import {Person, Organization, MedicalClinic, QuantitativeValue, Drug} from 'schema-dts'
+import {Person, Organization, MedicalClinic, QuantitativeValue, Drug, DefinedTerm} from 'schema-dts'
 
 //////////////////////////////////////////////////////////////
 // Medical test VCs
@@ -15,9 +15,9 @@ export type MedicalClinicE = MedicalClinic & {
 }
 export type MedicalTestCredential = Credential & {
   '@type': 'MedicalTestCredential' | string
-  testClass?: string // E.g., 'antibody'
-  testType?: string
-  testManufacturer?: Organization | string
+  testClass?: string | DefinedTerm // E.g., 'antibody'
+  testType?: string | DefinedTerm
+  testManufacturer?: Organization | string | DefinedTerm
   falsePositive?: number // Out of 100
   falseNegative?: number // Out of 100
   truePositive?: number // Out of 100
@@ -27,22 +27,22 @@ export type MedicalTestCredential = Credential & {
 
 export type MedicalAntibodyTestCredential = MedicalTestCredential & {
   '@type': 'MedicalAntibodyTestCredential'
-  pathogen?: string
-  pathogenVariant?: string
+  pathogen?: string | DefinedTerm
+  pathogenVariant?: string | DefinedTerm
   antibodyConcentration?: QuantitativeValue
   antibodyPresent?: boolean
 }
 export type MedicalPathogenLoadCredential = MedicalTestCredential & {
   '@type': 'MedicalPathogenLoadTestCredential'
-  pathogen?: string
-  pathogenVariant?: string
+  pathogen?: string | DefinedTerm
+  pathogenVariant?: string | DefinedTerm
   pathogenConcentration?: QuantitativeValue
   pathogenPresent?: boolean
 }
 export type MedicalVaccinationCredential = MedicalTestCredential & {
   '@type': 'MedicalVaccinationTestCredential'
-  pathogen?: string
-  pathogenVariant?: string
+  pathogen?: string | DefinedTerm
+  pathogenVariant?: string | DefinedTerm
   vaccine: Vaccine
 }
 
