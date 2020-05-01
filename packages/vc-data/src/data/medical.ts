@@ -20,9 +20,12 @@ export interface IImmunization extends R4.IImmunization {
   location: R4.IReference
   manufacturer: R4.IReference
   lotNumber: string
+  expirationDate?: string
   site: R4.ICodeableConcept
   route: R4.ICodeableConcept
   doseQuantity: R4.IQuantity
+  note?: Array<R4.IAnnotation>
+  protocolApplied?: Array<R4.IImmunization_ProtocolApplied>
 }
 export interface IObservation extends R4.IObservation {
   resourceType: 'Observation'
@@ -36,6 +39,7 @@ export interface IObservation extends R4.IObservation {
   effectiveDateTime: string
   performer: Array<R4.IReference>
   component: Array<R4.IObservation_Component>
+  referenceRange?: Array<R4.IObservation_Component>
 }
 export type VCSMedicalFHIRImmunization = Subject<IImmunization>
 export type VCSMedicalFHIRObservation = Subject<IObservation>
