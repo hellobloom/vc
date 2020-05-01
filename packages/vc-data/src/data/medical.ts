@@ -56,10 +56,8 @@ export type MedicalTestCredential = Credential & {
   testClass?: string | DefinedTerm // E.g., 'antibody'
   testType?: string | DefinedTerm
   testManufacturer?: Organization | string | DefinedTerm
-  falsePositive?: number // Out of 100
-  falseNegative?: number // Out of 100
-  truePositive?: number // Out of 100
-  trueNegative?: number // Out of 100
+  sensitivity?: number // Out of 100
+  specificity?: number // Out of 100
   clinic?: MedicalClinic
 }
 
