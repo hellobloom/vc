@@ -1,3 +1,7 @@
+:warning: **_Notice_** :warning:
+
+This library is no longer maintained, please use [ssi-sdk](https://github.com/hellobloom/ssi-sdk) instead.
+
 # Attestations ES
 
 Attestation related kits for TS/JS
